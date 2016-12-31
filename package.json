@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "check:only": "if [[ $(grep -R '\\.only' test | wc -l) -gt 2 ]]; then exit 1; fi",
+    "check:only": "if [[ $(grep -R '\\.only' src/test | wc -l) -gt 2 ]]; then exit 1; fi",
     "compile": "tsc",
     "lint": "tslint -c tslint.json --project tsconfig.json",
     "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
