@@ -1,0 +1,29 @@
+
+export type cachableValue = any;
+
+export abstract class CacheInstance {
+  /**
+   * Get a value from the cache.
+   *
+   * @param key   The key of the value to get.
+   *
+   * @return      The value associated with the key, or undefined if
+   *              no such value exists.
+   *
+   */
+  abstract getValue(key: string): Promise<cachableValue>;
+
+  /**
+   * Set a value in the cache.
+   *
+   * @param key        The key of the value to set.
+   * @param value      The value to set.
+   * @param ttl        The time to live of the value in seconds.
+   *                   By default, the value will not expire
+   * @param overwrite  Overwrite the value if it already exists. Defaults to true.
+   *
+   * @return {boolean} True if the value was written, false otherwise.
+   */
+  abstract setValue(key: string, value: cachableValue, ttl?: number, overwrite?: boolean): Promise<boolean>;
+
+}

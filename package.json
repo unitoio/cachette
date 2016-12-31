@@ -1,0 +1,57 @@
+{
+  "name": "cachette",
+  "version": "1.0.0",
+  "description": "Cache library with easy decorator and concurrent initialization",
+  "main": "dist/index.js",
+  "author": {
+    "name": "Unito",
+    "email": "hello@unito.io"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "cache",
+    "concurrent",
+    "redis",
+    "decorator"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "check:only": "if [[ $(grep -R '\\.only' test | wc -l) -gt 2 ]]; then exit 1; fi",
+    "compile": "tsc",
+    "lint": "tslint -c tslint.json --project tsconfig.json",
+    "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
+    "test": "npm run compile && npm run coverage",
+    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
+    "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
+    "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
+    "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"
+  },
+  "pre-commit": [
+    "lint",
+    "check:only",
+    "test"
+  ],
+  "devDependencies": {
+    "@types/bluebird": "^3.0.36",
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.35",
+    "@types/node": "^6.0.54",
+    "@types/sinon": "^1.16.33",
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.0",
+    "pre-commit": "^1.2.2",
+    "remap-istanbul": "^0.8.4",
+    "sinon": "^1.17.6",
+    "source-map-support": "^0.4.8",
+    "tslint": "^4.0.2",
+    "tslint-eslint-rules": "^3.1.0",
+    "typescript": "^2.1.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "lru-cache": "^4.0.2",
+    "redis": "^2.6.3"
+  }
+}
