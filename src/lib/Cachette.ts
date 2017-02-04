@@ -31,7 +31,7 @@ export module Cachette {
    *
    * @retuns        The cached or fetched value
    */
-  async function getOrFetchValue(
+  export async function getOrFetchValue(
     key: string,
     ttl: number,
     overwrite: boolean,
@@ -49,15 +49,21 @@ export module Cachette {
     // already fetching?
     const currentFetch = activeFetches[key];
     if (currentFetch) {
-      return await currentFetch;
+      // can't use await directly on currentFetch,
+      // as await translates into a yield on an awaiter function.
+      // As we branch the promises, we need to call .then explicitly
+      return currentFetch.then(result => result);
     }
 
-    // I'm the one fetching
+    // I'm the one fetching. It'll be the only await on the fetching function.
     const fetch = activeFetches[key] = fetchFn.apply(context, args);
-    const result = await fetch;
-    await instance.setValue(key, result, ttl, overwrite);
-    delete activeFetches[key];
-    return result;
+    try {
+      const result = await fetch;
+      await instance.setValue(key, result, ttl, overwrite);
+      return result;
+    } finally {
+      delete activeFetches[key];
+    }
   }
 
 
