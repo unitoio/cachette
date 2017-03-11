@@ -232,7 +232,7 @@ export class RedisCache extends CacheInstance {
     ttl: number,
     overwrite: boolean,
   ): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to ${value}.`);
+    Cachette.logger.debug(`Setting ${key} to`, value);
 
     if (value === undefined) {
       Cachette.logger.warn(`Cannot set ${key} to undefined!`);
@@ -266,7 +266,7 @@ export class RedisCache extends CacheInstance {
 
   private async getValueInternal(key: string): Promise<cachableValue> {
     const value = await this.client.getAsync(key);
-    Cachette.logger.debug(`Getting ${key} : ${value}.`);
+    Cachette.logger.debug(`Getting ${key} : `, value);
     return RedisCache.deserializeValue(value);
   }
 

@@ -1,3 +1,4 @@
+import * as assert from 'assert';
 
 import { Logger } from './Logger';
 import { ConsoleLogger } from './ConsoleLogger';
@@ -133,25 +134,18 @@ export module Cachette {
   }
 
   /**
-   * Compute a cache key from the given args
-   *
-   * @param keyPrefix   a prefix to the key
-   * @param args        an array of function arguments
-   *
-   */
-  function buildCacheKey(keyPrefix: string, args: string[]): string {
-    return [keyPrefix, ...args].join('-');
-  }
-
-  /**
    * decorator
    */
-  export function cached(keyType: string, ttl?: number, overwrite?: boolean): any {
-    return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+  export function cached(ttl?: number, overwrite?: boolean): any {
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+      assert(
+        target['buildCacheKey'],
+        'Need to define buildCacheKey on the class to use the decorator "cached"',
+      );
       const origFn = descriptor.value;
       // don't use an => function here, or you lose access to 'this'
       const newFn = function (...args): Promise<cachableValue> {
-        const key = buildCacheKey(keyType, args);
+        const key = this.buildCacheKey(propertyKey, args);
         return getOrFetchValue(key, ttl, overwrite, origFn, this, ...args);
       };
       descriptor.value = newFn;

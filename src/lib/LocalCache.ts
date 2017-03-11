@@ -17,7 +17,7 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public setValue(key: string, value: cachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to ${value}.`);
+    Cachette.logger.debug(`Setting ${key} to`, value);
 
     if (value === undefined) {
       Cachette.logger.warn(`Cannot set ${key} to undefined!`);
@@ -42,7 +42,7 @@ export class LocalCache extends CacheInstance {
    */
   public async getValue(key: string): Promise<string> {
     const value = await this.cache.get(key);
-    Cachette.logger.debug(`Getting ${key} : ${value}.`);
+    Cachette.logger.debug(`Getting ${key} : `, value);
     return Promise.resolve(value);
   }
 

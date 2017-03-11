@@ -277,7 +277,14 @@ describe('Cachette', () => {
     class MyClass {
       numCalled: number = 0;
 
-      @Cachette.cached('myType')
+      buildCacheKey(functionName: string, args: string[]): string {
+        return [
+          functionName,
+          ...args,
+        ].join('-');
+      }
+
+      @Cachette.cached()
       async fetchSomething(variant: string): Promise<Response> {
         this.numCalled++;
         await new Promise(resolve => setTimeout(resolve, 100));
