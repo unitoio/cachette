@@ -11,12 +11,18 @@ import { LocalCache } from '../lib/LocalCache';
 describe('LocalCache', () => {
 
   it('can set values', async () => {
-
     const cache = new LocalCache();
     cache.setValue('key', 'value');
     const value = await cache.getValue('key');
     expect(value).to.equal('value');
+  });
 
+  it('will not throw if we set a value of undefined', async () => {
+    const cache = new LocalCache();
+    const valueWritten = await cache.setValue('key', undefined);
+    expect(valueWritten).to.be.false;
+    const value = await cache.getValue('key');
+    expect(value).not.to.exist;
   });
 
   it('can set values with expiry', async () => {

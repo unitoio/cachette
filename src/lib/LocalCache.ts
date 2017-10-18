@@ -19,7 +19,8 @@ export class LocalCache extends CacheInstance {
     this.emit('set', key, value);
 
     if (value === undefined) {
-      throw new Error(`Cannot set ${key} to undefined!`);
+      this.emit('warn', `Cannot set ${key} to undefined!`);
+      return false;
     }
 
     if (overwrite || !this.cache.has(key)) {
