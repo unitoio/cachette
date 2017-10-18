@@ -25,9 +25,7 @@ class RedisClientStub extends EventEmitter {
 describe('Cachette', () => {
   describe('fallback', () => {
 
-    afterEach(() => {
-      Cachette.disconnect();
-    });
+    afterEach(() => Cachette.disconnect());
 
     it('will fallback to using a local cache is no connection is made', () => {
 
@@ -36,6 +34,11 @@ describe('Cachette', () => {
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
 
+    });
+
+    it('will create a local cache if connect was not called', () => {
+      const cacheInstance = Cachette.getCacheInstance();
+      expect(cacheInstance instanceof LocalCache).to.be.true;
     });
 
     it('will fallback to using a local cache when connection is lost, then reconnect when it is back', async () => {
