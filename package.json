@@ -1,7 +1,7 @@
 {
   "name": "cachette",
   "version": "1.0.0",
-  "description": "Cache library with easy decorator and concurrent initialization",
+  "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/index.js",
   "author": {
     "name": "Unito",

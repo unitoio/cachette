@@ -98,7 +98,7 @@ export module Cachette {
    * this function first, as calling getCache directly will
    * default to using a local cache.
    */
-  export async function connect(): Promise<void> {
+  export async function connect(redisUrl?: string): Promise<void> {
 
     if (mainCacheInstance !== null) {
       return;
@@ -113,9 +113,8 @@ export module Cachette {
       localCacheInstance = new LocalCache();
     }
 
-    const cacheURL = process.env.CACHE_URL || '';
-    if (cacheURL.startsWith('redis://')) {
-      new RedisCache(process.env.CACHE_URL); // tslint:disable-line
+    if (redisUrl && redisUrl.startsWith('redis://')) {
+      new RedisCache(redisUrl); // tslint:disable-line
     }
 
     if (mainCacheInstance === null) {

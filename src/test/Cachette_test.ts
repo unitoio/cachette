@@ -33,13 +33,10 @@ describe('Cachette', () => {
 
     it('will fallback to using a local cache is no connection is made', () => {
 
-      process.env.CACHE_URL = 'redis://localhost:9999';
-      Cachette.connect();
+      Cachette.connect('redis://localhost:9999');
 
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
-
-      process.env.CACHE_URL = undefined;
 
     });
 
@@ -51,8 +48,7 @@ describe('Cachette', () => {
         stub = sinon.stub(redis, 'createClient', () => {
           return redisClientStub;
         });
-        process.env.CACHE_URL = 'redis://localhost:9999';
-        Cachette.connect();
+        Cachette.connect('redis://localhost:9999');
 
         // redis ready
         redisClientStub.emit('connect');
@@ -78,28 +74,21 @@ describe('Cachette', () => {
         if (stub) {
           stub.restore();
         }
-        process.env.CACHE_URL = undefined;
       }
 
     });
 
     it('will not crash the application given an invalid Redis URL without protocol', () => {
-
-      process.env.REDIS_URL = 'rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com';
-      Cachette.connect();
-
+      Cachette.connect('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com');
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
-
-      process.env.REDIS_URL = undefined;
-
     });
 
   });
 
   describe('getOrFetchValue', () => {
-    beforeEach(Cachette.connect);
-    afterEach(Cachette.disconnect);
+    beforeEach(() => Cachette.connect());
+    afterEach(() => Cachette.disconnect());
 
 
     it('does not fetch if value in cache', async () => {
