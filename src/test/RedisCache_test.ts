@@ -54,7 +54,7 @@ describe('RedisCache', () => {
 
   describe('retryStrategy', () => {
 
-    it('Will not try to reconnect when it was never able to connect', () => {
+    it('will not try to reconnect when it was never able to connect', () => {
       const options = { times_connected: 0 };
       const retryDirective = RedisCache.retryStrategy(options);
       expect(typeof retryDirective).not.to.equal('number');

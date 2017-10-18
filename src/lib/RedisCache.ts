@@ -1,5 +1,3 @@
-import * as util from 'util';
-
 const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
@@ -70,8 +68,8 @@ export class RedisCache extends CacheInstance {
    * The end event is emitted by the redis client when an
    * established connection has ended.
    */
-  public endConnectionStrategy(): void {
-    this.emit('warn', 'Connection lost to Redis.');
+  public endConnectionStrategy(err): void {
+    this.emit('warn', 'Connection lost to Redis.', err);
     /**
      * Falling back to using a local cache while we reconnect.
      */
@@ -224,7 +222,7 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      this.emit('warn', `Error while setting value to Redis cache ${util.inspect(error)}`);
+      this.emit('warn', 'Error while setting value to Redis cache', error);
       return false;
     }
   }
@@ -262,7 +260,7 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      this.emit('warn', `Error while fetching value from the Redis cache ${util.inspect(error)}`);
+      this.emit('warn', 'Error while fetching value from the Redis cache', error);
       return undefined;
     }
   }
