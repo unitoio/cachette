@@ -85,9 +85,9 @@ describe('Cachette', () => {
   });
 
   describe('getOrFetchValue', () => {
+
     beforeEach(() => Cachette.connect());
     afterEach(() => Cachette.disconnect());
-
 
     it('does not fetch if value in cache', async () => {
       let numCalled = 0;
@@ -256,6 +256,10 @@ describe('Cachette', () => {
   });
 
   describe('decorator cached()', () => {
+
+    beforeEach(() => Cachette.connect());
+    afterEach(() => Cachette.disconnect());
+
     interface Response {
       variant: string;
       value: number;

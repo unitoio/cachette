@@ -62,7 +62,7 @@ export class RedisCache extends CacheInstance {
    * with an UncaughtException.
    */
   public errorStrategy(): void {
-    this.emit('error', 'Error while connected to the Redis cache!');
+    this.emit('warn', 'Error while connected to the Redis cache!');
     Cachette.setCacheInstance(null);
   }
 
@@ -224,7 +224,7 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      this.emit('error', `Error while setting value to Redis cache ${util.inspect(error)}`);
+      this.emit('warn', `Error while setting value to Redis cache ${util.inspect(error)}`);
       return false;
     }
   }
@@ -261,7 +261,7 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      this.emit('error', `Error while fetching value from the Redis cache ${util.inspect(error)}`);
+      this.emit('warn', `Error while fetching value from the Redis cache ${util.inspect(error)}`);
       return undefined;
     }
   }
