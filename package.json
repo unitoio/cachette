@@ -20,12 +20,12 @@
     "decorator"
   ],
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist node_modules",
     "compile": "tsc",
     "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
     "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
     "test": "npm run compile && npm run coverage",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
+    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
     "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
     "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
     "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"

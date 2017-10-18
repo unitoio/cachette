@@ -71,7 +71,7 @@
     "no-unused-new": true,
     "radix": true,
     "no-shadowed-variable": true,
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "array-bracket-spacing": [true, "never"],
     "block-spacing": [true, "never"],
     "brace-style": [true, "1tbs"],

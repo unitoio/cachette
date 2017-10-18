@@ -7,7 +7,7 @@ import * as sinon from 'sinon';
 import * as redis from 'redis';
 import { EventEmitter } from 'events';
 
-import { Cachette, fetchingFunction } from '../lib/Cachette';
+import { Cachette, FetchingFunction } from '../lib/Cachette';
 import { LocalCache } from '../lib/LocalCache';
 import { RedisCache } from '../lib/RedisCache';
 
@@ -107,7 +107,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -131,7 +131,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -156,7 +156,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -203,7 +203,7 @@ describe('Cachette', () => {
       for (let i = 0; i < 100; i++) {
         const fn = (i % 2) ? object.fetch1 : object.fetch2;
         const key = (i % 2) ? 'key1' : 'key2';
-        calls.push(callGetOrFetch(key, fn as fetchingFunction));
+        calls.push(callGetOrFetch(key, fn as FetchingFunction));
       }
 
       const values = await Promise.all(calls);
@@ -237,7 +237,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-          <fetchingFunction> object.fetch,
+          <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );

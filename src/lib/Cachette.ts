@@ -6,7 +6,7 @@ import { LocalCache } from './LocalCache';
 import { RedisCache } from './RedisCache';
 
 
-export type fetchingFunction = () => Promise<CachableValue>;
+export type FetchingFunction = () => Promise<CachableValue>;
 
 export module Cachette {
 
@@ -33,7 +33,7 @@ export module Cachette {
     key: string,
     ttl: number,
     overwrite: boolean,
-    fetchFn: fetchingFunction,
+    fetchFn: FetchingFunction,
     context: any,
     ...args: any[],
   ): Promise<CachableValue> {
