@@ -1,4 +1,3 @@
-
 require('source-map-support').install();
 
 import 'mocha';
@@ -12,7 +11,7 @@ describe('LocalCache', () => {
 
   it('can set values', async () => {
     const cache = new LocalCache();
-    cache.setValue('key', 'value');
+    await cache.setValue('key', 'value');
     const value = await cache.getValue('key');
     expect(value).to.equal('value');
   });

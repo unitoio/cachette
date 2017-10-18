@@ -22,7 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "compile": "tsc",
-    "lint": "tslint -c tslint.json --project tsconfig.json",
+    "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
     "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
     "test": "npm run compile && npm run coverage",
     "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",

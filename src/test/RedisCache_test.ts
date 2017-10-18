@@ -148,12 +148,12 @@ describe('RedisCache', () => {
 
   });
 
-  it('will not crash the application given an invalid Redis URL', () => {
+  it('will not crash the application given an invalid Redis URL', async () => {
 
-    Cachette.connect();
+    await Cachette.connect();
     const cache = new RedisCache('redis://localhost:9999');
-    cache.getValue('test');
-    cache.setValue('test', 'value');
+    await cache.getValue('test');
+    await cache.setValue('test', 'value');
     expect('still alive???').to.exist;
 
   });

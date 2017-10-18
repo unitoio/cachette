@@ -27,9 +27,9 @@ describe('Cachette', () => {
 
     afterEach(() => Cachette.disconnect());
 
-    it('will fallback to using a local cache is no connection is made', () => {
+    it('will fallback to using a local cache is no connection is made', async () => {
 
-      Cachette.connect('redis://localhost:9999');
+      await Cachette.connect('redis://localhost:9999');
 
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
@@ -49,7 +49,7 @@ describe('Cachette', () => {
         stub = sinon.stub(redis, 'createClient', () => {
           return redisClientStub;
         });
-        Cachette.connect('redis://localhost:9999');
+        await Cachette.connect('redis://localhost:9999');
 
         // redis ready
         redisClientStub.emit('connect');
@@ -79,8 +79,8 @@ describe('Cachette', () => {
 
     });
 
-    it('will not crash the application given an invalid Redis URL without protocol', () => {
-      Cachette.connect('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com');
+    it('will not crash the application given an invalid Redis URL without protocol', async () => {
+      await Cachette.connect('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com');
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
     });
@@ -102,7 +102,7 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key', 'value');
+      await cache.setValue('key', 'value');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
@@ -126,7 +126,7 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
@@ -150,7 +150,7 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
 
       const callGetOrFetch = () => Cachette.getOrFetchValue(
         'key',
