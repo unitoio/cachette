@@ -1,9 +1,11 @@
+import * as util from 'util';
 
 const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
 import { cachableValue, CacheInstance } from './CacheInstance';
 import { Cachette } from './Cachette';
+
 
 Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
@@ -42,7 +44,7 @@ export class RedisCache extends CacheInstance {
 
   constructor(redisUrl: string) {
     super();
-    Cachette.logger.info(`Connecting to Redis at ${redisUrl}.`);
+    this.emit('info', `Connecting to Redis at ${redisUrl}.`);
     this.client = redis.createClient({
       url: redisUrl,
       retry_strategy: RedisCache.retryStrategy,
@@ -221,7 +223,7 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      Cachette.logger.error(`Error while setting value to Redis cache`, error);
+      this.emit('error', `Error while setting value to Redis cache ${util.inspect(error)}`);
       return false;
     }
   }
@@ -232,11 +234,10 @@ export class RedisCache extends CacheInstance {
     ttl: number,
     overwrite: boolean,
   ): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to`, value);
+    this.emit('set', key, value);
 
     if (value === undefined) {
-      Cachette.logger.warn(`Cannot set ${key} to undefined!`);
-      return;
+      throw new Error(`Cannot set ${key} to undefined!`);
     }
 
     value = RedisCache.serializeValue(value);
@@ -259,14 +260,14 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      Cachette.logger.error(`Error while fetching from the Redis cache`, error);
+      this.emit('error', `Error while fetching value from the Redis cache ${util.inspect(error)}`);
       return undefined;
     }
   }
 
   private async getValueInternal(key: string): Promise<cachableValue> {
     const value = await this.client.getAsync(key);
-    Cachette.logger.debug(`Getting ${key} : `, value);
+    this.emit('get', key, value);
     return RedisCache.deserializeValue(value);
   }
 
