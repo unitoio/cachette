@@ -1,7 +1,8 @@
+import * as EventEmitter from 'events';
 
 export type cachableValue = any;
 
-export abstract class CacheInstance {
+export abstract class CacheInstance extends EventEmitter {
   /**
    * Get a value from the cache.
    *

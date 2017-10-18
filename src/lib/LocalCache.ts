@@ -1,7 +1,6 @@
 const LRU = require('lru-cache');
 
 import { cachableValue, CacheInstance } from './CacheInstance';
-import { Cachette } from './Cachette';
 
 
 export class LocalCache extends CacheInstance {
@@ -17,11 +16,10 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public async setValue(key: string, value: cachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to`, value);
+    this.emit('set', key, value);
 
     if (value === undefined) {
-      Cachette.logger.warn(`Cannot set ${key} to undefined!`);
-      return;
+      throw new Error(`Cannot set ${key} to undefined!`);
     }
 
     if (overwrite || !this.cache.has(key)) {
@@ -42,7 +40,7 @@ export class LocalCache extends CacheInstance {
    */
   public async getValue(key: string): Promise<string> {
     const value = await this.cache.get(key);
-    Cachette.logger.debug(`Getting ${key} : `, value);
+    this.emit('get', key, value);
     return value;
   }
 
