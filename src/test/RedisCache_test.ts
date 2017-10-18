@@ -55,29 +55,31 @@ describe('RedisCache', () => {
   describe('retryStrategy', () => {
 
     it('Will not try to reconnect when it was never able to connect', () => {
-
       const options = { times_connected: 0 };
       const retryDirective = RedisCache.retryStrategy(options);
-      expect(retryDirective).to.equal(null);
-
+      expect(typeof retryDirective).not.to.equal('number');
+      expect(retryDirective instanceof Error).to.be.true;
+      expect((<Error> retryDirective).message).to.include('Unable to connect');
     });
 
     it('Will not try to reconnect when the maximum retry count has been reached', () => {
-
       const options = { times_connected: 1, attempt: RedisCache.MAX_RETRY_COUNT + 1 };
       const retryDirective = RedisCache.retryStrategy(options);
-      expect(retryDirective).to.equal(null);
-
+      expect(typeof retryDirective).not.to.equal('number');
+      expect(retryDirective instanceof Error).to.be.true;
+      expect((<Error> retryDirective).message).to.include('connection attempts reached');
     });
 
     it('Will try to reconnect when the maximum retry count has not been reached', () => {
 
       const options = { times_connected: 1, attempt: 1 };
       let retryDirective = RedisCache.retryStrategy(options);
+      expect(typeof retryDirective).to.equal('number');
       expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
 
       options.attempt = RedisCache.MAX_RETRY_COUNT;
       retryDirective = RedisCache.retryStrategy(options);
+      expect(typeof retryDirective).to.equal('number');
       expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
 
     });

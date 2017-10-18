@@ -53,8 +53,8 @@ export class RedisCache extends CacheInstance {
       enable_offline_queue: false,
     });
     this.client.on('connect', this.startConnectionStrategy.bind(this));
-    this.client.on('end', RedisCache.endConnectionStrategy);
-    this.client.on('error', RedisCache.errorStrategy);
+    this.client.on('end', this.endConnectionStrategy.bind(this));
+    this.client.on('error', this.errorStrategy.bind(this));
   }
 
   /**
@@ -62,8 +62,8 @@ export class RedisCache extends CacheInstance {
    * We must catch it, otherwise it will crash the process
    * with an UncaughtException.
    */
-  public static errorStrategy(): void {
-    Cachette.logger.error(`Error while connected to the Redis cache!`);
+  public errorStrategy(): void {
+    this.emit('error', 'Error while connected to the Redis cache!');
     Cachette.setCacheInstance(null);
   }
 
@@ -71,8 +71,8 @@ export class RedisCache extends CacheInstance {
    * The end event is emitted by the redis client when an
    * established connection has ended.
    */
-  public static endConnectionStrategy(): void {
-    Cachette.logger.warn(`Connection lost to Redis.`);
+  public endConnectionStrategy(): void {
+    this.emit('warn', 'Connection lost to Redis.');
     /**
      * Falling back to using a local cache while we reconnect.
      */
@@ -84,31 +84,33 @@ export class RedisCache extends CacheInstance {
    * soon as a new connection is established.
    */
   public startConnectionStrategy(): void {
-    Cachette.logger.info(`Connection established to Redis.`);
+    this.emit('info', 'Connection established to Redis.');
     Cachette.setCacheInstance(this);
   }
 
   /**
    * Custom connection retry strategy used by the redis client.
+   *
    * For details of the properties of the options object,
    * see https://github.com/NodeRedis/node_redis#options-object-properties
+   *
+   * > If you return a non-number, no further retry will happen
+   * > and all offline commands are flushed with errors.
+   * > Return an error to return that specific error to all offline commands.
    */
-  public static retryStrategy(options): number {
+  public static retryStrategy(options): number | Error {
 
     // This means we are unable to connect when starting the service.
     if (options.times_connected === 0) {
-      Cachette.logger.error('Unable to connect to the Redis instance!');
-      return null;
+      return new Error('Unable to connect to the Redis instance!');
     }
 
     // The attempt counter goes back to 0 everytime the connection
     // is re-established.
     if (options.attempt > RedisCache.MAX_RETRY_COUNT) {
-      Cachette.logger.error('Maximum number of connection attempts reached.');
-      return null;
+      return new Error('Maximum number of connection attempts reached.');
     }
 
-    Cachette.logger.info(`Trying to reconnect in ${RedisCache.RETRY_DELAY} ms.`);
     return RedisCache.RETRY_DELAY;
 
   }
