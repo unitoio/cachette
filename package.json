@@ -26,9 +26,10 @@
     "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
     "test": "npm run compile && npm run coverage",
     "test:ci": "mocha --ui tdd -R xunit 'dist/src/test/**/*.js' > shippable/testresults/result.xml",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
+    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
     "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
     "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
+    "coverage:remap:xml": "cd coverage && remap-istanbul -i coverage.json -o coverage.xml -t cobertura",
     "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"
   },
   "pre-commit": [

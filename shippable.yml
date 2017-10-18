@@ -23,7 +23,7 @@ build:
     - npm run test:ci
   on_success:
     - npm run coverage
-    - cp shippable/codecoverage/cobertura-coverage.xml shippable/codecoverage/coverage.xml
+    - cp coverage/coverage.xml shippable/codecoverage/coverage.xml
 
 integrations:
   notifications:
