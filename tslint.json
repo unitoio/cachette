@@ -1,6 +1,4 @@
 {
-  "extends": [
-  ],
   "rulesDirectory": "node_modules/tslint-eslint-rules/dist/rules",
   "rules": {
     "align": [true, "parameters", "statements"],
@@ -8,31 +6,36 @@
     "comment-format": [true, "check-space"],
     "eofline": true,
     "one-line": [true, "check-else", "check-whitespace", "check-catch", "check-finally"],
-    "typedef": [true,
-                "call-signature",
-                "property-declaration",
-                "member-variable-declaration"],
-    "typedef-whitespace": [true, {
-      "call-signature": "nospace",
-      "index-signature": "nospace",
-      "parameter": "nospace",
-      "property-declaration": "nospace",
-      "variable-declaration": "nospace"
-    }, {
-      "call-signature": "onespace",
-      "index-signature": "onespace",
-      "parameter": "onespace",
-      "property-declaration": "onespace",
-      "variable-declaration": "onespace"
-    }],
-    "whitespace": [true,
-                   "check-branch",
-                   "check-decl",
-                   "check-operator",
-                   "check-module",
-                   "check-separator",
-                   "check-type",
-                   "check-typecast"],
+    "typedef": [
+      true,
+      "call-signature",
+      "property-declaration"
+    ],
+    "typedef-whitespace": [
+      true, {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      }, {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ],
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-separator",
+      "check-type",
+      "check-typecast"
+    ],
     "trailing-comma": [true, { "multiline": "always", "singleline": "never" }],
     "no-conditional-assignment": true,
     "no-console": [true, "log", "dir", "stack"],
@@ -45,6 +48,7 @@
     "no-ex-assign": true,
     "no-extra-boolean-cast": true,
     "no-extra-semi": true,
+    "no-floating-promises": [true, "Bluebird"],
     "no-inner-declarations": [true, "both"],
     "no-invalid-regexp": true,
     "no-irregular-whitespace": true,

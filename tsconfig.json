@@ -3,17 +3,21 @@
     "target": "es6",
     "module": "commonjs",
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "declaration": true,
     "listFiles": false,
     "sourceMap": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "baseUrl": ".",
+    "paths": {
+      "node": ["node/v6"]
+    }
   },
 
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ]
 }
