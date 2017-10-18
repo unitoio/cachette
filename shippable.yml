@@ -16,7 +16,7 @@ branches:
 build:
   ci:
     - shippable_retry npm install
-    - npm run prepublish
+    - npm run compile
     - mkdir -p shippable/testresults
     - mkdir -p shippable/codecoverage
     - npm run lint
