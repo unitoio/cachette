@@ -10,7 +10,7 @@ import { LocalCache } from '../lib/LocalCache';
 process.env.LOG_LEVEL = 'disabled';
 
 
-describe('LocalCache test case', () => {
+describe('LocalCache', () => {
 
   it('can set values', async () => {
 

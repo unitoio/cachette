@@ -10,7 +10,7 @@ import { RedisCache } from '../lib/RedisCache';
 
 describe('RedisCache', () => {
 
-  describe('buildSetArguments function', () => {
+  describe('buildSetArguments', () => {
 
     it('Can return only the key and the value', () => {
 
@@ -52,7 +52,7 @@ describe('RedisCache', () => {
 
   });
 
-  describe('retryStrategy function', () => {
+  describe('retryStrategy', () => {
 
     it('Will not try to reconnect when it was never able to connect', () => {
 
