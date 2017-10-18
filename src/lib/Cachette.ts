@@ -1,7 +1,5 @@
 import * as assert from 'assert';
 
-import { Logger } from './Logger';
-import { ConsoleLogger } from './ConsoleLogger';
 import { cachableValue, CacheInstance } from './CacheInstance';
 
 import { LocalCache } from './LocalCache';
@@ -14,7 +12,6 @@ export module Cachette {
 
   let localCacheInstance: CacheInstance = null;
   let mainCacheInstance: CacheInstance = null;
-  export let logger: Logger = new ConsoleLogger();
 
   /**
    * Keep track of active fetches to prevent
