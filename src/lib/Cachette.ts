@@ -57,7 +57,9 @@ export module Cachette {
     const fetch = activeFetches[key] = fetchFn.apply(context, args);
     try {
       const result = await fetch;
-      await instance.setValue(key, result, ttl, overwrite);
+      if (result !== undefined) {
+        await instance.setValue(key, result, ttl, overwrite);
+      }
       return result;
     } finally {
       delete activeFetches[key];
