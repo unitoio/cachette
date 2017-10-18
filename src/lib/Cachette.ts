@@ -116,7 +116,7 @@ export module Cachette {
     }
 
     if (mainCacheInstance === null) {
-      console.log('No redis URL provided. Only using local cache.'); // tslint:disable-line
+      // No redis URL provided. Only using local cache.
       mainCacheInstance = localCacheInstance;
     }
 

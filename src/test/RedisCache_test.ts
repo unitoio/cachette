@@ -12,7 +12,7 @@ describe('RedisCache', () => {
 
   describe('buildSetArguments', () => {
 
-    it('Can return only the key and the value', () => {
+    it('can return only the key and the value', () => {
 
       const setArguments = RedisCache.buildSetArguments('key', 'value');
       expect(setArguments).to.eql(['key', 'value']);
