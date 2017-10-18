@@ -1,6 +1,6 @@
 const LRU = require('lru-cache');
 
-import { cachableValue, CacheInstance } from './CacheInstance';
+import { CachableValue, CacheInstance } from './CacheInstance';
 
 
 export class LocalCache extends CacheInstance {
@@ -15,7 +15,7 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async setValue(key: string, value: cachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
+  public async setValue(key: string, value: CachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
     this.emit('set', key, value);
 
     if (value === undefined) {

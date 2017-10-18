@@ -1,6 +1,7 @@
 import * as EventEmitter from 'events';
 
-export type cachableValue = any;
+export type CachableValue = any;
+
 
 export abstract class CacheInstance extends EventEmitter {
 
@@ -13,7 +14,7 @@ export abstract class CacheInstance extends EventEmitter {
    *              no such value exists.
    *
    */
-  abstract getValue(key: string): Promise<cachableValue>;
+  abstract getValue(key: string): Promise<CachableValue>;
 
   /**
    * Set a value in the cache.
@@ -26,6 +27,6 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @return {boolean} True if the value was written, false otherwise.
    */
-  abstract setValue(key: string, value: cachableValue, ttl?: number, overwrite?: boolean): Promise<boolean>;
+  abstract setValue(key: string, value: CachableValue, ttl?: number, overwrite?: boolean): Promise<boolean>;
 
 }

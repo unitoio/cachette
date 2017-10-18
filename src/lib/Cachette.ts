@@ -1,12 +1,12 @@
 import * as assert from 'assert';
 
-import { cachableValue, CacheInstance } from './CacheInstance';
+import { CachableValue, CacheInstance } from './CacheInstance';
 
 import { LocalCache } from './LocalCache';
 import { RedisCache } from './RedisCache';
 
 
-export type fetchingFunction = () => Promise<cachableValue>;
+export type fetchingFunction = () => Promise<CachableValue>;
 
 export module Cachette {
 
@@ -17,7 +17,7 @@ export module Cachette {
    * Keep track of active fetches to prevent
    * simultaneous requests to the same resource in parallel.
    */
-  const activeFetches: { [key: string]: Promise<cachableValue> } = {};
+  const activeFetches: { [key: string]: Promise<CachableValue> } = {};
 
   /**
    * Get or fetch a value
@@ -36,7 +36,7 @@ export module Cachette {
     fetchFn: fetchingFunction,
     context: any,
     ...args: any[],
-  ): Promise<cachableValue> {
+  ): Promise<CachableValue> {
     const instance = getCacheInstance();
     // already cached?
     const cached = await instance.getValue(key);
@@ -141,7 +141,7 @@ export module Cachette {
       );
       const origFn = descriptor.value;
       // don't use an => function here, or you lose access to 'this'
-      const newFn = function (...args): Promise<cachableValue> {
+      const newFn = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         return getOrFetchValue(key, ttl, overwrite, origFn, this, ...args);
       };

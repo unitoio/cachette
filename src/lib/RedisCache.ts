@@ -1,7 +1,7 @@
 const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
-import { cachableValue, CacheInstance } from './CacheInstance';
+import { CachableValue, CacheInstance } from './CacheInstance';
 import { Cachette } from './Cachette';
 
 
@@ -123,7 +123,7 @@ export class RedisCache extends CacheInstance {
    * and retrieve them as strings.
    *
    */
-  public static serializeValue(value: cachableValue): cachableValue {
+  public static serializeValue(value: CachableValue): CachableValue {
 
     if (value === null) {
       return RedisCache.NULL_VALUE;
@@ -157,7 +157,7 @@ export class RedisCache extends CacheInstance {
    * > If the key is missing, reply will be null.
    *
    */
-  public static deserializeValue(value: cachableValue): cachableValue {
+  public static deserializeValue(value: CachableValue): CachableValue {
 
     if (value === null) {
       // null means that the key was not present, which we interpret as undefined.
@@ -188,7 +188,7 @@ export class RedisCache extends CacheInstance {
    * Returns the list of parameters to be sent to the set
    * function.
    */
-  public static buildSetArguments(key: string, value: cachableValue, ttl: number = undefined, overwrite: boolean = true): any[] {
+  public static buildSetArguments(key: string, value: CachableValue, ttl: number = undefined, overwrite: boolean = true): any[] {
 
     const setArguments = [key, value];
 
@@ -211,7 +211,7 @@ export class RedisCache extends CacheInstance {
    */
   public async setValue(
     key: string,
-    value: cachableValue,
+    value: CachableValue,
     ttl: number = undefined,
     overwrite: boolean = true,
   ): Promise<boolean> {
@@ -229,7 +229,7 @@ export class RedisCache extends CacheInstance {
 
   public async setValueInternal(
     key: string,
-    value: cachableValue,
+    value: CachableValue,
     ttl: number,
     overwrite: boolean,
   ): Promise<boolean> {
@@ -252,7 +252,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async getValue(key: string): Promise<cachableValue> {
+  public async getValue(key: string): Promise<CachableValue> {
     try {
       return await this.getValueInternal(key);
     } catch (error) {
@@ -265,7 +265,7 @@ export class RedisCache extends CacheInstance {
     }
   }
 
-  private async getValueInternal(key: string): Promise<cachableValue> {
+  private async getValueInternal(key: string): Promise<CachableValue> {
     const value = await this.client.getAsync(key);
     this.emit('get', key, value);
     return RedisCache.deserializeValue(value);
