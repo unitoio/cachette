@@ -10,14 +10,9 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "noUnusedLocals": true,
-    "baseUrl": ".",
-    "paths": {
-      "node": ["node/v6"]
-    }
+    "baseUrl": "."
   },
-
   "include": [
-    "src/**/*",
-    "test/**/*"
+    "src/**/*"
   ]
 }
