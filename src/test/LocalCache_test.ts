@@ -7,8 +7,6 @@ import * as Bluebird from 'bluebird';
 
 import { LocalCache } from '../lib/LocalCache';
 
-process.env.LOG_LEVEL = 'disabled';
-
 
 describe('LocalCache', () => {
 

@@ -10,7 +10,6 @@ import { Cachette } from './Cachette';
 Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
 
-process.env.LOG_LEVEL = 'disabled';
 
 /**
  * Wrapper class for using Redis as a cache.

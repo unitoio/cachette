@@ -11,8 +11,6 @@ import { Cachette, fetchingFunction } from '../lib/Cachette';
 import { LocalCache } from '../lib/LocalCache';
 import { RedisCache } from '../lib/RedisCache';
 
-process.env.LOG_LEVEL = 'disabled';
-
 
 /**
  * a simple Redis stub used in tests
