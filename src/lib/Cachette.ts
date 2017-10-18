@@ -72,6 +72,7 @@ export module Cachette {
    * Returns the cache instance.
    */
   export function getCacheInstance(): CacheInstance {
+
     if (mainCacheInstance) {
       return mainCacheInstance;
     }
@@ -80,7 +81,7 @@ export module Cachette {
       return localCacheInstance;
     }
 
-    logger.warn('The cache is used before initialization! Using a local cache.');
+    console.log('The cache is used before initialization! Using a local cache.'); // tslint:disable-line
     localCacheInstance = new LocalCache();
     return localCacheInstance;
   }
@@ -118,7 +119,7 @@ export module Cachette {
     }
 
     if (mainCacheInstance === null) {
-      logger.info('No cache URL provided. Only using local cache.');
+      console.log('No redis URL provided. Only using local cache.'); // tslint:disable-line
       mainCacheInstance = localCacheInstance;
     }
 
