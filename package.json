@@ -1,8 +1,12 @@
 {
   "name": "cachette",
   "version": "1.0.0",
-  "description": "Cache library with easy decorator and concurrent initialization",
+  "engines": {
+    "node": ">=6.10.0"
+  },
+  "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/index.js",
+  "repository": "https://github.com/unitoio/cachette",
   "author": {
     "name": "Unito",
     "email": "hello@unito.io"
@@ -16,20 +20,18 @@
     "decorator"
   ],
   "scripts": {
-    "clean": "rm -rf dist",
-    "check:only": "if [[ $(grep -R '\\.only' src/test | wc -l) -gt 2 ]]; then exit 1; fi",
+    "clean": "rm -rf dist node_modules",
     "compile": "tsc",
-    "lint": "tslint -c tslint.json --project tsconfig.json",
+    "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
     "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
     "test": "npm run compile && npm run coverage",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
+    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:report",
     "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
     "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
     "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"
   },
   "pre-commit": [
     "lint",
-    "check:only",
     "test"
   ],
   "devDependencies": {
@@ -45,9 +47,9 @@
     "remap-istanbul": "^0.8.4",
     "sinon": "^1.17.6",
     "source-map-support": "^0.4.8",
-    "tslint": "^4.0.2",
+    "tslint": "^4.5.1",
     "tslint-eslint-rules": "^3.1.0",
-    "typescript": "^2.1.0"
+    "typescript": "^2.2.1"
   },
   "dependencies": {
     "bluebird": "^3.4.7",

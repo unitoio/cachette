@@ -1,14 +1,13 @@
-
 const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
-import { cachableValue, CacheInstance } from './CacheInstance';
+import { CachableValue, CacheInstance } from './CacheInstance';
 import { Cachette } from './Cachette';
+
 
 Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
 
-process.env.LOG_LEVEL = 'disabled';
 
 /**
  * Wrapper class for using Redis as a cache.
@@ -42,7 +41,7 @@ export class RedisCache extends CacheInstance {
 
   constructor(redisUrl: string) {
     super();
-    Cachette.logger.info(`Connecting to Redis at ${redisUrl}.`);
+    this.emit('info', `Connecting to Redis at ${redisUrl}.`);
     this.client = redis.createClient({
       url: redisUrl,
       retry_strategy: RedisCache.retryStrategy,
@@ -51,8 +50,8 @@ export class RedisCache extends CacheInstance {
       enable_offline_queue: false,
     });
     this.client.on('connect', this.startConnectionStrategy.bind(this));
-    this.client.on('end', RedisCache.endConnectionStrategy);
-    this.client.on('error', RedisCache.errorStrategy);
+    this.client.on('end', this.endConnectionStrategy.bind(this));
+    this.client.on('error', this.errorStrategy.bind(this));
   }
 
   /**
@@ -60,8 +59,8 @@ export class RedisCache extends CacheInstance {
    * We must catch it, otherwise it will crash the process
    * with an UncaughtException.
    */
-  public static errorStrategy(): void {
-    Cachette.logger.error(`Error while connected to the Redis cache!`);
+  public errorStrategy(): void {
+    this.emit('warn', 'Error while connected to the Redis cache!');
     Cachette.setCacheInstance(null);
   }
 
@@ -69,8 +68,8 @@ export class RedisCache extends CacheInstance {
    * The end event is emitted by the redis client when an
    * established connection has ended.
    */
-  public static endConnectionStrategy(): void {
-    Cachette.logger.warn(`Connection lost to Redis.`);
+  public endConnectionStrategy(err): void {
+    this.emit('warn', 'Connection lost to Redis.', err);
     /**
      * Falling back to using a local cache while we reconnect.
      */
@@ -82,31 +81,33 @@ export class RedisCache extends CacheInstance {
    * soon as a new connection is established.
    */
   public startConnectionStrategy(): void {
-    Cachette.logger.info(`Connection established to Redis.`);
+    this.emit('info', 'Connection established to Redis.');
     Cachette.setCacheInstance(this);
   }
 
   /**
    * Custom connection retry strategy used by the redis client.
+   *
    * For details of the properties of the options object,
    * see https://github.com/NodeRedis/node_redis#options-object-properties
+   *
+   * > If you return a non-number, no further retry will happen
+   * > and all offline commands are flushed with errors.
+   * > Return an error to return that specific error to all offline commands.
    */
-  public static retryStrategy(options): number {
+  public static retryStrategy(options): number | Error {
 
     // This means we are unable to connect when starting the service.
     if (options.times_connected === 0) {
-      Cachette.logger.error('Unable to connect to the Redis instance!');
-      return null;
+      return new Error('Unable to connect to the Redis instance!');
     }
 
     // The attempt counter goes back to 0 everytime the connection
     // is re-established.
     if (options.attempt > RedisCache.MAX_RETRY_COUNT) {
-      Cachette.logger.error('Maximum number of connection attempts reached.');
-      return null;
+      return new Error('Maximum number of connection attempts reached.');
     }
 
-    Cachette.logger.info(`Trying to reconnect in ${RedisCache.RETRY_DELAY} ms.`);
     return RedisCache.RETRY_DELAY;
 
   }
@@ -122,7 +123,7 @@ export class RedisCache extends CacheInstance {
    * and retrieve them as strings.
    *
    */
-  public static serializeValue(value: cachableValue): cachableValue {
+  public static serializeValue(value: CachableValue): CachableValue {
 
     if (value === null) {
       return RedisCache.NULL_VALUE;
@@ -156,7 +157,7 @@ export class RedisCache extends CacheInstance {
    * > If the key is missing, reply will be null.
    *
    */
-  public static deserializeValue(value: cachableValue): cachableValue {
+  public static deserializeValue(value: CachableValue): CachableValue {
 
     if (value === null) {
       // null means that the key was not present, which we interpret as undefined.
@@ -187,7 +188,7 @@ export class RedisCache extends CacheInstance {
    * Returns the list of parameters to be sent to the set
    * function.
    */
-  public static buildSetArguments(key: string, value: cachableValue, ttl: number = undefined, overwrite: boolean = true): any[] {
+  public static buildSetArguments(key: string, value: CachableValue, ttl: number = undefined, overwrite: boolean = true): any[] {
 
     const setArguments = [key, value];
 
@@ -210,7 +211,7 @@ export class RedisCache extends CacheInstance {
    */
   public async setValue(
     key: string,
-    value: cachableValue,
+    value: CachableValue,
     ttl: number = undefined,
     overwrite: boolean = true,
   ): Promise<boolean> {
@@ -221,22 +222,22 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      Cachette.logger.error(`Error while setting value to Redis cache`, error);
+      this.emit('warn', 'Error while setting value to Redis cache', error);
       return false;
     }
   }
 
   public async setValueInternal(
     key: string,
-    value: cachableValue,
+    value: CachableValue,
     ttl: number,
     overwrite: boolean,
   ): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to`, value);
+    this.emit('set', key, value);
 
     if (value === undefined) {
-      Cachette.logger.warn(`Cannot set ${key} to undefined!`);
-      return;
+      this.emit('warn', `Cannot set ${key} to undefined!`);
+      return false;
     }
 
     value = RedisCache.serializeValue(value);
@@ -251,7 +252,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async getValue(key: string): Promise<cachableValue> {
+  public async getValue(key: string): Promise<CachableValue> {
     try {
       return await this.getValueInternal(key);
     } catch (error) {
@@ -259,14 +260,14 @@ export class RedisCache extends CacheInstance {
        * A timeout can occur if the connection was broken during
        * a value fetching. We don't want to hang forever if this is the case.
        */
-      Cachette.logger.error(`Error while fetching from the Redis cache`, error);
+      this.emit('warn', 'Error while fetching value from the Redis cache', error);
       return undefined;
     }
   }
 
-  private async getValueInternal(key: string): Promise<cachableValue> {
+  private async getValueInternal(key: string): Promise<CachableValue> {
     const value = await this.client.getAsync(key);
-    Cachette.logger.debug(`Getting ${key} : `, value);
+    this.emit('get', key, value);
     return RedisCache.deserializeValue(value);
   }
 

@@ -7,11 +7,9 @@ import * as sinon from 'sinon';
 import * as redis from 'redis';
 import { EventEmitter } from 'events';
 
-import { Cachette, fetchingFunction } from '../lib/Cachette';
+import { Cachette, FetchingFunction } from '../lib/Cachette';
 import { LocalCache } from '../lib/LocalCache';
 import { RedisCache } from '../lib/RedisCache';
-
-process.env.LOG_LEVEL = 'disabled';
 
 
 /**
@@ -27,20 +25,20 @@ class RedisClientStub extends EventEmitter {
 describe('Cachette', () => {
   describe('fallback', () => {
 
-    afterEach(() => {
-      Cachette.disconnect();
-    });
+    afterEach(() => Cachette.disconnect());
 
-    it('will fallback to using a local cache is no connection is made', () => {
+    it('will fallback to using a local cache is no connection is made', async () => {
 
-      process.env.CACHE_URL = 'redis://localhost:9999';
-      Cachette.connect();
+      await Cachette.connect('redis://localhost:9999');
 
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
 
-      process.env.CACHE_URL = undefined;
+    });
 
+    it('will create a local cache if connect was not called', () => {
+      const cacheInstance = Cachette.getCacheInstance();
+      expect(cacheInstance instanceof LocalCache).to.be.true;
     });
 
     it('will fallback to using a local cache when connection is lost, then reconnect when it is back', async () => {
@@ -51,8 +49,7 @@ describe('Cachette', () => {
         stub = sinon.stub(redis, 'createClient', () => {
           return redisClientStub;
         });
-        process.env.CACHE_URL = 'redis://localhost:9999';
-        Cachette.connect();
+        await Cachette.connect('redis://localhost:9999');
 
         // redis ready
         redisClientStub.emit('connect');
@@ -78,29 +75,22 @@ describe('Cachette', () => {
         if (stub) {
           stub.restore();
         }
-        process.env.CACHE_URL = undefined;
       }
 
     });
 
-    it('will not crash the application given an invalid Redis URL without protocol', () => {
-
-      process.env.REDIS_URL = 'rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com';
-      Cachette.connect();
-
+    it('will not crash the application given an invalid Redis URL without protocol', async () => {
+      await Cachette.connect('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com');
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
-
-      process.env.REDIS_URL = undefined;
-
     });
 
   });
 
   describe('getOrFetchValue', () => {
-    beforeEach(Cachette.connect);
-    afterEach(Cachette.disconnect);
 
+    beforeEach(() => Cachette.connect());
+    afterEach(() => Cachette.disconnect());
 
     it('does not fetch if value in cache', async () => {
       let numCalled = 0;
@@ -112,12 +102,12 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key', 'value');
+      await cache.setValue('key', 'value');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -136,12 +126,12 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -160,13 +150,13 @@ describe('Cachette', () => {
       };
 
       const cache = Cachette.getCacheInstance();
-      cache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
 
       const callGetOrFetch = () => Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <fetchingFunction> object.fetch,
+        <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -213,7 +203,7 @@ describe('Cachette', () => {
       for (let i = 0; i < 100; i++) {
         const fn = (i % 2) ? object.fetch1 : object.fetch2;
         const key = (i % 2) ? 'key1' : 'key2';
-        calls.push(callGetOrFetch(key, fn as fetchingFunction));
+        calls.push(callGetOrFetch(key, fn as FetchingFunction));
       }
 
       const values = await Promise.all(calls);
@@ -247,7 +237,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-          <fetchingFunction> object.fetch,
+          <FetchingFunction> object.fetch,
         object,
         'newvalue',
       );
@@ -269,6 +259,10 @@ describe('Cachette', () => {
   });
 
   describe('decorator cached()', () => {
+
+    beforeEach(() => Cachette.connect());
+    afterEach(() => Cachette.disconnect());
+
     interface Response {
       variant: string;
       value: number;

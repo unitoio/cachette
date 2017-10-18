@@ -1,7 +1,6 @@
 const LRU = require('lru-cache');
 
-import { cachableValue, CacheInstance } from './CacheInstance';
-import { Cachette } from './Cachette';
+import { CachableValue, CacheInstance } from './CacheInstance';
 
 
 export class LocalCache extends CacheInstance {
@@ -16,12 +15,12 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public setValue(key: string, value: cachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
-    Cachette.logger.debug(`Setting ${key} to`, value);
+  public async setValue(key: string, value: CachableValue, ttl: number = 0, overwrite: boolean = true): Promise<boolean> {
+    this.emit('set', key, value);
 
     if (value === undefined) {
-      Cachette.logger.warn(`Cannot set ${key} to undefined!`);
-      return;
+      this.emit('warn', `Cannot set ${key} to undefined!`);
+      return false;
     }
 
     if (overwrite || !this.cache.has(key)) {
@@ -31,10 +30,10 @@ export class LocalCache extends CacheInstance {
       } else {
         this.cache.set(key, value, ttl * 1000);
       }
-      return Promise.resolve(true);
+      return true;
     }
 
-    return Promise.resolve(false);
+    return false;
   }
 
   /**
@@ -42,8 +41,8 @@ export class LocalCache extends CacheInstance {
    */
   public async getValue(key: string): Promise<string> {
     const value = await this.cache.get(key);
-    Cachette.logger.debug(`Getting ${key} : `, value);
-    return Promise.resolve(value);
+    this.emit('get', key, value);
+    return value;
   }
 
 }

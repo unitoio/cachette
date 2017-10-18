@@ -10,9 +10,9 @@ import { RedisCache } from '../lib/RedisCache';
 
 describe('RedisCache', () => {
 
-  describe('buildSetArguments function', () => {
+  describe('buildSetArguments', () => {
 
-    it('Can return only the key and the value', () => {
+    it('can return only the key and the value', () => {
 
       const setArguments = RedisCache.buildSetArguments('key', 'value');
       expect(setArguments).to.eql(['key', 'value']);
@@ -52,32 +52,34 @@ describe('RedisCache', () => {
 
   });
 
-  describe('retryStrategy function', () => {
+  describe('retryStrategy', () => {
 
-    it('Will not try to reconnect when it was never able to connect', () => {
-
+    it('will not try to reconnect when it was never able to connect', () => {
       const options = { times_connected: 0 };
       const retryDirective = RedisCache.retryStrategy(options);
-      expect(retryDirective).to.equal(null);
-
+      expect(typeof retryDirective).not.to.equal('number');
+      expect(retryDirective instanceof Error).to.be.true;
+      expect((<Error> retryDirective).message).to.include('Unable to connect');
     });
 
     it('Will not try to reconnect when the maximum retry count has been reached', () => {
-
       const options = { times_connected: 1, attempt: RedisCache.MAX_RETRY_COUNT + 1 };
       const retryDirective = RedisCache.retryStrategy(options);
-      expect(retryDirective).to.equal(null);
-
+      expect(typeof retryDirective).not.to.equal('number');
+      expect(retryDirective instanceof Error).to.be.true;
+      expect((<Error> retryDirective).message).to.include('connection attempts reached');
     });
 
     it('Will try to reconnect when the maximum retry count has not been reached', () => {
 
       const options = { times_connected: 1, attempt: 1 };
       let retryDirective = RedisCache.retryStrategy(options);
+      expect(typeof retryDirective).to.equal('number');
       expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
 
       options.attempt = RedisCache.MAX_RETRY_COUNT;
       retryDirective = RedisCache.retryStrategy(options);
+      expect(typeof retryDirective).to.equal('number');
       expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
 
     });
@@ -146,12 +148,12 @@ describe('RedisCache', () => {
 
   });
 
-  it('will not crash the application given an invalid Redis URL', () => {
+  it('will not crash the application given an invalid Redis URL', async () => {
 
-    Cachette.connect();
+    await Cachette.connect();
     const cache = new RedisCache('redis://localhost:9999');
-    cache.getValue('test');
-    cache.setValue('test', 'value');
+    await cache.getValue('test');
+    await cache.setValue('test', 'value');
     expect('still alive???').to.exist;
 
   });

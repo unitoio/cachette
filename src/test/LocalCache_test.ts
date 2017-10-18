@@ -1,4 +1,3 @@
-
 require('source-map-support').install();
 
 import 'mocha';
@@ -7,26 +6,32 @@ import * as Bluebird from 'bluebird';
 
 import { LocalCache } from '../lib/LocalCache';
 
-process.env.LOG_LEVEL = 'disabled';
 
-
-describe('LocalCache test case', () => {
+describe('LocalCache', () => {
 
   it('can set values', async () => {
-
     const cache = new LocalCache();
-    cache.setValue('key', 'value');
+    await cache.setValue('key', 'value');
     const value = await cache.getValue('key');
     expect(value).to.equal('value');
+  });
 
+  it('will not throw if we set a value of undefined', async () => {
+    const cache = new LocalCache();
+    const valueWritten = await cache.setValue('key', undefined);
+    expect(valueWritten).to.be.false;
+    const value = await cache.getValue('key');
+    expect(value).not.to.exist;
   });
 
   it('can set values with expiry', async () => {
 
     const cache = new LocalCache();
-    await cache.setValue('key', 'value', 1);
-    await Bluebird.delay(1000);
-    const value = await cache.getValue('key');
+    await cache.setValue('key', 'value', .2);
+    let value = await cache.getValue('key');
+    expect(value).to.equal('value');
+    await Bluebird.delay(250);
+    value = await cache.getValue('key');
     expect(value).to.equal(undefined);
 
   });

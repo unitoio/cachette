@@ -1,26 +1,23 @@
 import * as assert from 'assert';
 
-import { Logger } from './Logger';
-import { ConsoleLogger } from './ConsoleLogger';
-import { cachableValue, CacheInstance } from './CacheInstance';
+import { CachableValue, CacheInstance } from './CacheInstance';
 
 import { LocalCache } from './LocalCache';
 import { RedisCache } from './RedisCache';
 
 
-export type fetchingFunction = () => Promise<cachableValue>;
+export type FetchingFunction = () => Promise<CachableValue>;
 
 export module Cachette {
 
   let localCacheInstance: CacheInstance = null;
   let mainCacheInstance: CacheInstance = null;
-  export let logger: Logger = new ConsoleLogger();
 
   /**
    * Keep track of active fetches to prevent
    * simultaneous requests to the same resource in parallel.
    */
-  const activeFetches: { [key: string]: Promise<cachableValue> } = {};
+  const activeFetches: { [key: string]: Promise<CachableValue> } = {};
 
   /**
    * Get or fetch a value
@@ -36,10 +33,10 @@ export module Cachette {
     key: string,
     ttl: number,
     overwrite: boolean,
-    fetchFn: fetchingFunction,
+    fetchFn: FetchingFunction,
     context: any,
     ...args: any[],
-  ): Promise<cachableValue> {
+  ): Promise<CachableValue> {
     const instance = getCacheInstance();
     // already cached?
     const cached = await instance.getValue(key);
@@ -60,7 +57,9 @@ export module Cachette {
     const fetch = activeFetches[key] = fetchFn.apply(context, args);
     try {
       const result = await fetch;
-      await instance.setValue(key, result, ttl, overwrite);
+      if (result !== undefined) {
+        await instance.setValue(key, result, ttl, overwrite);
+      }
       return result;
     } finally {
       delete activeFetches[key];
@@ -72,6 +71,7 @@ export module Cachette {
    * Returns the cache instance.
    */
   export function getCacheInstance(): CacheInstance {
+
     if (mainCacheInstance) {
       return mainCacheInstance;
     }
@@ -80,7 +80,7 @@ export module Cachette {
       return localCacheInstance;
     }
 
-    logger.warn('The cache is used before initialization! Using a local cache.');
+    console.log('The cache is used before initialization! Using a local cache.'); // tslint:disable-line
     localCacheInstance = new LocalCache();
     return localCacheInstance;
   }
@@ -98,7 +98,7 @@ export module Cachette {
    * this function first, as calling getCache directly will
    * default to using a local cache.
    */
-  export async function connect(): Promise<void> {
+  export async function connect(redisUrl?: string): Promise<void> {
 
     if (mainCacheInstance !== null) {
       return;
@@ -113,13 +113,12 @@ export module Cachette {
       localCacheInstance = new LocalCache();
     }
 
-    const cacheURL = process.env.CACHE_URL || '';
-    if (cacheURL.startsWith('redis://')) {
-      new RedisCache(process.env.CACHE_URL); // tslint:disable-line
+    if (redisUrl && redisUrl.startsWith('redis://')) {
+      new RedisCache(redisUrl); // tslint:disable-line
     }
 
     if (mainCacheInstance === null) {
-      logger.info('No cache URL provided. Only using local cache.');
+      // No redis URL provided. Only using local cache.
       mainCacheInstance = localCacheInstance;
     }
 
@@ -144,7 +143,7 @@ export module Cachette {
       );
       const origFn = descriptor.value;
       // don't use an => function here, or you lose access to 'this'
-      const newFn = function (...args): Promise<cachableValue> {
+      const newFn = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         return getOrFetchValue(key, ttl, overwrite, origFn, this, ...args);
       };
