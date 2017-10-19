@@ -22,7 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/",
     "compile": "tsc",
-    "prepublish": "npm run clean && npm run install && npm run compile",
+    "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
     "test": "npm run compile && npm run coverage",
     "test:ci": "mocha --ui tdd -R xunit 'dist/src/test/**/*.js' > shippable/testresults/result.xml",
