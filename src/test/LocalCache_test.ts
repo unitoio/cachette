@@ -36,6 +36,18 @@ describe('LocalCache', () => {
 
   });
 
+  it('can delete a value', async () => {
+
+    const cache = new LocalCache();
+    await cache.setValue('key', 'value');
+
+    expect(await cache.getValue('key')).to.equal('value');
+    await cache.delValue('key');
+
+    expect(await cache.getValue('key')).not.to.exist;
+
+  });
+
   it('will not grow in size past the maximum size', async () => {
     const origMax = LocalCache['MAXIMUM_CACHE_SIZE'];
     LocalCache['MAXIMUM_CACHE_SIZE'] = 5;
