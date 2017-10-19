@@ -20,7 +20,7 @@
     "decorator"
   ],
   "scripts": {
-    "clean": "rm -rf dist/ node_modules/ shippable/ coverage/",
+    "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
