@@ -20,10 +20,10 @@
     "decorator"
   ],
   "scripts": {
-    "clean": "rm -rf dist node_modules",
+    "clean": "rm -rf dist/ node_modules/ shippable/ coverage/",
     "compile": "tsc",
+    "prepublish": "npm run clean && npm run install && npm run compile",
     "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
-    "start": "npm run compile && npm run naive && npm run protected && npm run cacheClass && npm run decorated",
     "test": "npm run compile && npm run coverage",
     "test:ci": "mocha --ui tdd -R xunit 'dist/src/test/**/*.js' > shippable/testresults/result.xml",
     "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
