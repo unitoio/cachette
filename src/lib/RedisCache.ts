@@ -271,4 +271,11 @@ export class RedisCache extends CacheInstance {
     return RedisCache.deserializeValue(value);
   }
 
+  /**
+   * @inheritdoc
+   */
+  public async delValue(key: string): Promise<void> {
+    return this.client.delAsync.bind(this.client, key);
+  }
+
 }

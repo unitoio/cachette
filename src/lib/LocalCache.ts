@@ -45,4 +45,11 @@ export class LocalCache extends CacheInstance {
     return value;
   }
 
+  /**
+   * @inheritdoc
+   */
+  public async delValue(key: string): Promise<void> {
+    this.cache.del(key);
+  }
+
 }
