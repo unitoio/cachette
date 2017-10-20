@@ -1,5 +1,8 @@
 coverage/
 shippable/
+src/
+test/
+dist/test/
 shippable.yml
 tsconfig.json
 tslint.json
