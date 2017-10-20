@@ -5,7 +5,7 @@
     "node": ">=6.10.0"
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "repository": "https://github.com/unitoio/cachette",
   "author": {
     "name": "Unito",
@@ -25,8 +25,8 @@
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
     "test": "npm run compile && npm run coverage",
-    "test:ci": "mocha --ui tdd -R xunit 'dist/src/test/**/*.js' > shippable/testresults/result.xml",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/src/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
+    "test:ci": "mocha --ui tdd -R xunit 'dist/test/**/*.js' > shippable/testresults/result.xml",
+    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
     "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
     "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
     "coverage:remap:xml": "cd coverage && remap-istanbul -i coverage.json -o coverage.xml -t cobertura",

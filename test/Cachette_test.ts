@@ -7,9 +7,9 @@ import * as sinon from 'sinon';
 import * as redis from 'redis';
 import { EventEmitter } from 'events';
 
-import { Cachette, FetchingFunction } from '../lib/Cachette';
-import { LocalCache } from '../lib/LocalCache';
-import { RedisCache } from '../lib/RedisCache';
+import { Cachette, FetchingFunction } from '../src/lib/Cachette';
+import { LocalCache } from '../src/lib/LocalCache';
+import { RedisCache } from '../src/lib/RedisCache';
 
 
 /**
