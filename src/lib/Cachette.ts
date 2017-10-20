@@ -33,9 +33,7 @@ export module Cachette {
     key: string,
     ttl: number,
     overwrite: boolean,
-    fetchFn: FetchingFunction,
-    context: any,
-    ...args: any[],
+    fetchFunction: FetchingFunction,
   ): Promise<CachableValue> {
     const instance = getCacheInstance();
     // already cached?
@@ -54,9 +52,9 @@ export module Cachette {
     }
 
     // I'm the one fetching. It'll be the only await on the fetching function.
-    const fetch = activeFetches[key] = fetchFn.apply(context, args);
+    const fetchPromise = activeFetches[key] = fetchFunction();
     try {
-      const result = await fetch;
+      const result = await fetchPromise;
       if (result !== undefined) {
         await instance.setValue(key, result, ttl, overwrite);
       }
@@ -141,13 +139,14 @@ export module Cachette {
         target['buildCacheKey'],
         'Need to define buildCacheKey on the class to use the decorator "cached"',
       );
-      const origFn = descriptor.value;
+      const origFunction = descriptor.value;
       // don't use an => function here, or you lose access to 'this'
-      const newFn = function (...args): Promise<CachableValue> {
+      const newFunction = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
-        return getOrFetchValue(key, ttl, overwrite, origFn, this, ...args);
+        const fetchFunction = origFunction.bind(this, ...args);
+        return getOrFetchValue(key, ttl, overwrite, fetchFunction);
       };
-      descriptor.value = newFn;
+      descriptor.value = newFunction;
       return descriptor;
     };
   }

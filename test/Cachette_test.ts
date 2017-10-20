@@ -100,13 +100,12 @@ describe('Cachette', () => {
 
       const cache = Cachette.getCacheInstance();
       await cache.setValue('key', 'value');
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <FetchingFunction> object.fetch,
-        object,
-        'newvalue',
+        fetchFunction,
       );
       expect(value).to.eql('value');
       expect(numCalled).to.eql(0);
@@ -124,13 +123,12 @@ describe('Cachette', () => {
 
       const cache = Cachette.getCacheInstance();
       await cache.setValue('key2', 'value');
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <FetchingFunction> object.fetch,
-        object,
-        'newvalue',
+        fetchFunction,
       );
       expect(value).to.eql('newvalue');
       expect(numCalled).to.eql(1);
@@ -149,13 +147,12 @@ describe('Cachette', () => {
       const cache = Cachette.getCacheInstance();
       await cache.setValue('key2', 'value');
 
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
       const callGetOrFetch = () => Cachette.getOrFetchValue(
         'key',
         10,
         false,
-        <FetchingFunction> object.fetch,
-        object,
-        'newvalue',
+        fetchFunction,
       );
 
       const calls = [];
@@ -186,14 +183,15 @@ describe('Cachette', () => {
         },
       };
 
-      const callGetOrFetch = (key, fn) => Cachette.getOrFetchValue(
-        key,
-        10,
-        false,
-        fn,
-        object,
-        'newvalue',
-      );
+      const callGetOrFetch = (key, fn) => {
+        const fetchFunction = fn.bind(object, 'newvalue');
+        return Cachette.getOrFetchValue(
+          key,
+          10,
+          false,
+          fetchFunction,
+        );
+      };
 
       const calls = [];
 
@@ -234,9 +232,7 @@ describe('Cachette', () => {
         'key',
         10,
         false,
-          <FetchingFunction> object.fetch,
-        object,
-        'newvalue',
+        object.fetch,
       );
 
       const calls = [];
