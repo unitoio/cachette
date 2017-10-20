@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as redis from 'redis';
 import { EventEmitter } from 'events';
+import * as Bluebird from 'bluebird';
 
 import { Cachette, FetchingFunction } from '../src/lib/Cachette';
 import { LocalCache } from '../src/lib/LocalCache';
@@ -247,6 +248,22 @@ describe('Cachette', () => {
 
       expect(numExceptions).to.eql(10);
 
+    });
+
+    it('resolves promises in order', async () => {
+      async function fetchFunction(): Promise<number> {
+        await Bluebird.delay(100);
+        return 1;
+      }
+      const onehundred = Array.from(new Array(100).keys());
+
+      const calls = [];
+      await Promise.all(onehundred.map(num => {
+        return Cachette.getOrFetchValue('key', 10, false, fetchFunction)
+          .then(result => calls.push(num));
+      }));
+
+      expect(calls).to.eql(onehundred);
     });
 
   });

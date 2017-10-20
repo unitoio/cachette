@@ -45,23 +45,24 @@ export module Cachette {
     // already fetching?
     const currentFetch = activeFetches[key];
     if (currentFetch) {
-      // can't use await directly on currentFetch,
-      // as await translates into a yield on an awaiter function.
-      // As we branch the promises, we need to call .then explicitly
-      return currentFetch.then(result => result);
+      return currentFetch;
     }
 
     // I'm the one fetching. It'll be the only await on the fetching function.
     const fetchPromise = activeFetches[key] = fetchFunction();
-    try {
-      const result = await fetchPromise;
+    return fetchPromise.then(result => {
       if (result !== undefined) {
-        await instance.setValue(key, result, ttl, overwrite);
+        return instance.setValue(key, result, ttl, overwrite).then(() => result);
       }
       return result;
-    } finally {
-      delete activeFetches[key];
-    }
+    }).then(result => {
+      delete activeFetches[key]
+      return result;
+    }, err => {
+      delete activeFetches[key]
+      return Promise.reject(err);
+    });
+
   }
 
 
