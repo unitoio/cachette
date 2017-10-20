@@ -17,7 +17,7 @@ describe('LocalCache', () => {
   it('will not throw if we set a value of undefined', async () => {
     const cache = new LocalCache();
     const valueWritten = await cache.setValue('key', undefined);
-    expect(valueWritten).to.be.false;
+    expect(valueWritten).to.be.undefined;
     const value = await cache.getValue('key');
     expect(value).not.to.exist;
   });
@@ -31,21 +31,6 @@ describe('LocalCache', () => {
     await Bluebird.delay(250);
     value = await cache.getValue('key');
     expect(value).to.equal(undefined);
-
-  });
-
-  it('does not override a value if option is not set', async () => {
-
-    let value;
-
-    const cache = new LocalCache();
-    await cache.setValue('key', 'value1', 0);
-    value = await cache.getValue('key');
-    expect(value).to.equal('value1');
-
-    await cache.setValue('key', 'value2', 0, false);
-    value = await cache.getValue('key');
-    expect(value).to.equal('value1');
 
   });
 
