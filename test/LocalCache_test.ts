@@ -1,10 +1,8 @@
-require('source-map-support').install();
-
 import 'mocha';
 import { expect } from 'chai';
 import * as Bluebird from 'bluebird';
 
-import { LocalCache } from '../lib/LocalCache';
+import { LocalCache } from '../src/lib/LocalCache';
 
 
 describe('LocalCache', () => {

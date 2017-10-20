@@ -1,11 +1,8 @@
-
-require('source-map-support').install();
-
 import 'mocha';
 import { expect } from 'chai';
 
-import { Cachette } from '../lib/Cachette';
-import { RedisCache } from '../lib/RedisCache';
+import { Cachette } from '../src/lib/Cachette';
+import { RedisCache } from '../src/lib/RedisCache';
 
 
 describe('RedisCache', () => {
