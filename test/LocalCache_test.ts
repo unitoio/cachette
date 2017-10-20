@@ -34,6 +34,21 @@ describe('LocalCache', () => {
 
   });
 
+  it('does not override a value if option is not set', async () => {
+
+    let value;
+
+    const cache = new LocalCache();
+    await cache.setValue('key', 'value1', 0);
+    value = await cache.getValue('key');
+    expect(value).to.equal('value1');
+
+    await cache.setValue('key', 'value2', 0, false);
+    value = await cache.getValue('key');
+    expect(value).to.equal('value1');
+
+  });
+
   it('can delete a value', async () => {
 
     const cache = new LocalCache();

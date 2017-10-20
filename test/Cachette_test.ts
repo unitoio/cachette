@@ -33,6 +33,17 @@ describe('Cachette', () => {
 
     });
 
+    it('handles calling connect multiple times', async () => {
+
+      await Cachette.connect();
+      await Cachette.connect();
+      await Cachette.connect();
+
+      const cacheInstance = Cachette.getCacheInstance();
+      expect(cacheInstance instanceof LocalCache).to.be.true;
+
+    });
+
     it('will create a local cache if connect was not called', () => {
       const cacheInstance = Cachette.getCacheInstance();
       expect(cacheInstance instanceof LocalCache).to.be.true;
