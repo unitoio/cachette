@@ -36,7 +36,7 @@ describe('RedisCache', () => {
     it('supports setting the time to live to 0', () => {
 
       const setArguments = RedisCache.buildSetArguments('key', 'value', 0, undefined);
-      expect(setArguments).to.eql(['key', 'value', 'EX', '0']);
+      expect(setArguments).to.eql(['key', 'value']);
 
     });
 

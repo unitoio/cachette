@@ -188,11 +188,11 @@ export class RedisCache extends CacheInstance {
    * Returns the list of parameters to be sent to the set
    * function.
    */
-  public static buildSetArguments(key: string, value: CachableValue, ttl: number = undefined, overwrite: boolean = true): any[] {
+  public static buildSetArguments(key: string, value: CachableValue, ttl: number = 0, overwrite: boolean = true): any[] {
 
     const setArguments = [key, value];
 
-    if (ttl !== undefined) {
+    if (ttl !== 0) {
       // By default the keys do not expire in Redis.
       setArguments.push('EX');
       setArguments.push(ttl.toString());
@@ -212,7 +212,7 @@ export class RedisCache extends CacheInstance {
   public async setValue(
     key: string,
     value: CachableValue,
-    ttl: number = undefined,
+    ttl: number = 0,
     overwrite: boolean = true,
   ): Promise<boolean> {
     try {
