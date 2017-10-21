@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "baseUrl": ".",
+    "declaration": true,
+    "experimentalDecorators": true,
+    "listFiles": false,
     "module": "commonjs",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
     "outDir": "dist",
     "rootDir": ".",
-    "declaration": true,
-    "listFiles": false,
     "sourceMap": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "noUnusedLocals": true,
-    "baseUrl": "."
+    "strictNullChecks": true,
+    "target": "es6"
   },
   "include": [
     "src/**/*",

@@ -166,7 +166,7 @@ describe('Cachette', () => {
         fetchFunction,
       );
 
-      const calls = [];
+      const calls: Promise<any>[] = [];
       for (let i = 0; i < 100; i++) {
         calls.push(callGetOrFetch());
       }
@@ -204,7 +204,7 @@ describe('Cachette', () => {
         );
       };
 
-      const calls = [];
+      const calls: Promise<any>[] = [];
 
       for (let i = 0; i < 100; i++) {
         const fn = (i % 2) ? object.fetch1 : object.fetch2;
@@ -246,7 +246,7 @@ describe('Cachette', () => {
         object.fetch,
       );
 
-      const calls = [];
+      const calls: Promise<any>[] = [];
       for (let i = 0; i < 10; i++) {
         calls.push(callGetOrFetch());
       }
@@ -295,7 +295,7 @@ describe('Cachette', () => {
 
     it('protect against concurrent fetches', async () => {
       const myObj = new MyClass();
-      const jobs = [];
+      const jobs: Promise<any>[] = [];
 
       for (let i = 0; i < 100; i++) {
         const variant = i % 10;

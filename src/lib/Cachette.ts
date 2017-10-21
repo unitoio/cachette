@@ -10,8 +10,8 @@ export type FetchingFunction = () => Promise<CachableValue>;
 
 export module Cachette {
 
-  let localCacheInstance: CacheInstance = null;
-  let mainCacheInstance: CacheInstance = null;
+  let localCacheInstance: CacheInstance | null = null;
+  let mainCacheInstance: CacheInstance | null = null;
 
   /**
    * Keep track of active fetches to prevent
@@ -86,7 +86,7 @@ export module Cachette {
   /**
    * Set the main cache instance. Will overwrite any existing instance
    */
-  export function setCacheInstance(instance: CacheInstance): void {
+  export function setCacheInstance(instance: CacheInstance | null): void {
     mainCacheInstance = instance;
   }
 
@@ -133,7 +133,7 @@ export module Cachette {
   /**
    * decorator
    */
-  export function cached(ttl?: number, overwrite?: boolean): any {
+  export function cached(ttl: number = 0, overwrite: boolean = true): any {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
       assert(
         target['buildCacheKey'],
