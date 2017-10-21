@@ -24,7 +24,7 @@ async function fetchUrl(url) {
 
 async function fetchUrlCached(url) {
   const fetchFunction = fetchUrl.bind(undefined, url);
-  return Cachette.getOrFetchValue(url, 600, true, fetchFunction);
+  return Cachette.getOrFetchValue(url, 600, fetchFunction);
 }
 
 // First, initialize the redis connection.
