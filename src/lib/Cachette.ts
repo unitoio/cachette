@@ -26,7 +26,7 @@ export namespace Cachette {
    * @param ttl     The time to live of the value in seconds.
    * @param fetchFn The function that can retrieve the original value
    *
-   * @retuns        The cached or fetched value
+   * @returns       The cached or fetched value
    */
   export async function getOrFetchValue(
     key: string,
