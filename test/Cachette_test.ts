@@ -115,7 +115,6 @@ describe('Cachette', () => {
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
-        false,
         fetchFunction,
       );
       expect(value).to.eql('value');
@@ -138,7 +137,6 @@ describe('Cachette', () => {
       const value = await Cachette.getOrFetchValue(
         'key',
         10,
-        false,
         fetchFunction,
       );
       expect(value).to.eql('newvalue');
@@ -162,7 +160,6 @@ describe('Cachette', () => {
       const callGetOrFetch = () => Cachette.getOrFetchValue(
         'key',
         10,
-        false,
         fetchFunction,
       );
 
@@ -199,7 +196,6 @@ describe('Cachette', () => {
         return Cachette.getOrFetchValue(
           key,
           10,
-          false,
           fetchFunction,
         );
       };
@@ -242,7 +238,6 @@ describe('Cachette', () => {
       const callGetOrFetch = () => Cachette.getOrFetchValue(
         'key',
         10,
-        false,
         object.fetch,
       );
 

@@ -23,11 +23,10 @@ export abstract class CacheInstance extends EventEmitter {
    * @param value      The value to set.
    * @param ttl        The time to live of the value in seconds.
    *                   By default, the value will not expire
-   * @param overwrite  Overwrite the value if it already exists. Defaults to true.
    *
-   * @return {boolean} True if the value was written, false otherwise.
+   * @return the now-cached value
    */
-  abstract setValue(key: string, value: CachableValue, ttl?: number, overwrite?: boolean): Promise<boolean>;
+  abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<CachableValue>;
 
   /**
    * Delete a value from the cache.

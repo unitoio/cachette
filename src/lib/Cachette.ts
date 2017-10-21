@@ -8,7 +8,7 @@ import { RedisCache } from './RedisCache';
 
 export type FetchingFunction = () => Promise<CachableValue>;
 
-export module Cachette {
+export namespace Cachette {
 
   let localCacheInstance: CacheInstance | null = null;
   let mainCacheInstance: CacheInstance | null = null;
@@ -23,16 +23,14 @@ export module Cachette {
    * Get or fetch a value
    *
    * @param key     The key of the value to get
+   * @param ttl     The time to live of the value in seconds.
    * @param fetchFn The function that can retrieve the original value
-   * @param context The instance on which to call fetchFn
-   * @param args    The arguments to pass to fetchFn
    *
-   * @retuns        The cached or fetched value
+   * @returns       The cached or fetched value
    */
   export async function getOrFetchValue(
     key: string,
     ttl: number,
-    overwrite: boolean,
     fetchFunction: FetchingFunction,
   ): Promise<CachableValue> {
     const instance = getCacheInstance();
@@ -45,10 +43,7 @@ export module Cachette {
     // already fetching?
     const currentFetch = activeFetches[key];
     if (currentFetch) {
-      // can't use await directly on currentFetch,
-      // as await translates into a yield on an awaiter function.
-      // As we branch the promises, we need to call .then explicitly
-      return currentFetch.then(result => result);
+      return currentFetch;
     }
 
     // I'm the one fetching. It'll be the only await on the fetching function.
@@ -56,7 +51,7 @@ export module Cachette {
     try {
       const result = await fetchPromise;
       if (result !== undefined) {
-        await instance.setValue(key, result, ttl, overwrite);
+        await instance.setValue(key, result, ttl);
       }
       return result;
     } finally {
@@ -133,7 +128,7 @@ export module Cachette {
   /**
    * decorator
    */
-  export function cached(ttl: number = 0, overwrite: boolean = true): any {
+  export function cached(ttl: number = 0): any {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
       assert(
         target['buildCacheKey'],
@@ -144,7 +139,7 @@ export module Cachette {
       const newFunction = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         const fetchFunction = origFunction.bind(this, ...args);
-        return getOrFetchValue(key, ttl, overwrite, fetchFunction);
+        return getOrFetchValue(key, ttl, fetchFunction);
       };
       descriptor.value = newFunction;
       return descriptor;
