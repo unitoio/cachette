@@ -141,6 +141,9 @@ export namespace Cachette {
         const fetchFunction = origFunction.bind(this, ...args);
         return getOrFetchValue(key, ttl, fetchFunction);
       };
+
+      // create a NoCache version
+      target[`${propertyKey}NoCache`] = origFunction;
       descriptor.value = newFunction;
       return descriptor;
     };
