@@ -245,8 +245,8 @@ export class RedisCache extends CacheInstance {
     const setArguments = RedisCache.buildSetArguments(key, value, ttl, overwrite);
     // bind returns a new function, so it's safe to call it directly
     // on the redis client instance.
-    const result = await this.client.setAsync.bind(this.client, setArguments)();
-    return result === 'OK' ? true : false;
+    const result = await this.client.setAsync(setArguments);
+    return result === 'OK';
   }
 
   /**
@@ -275,7 +275,8 @@ export class RedisCache extends CacheInstance {
    * @inheritdoc
    */
   public async delValue(key: string): Promise<void> {
-    return this.client.delAsync.bind(this.client, key);
+    this.emit('del', key);
+    return this.client.delAsync(key);
   }
 
 }
