@@ -311,6 +311,17 @@ describe('Cachette', () => {
       expect(numSuccess).to.eql(100);
     });
 
+    it('creates a NoCache() variant', async () => {
+      const myObj = new MyClass();
+
+      await myObj.fetchSomething('123');
+      await myObj.fetchSomething('123');
+      expect(myObj.numCalled).to.eql(1);
+
+      await myObj['fetchSomethingNoCache']('123');
+      expect(myObj.numCalled).to.eql(2);
+    });
+
   });
 
 });
