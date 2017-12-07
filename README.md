@@ -14,8 +14,11 @@ npm install --save cachette
 ## Basic usage
 
 ```javascript
-const { Cachette } = require('cachette');
+const { WriteThroughCache } = require('cachette');
 const request = require('request-promise');
+
+// First, initialize the redis connection.
+const cache = new WriteThroughCache(process.env.REDIS_URL);
 
 async function fetchUrl(url) {
   console.log('fetching', url);
@@ -24,18 +27,13 @@ async function fetchUrl(url) {
 
 async function fetchUrlCached(url) {
   const fetchFunction = fetchUrl.bind(undefined, url);
-  return Cachette.getOrFetchValue(url, 600, fetchFunction);
+  return cache.getOrFetchValue(url, 600, fetchFunction);
 }
 
-// First, initialize the redis connection.
-Cachette.connect(process.env.REDIS_URL).then(() => {
-
-  fetchUrlCached('https://unito.io').then(() => console.log('first call returned'));
-  // First call fetches the resource, the other calls use the cached value.
-  fetchUrlCached('https://unito.io').then(() => console.log('second call returned'));
-  fetchUrlCached('https://unito.io').then(() => console.log('third call returned'));
-
-});
+fetchUrlCached('https://unito.io').then(() => console.log('first call returned'));
+// First call fetches the resource, the other calls use the cached value.
+fetchUrlCached('https://unito.io').then(() => console.log('second call returned'));
+fetchUrlCached('https://unito.io').then(() => console.log('third call returned'));
 ```
 
 ## License
