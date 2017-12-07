@@ -1,4 +1,3 @@
-import 'mocha';
 import { expect } from 'chai';
 
 import { RedisCache } from '../src/lib/RedisCache';

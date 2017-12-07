@@ -1,4 +1,3 @@
-import 'mocha';
 import { expect } from 'chai';
 
 import { LocalCache } from '../src/lib/LocalCache';

@@ -1,4 +1,3 @@
-import 'mocha';
 import { expect } from 'chai';
 
 import { WriteThroughCache } from '../src/lib/WriteThroughCache';
