@@ -1,6 +1,4 @@
-import * as assert from 'assert';
-
-import { CachableValue, CacheInstance } from './CacheInstance';
+import { CacheInstance } from './CacheInstance';
 
 import { LocalCache } from './LocalCache';
 import { RedisCache } from './RedisCache';
@@ -74,27 +72,6 @@ export namespace Cachette {
   export function disconnect(): void {
     localCacheInstance = null;
     mainCacheInstance = null;
-  }
-
-  /**
-   * decorator
-   */
-  export function cached(ttl: number = 0): any {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-      assert(
-        target['buildCacheKey'],
-        'Need to define buildCacheKey on the class to use the decorator "cached"',
-      );
-      const origFunction = descriptor.value;
-      // don't use an => function here, or you lose access to 'this'
-      const newFunction = function (...args): Promise<CachableValue> {
-        const key = this.buildCacheKey(propertyKey, args);
-        const fetchFunction = origFunction.bind(this, ...args);
-        return this['cache'].getOrFetchValue(key, ttl, fetchFunction);
-      };
-      descriptor.value = newFunction;
-      return descriptor;
-    };
   }
 
 }
