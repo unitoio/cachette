@@ -30,11 +30,9 @@ export class WriteThroughCache extends CacheInstance {
     key: string,
     value: CachableValue,
     ttl: number = 0,
-    overwrite: boolean = true,
   ): Promise<boolean> {
-    // FIXME why is overwrite still in RedisCache????
     let response = await this.localCache.setValue(key, value, ttl);
-    return await this.redisCache.setValue(key, value, ttl, overwrite) && response;
+    return await this.redisCache.setValue(key, value, ttl) && response;
   }
 
   /**

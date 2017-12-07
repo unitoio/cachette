@@ -14,34 +14,24 @@ describe('RedisCache', () => {
 
     });
 
-    it('will overwrite only when passing false', () => {
-
-      let setArguments = RedisCache.buildSetArguments('key', 'value', undefined, false);
-      expect(setArguments).to.eql(['key', 'value', 'NX']);
-
-      setArguments = RedisCache.buildSetArguments('key', 'value', undefined, true);
-      expect(setArguments).to.eql(['key', 'value']);
-
-    });
-
     it('will set the arguments when using time to live', () => {
 
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 20, undefined);
+      const setArguments = RedisCache.buildSetArguments('key', 'value', 20);
       expect(setArguments).to.eql(['key', 'value', 'EX', '20']);
 
     });
 
     it('supports setting the time to live to 0', () => {
 
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 0, undefined);
+      const setArguments = RedisCache.buildSetArguments('key', 'value', 0);
       expect(setArguments).to.eql(['key', 'value']);
 
     });
 
     it('supports setting all the arguments at the same time', () => {
 
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 14, false);
-      expect(setArguments).to.eql(['key', 'value', 'EX', '14', 'NX']);
+      const setArguments = RedisCache.buildSetArguments('key', 'value', 14);
+      expect(setArguments).to.eql(['key', 'value', 'EX', '14']);
 
     });
 
