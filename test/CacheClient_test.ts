@@ -53,4 +53,36 @@ describe('CacheClient', () => {
 
   });
 
+  describe('buildCacheKey', () => {
+
+    class MyCacheClient extends CacheClient {
+      cacheInstance = new LocalCache();
+    }
+
+    it('will ignore null or undefined', async () => {
+
+      const cacheClient = new MyCacheClient();
+      const key = cacheClient['buildCacheKey']('functionName', [null, undefined, 'argument']);
+      expect(key).to.equal('functionName-argument');
+
+    });
+
+    it('will convert boolean values', async () => {
+
+      const cacheClient = new MyCacheClient();
+      const key = cacheClient['buildCacheKey']('functionName', ['argument', true, 'argument', false]);
+      expect(key).to.equal('functionName-argument-true-argument-false');
+
+    });
+
+    it('will convert number values', async () => {
+
+      const cacheClient = new MyCacheClient();
+      const key = cacheClient['buildCacheKey']('functionName', ['argument', 14, 'argument', 16]);
+      expect(key).to.equal('functionName-argument-14-argument-16');
+
+    });
+
+  });
+
 });

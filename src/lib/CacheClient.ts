@@ -4,9 +4,13 @@ export abstract class CacheClient {
 
   protected cacheInstance: CacheInstance;
   protected buildCacheKey(propertyKey: string, args: any[]): string {
+    const keyParts = args
+      .filter(x => x !== undefined && x !== null)
+      .filter(x => typeof x === 'string' || typeof x === 'number' || typeof x === 'boolean')
+      .map(x => x.toString());
     return [
       propertyKey,
-      ...args.filter(x => !!x && typeof x === 'string'),
+      ...keyParts,
     ].join('-');
   }
 
