@@ -26,9 +26,18 @@ export abstract class CacheClient {
         const fetchFunction = origFunction.bind(this, ...args);
         return this.cacheInstance.getOrFetchValue(key, ttl, fetchFunction);
       };
+      // create a NoCache version
+      target[`${propertyKey}NoCache`] = origFunction;
       descriptor.value = newFunction;
       return descriptor;
     };
+  }
+
+  public getUncachedFunction(functionName: string): Function {
+    if (this[`${functionName}NoCache`]) {
+      return this[`${functionName}NoCache`].bind(this);
+    }
+    return this[functionName].bind(this);
   }
 
 }

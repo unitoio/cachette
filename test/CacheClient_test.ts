@@ -51,7 +51,19 @@ describe('CacheClient', () => {
       expect(numSuccess).to.eql(100);
     });
 
-  });
+
+    it('can use the uncached version of a cached function', async () => {
+      const myObj = new MyClass();
+
+      await myObj.fetchSomething('123');
+      await myObj.fetchSomething('123');
+      expect(myObj.numCalled).to.eql(1);
+
+      await myObj.getUncachedFunction('fetchSomething')('123');
+      expect(myObj.numCalled).to.eql(2);
+    });
+
+ });
 
   describe('buildCacheKey', () => {
 
