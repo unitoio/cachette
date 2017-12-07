@@ -22,7 +22,8 @@ const cache = new WriteThroughCache(process.env.REDIS_URL);
 
 async function fetchUrl(url) {
   console.log('fetching', url);
-  return request.get(url);
+  const response = await request.get(url);
+  console.log('fetched', url);
 }
 
 async function fetchUrlCached(url) {
