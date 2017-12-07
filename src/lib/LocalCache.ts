@@ -48,4 +48,8 @@ export class LocalCache extends CacheInstance {
     this.cache.del(key);
   }
 
+  public async clear(): Promise<void> {
+    this.cache.reset();
+  }
+
 }

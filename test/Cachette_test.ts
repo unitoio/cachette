@@ -4,9 +4,10 @@ import * as sinon from 'sinon';
 import * as redis from 'redis';
 import { EventEmitter } from 'events';
 
-import { Cachette, FetchingFunction } from '../src/lib/Cachette';
+import { Cachette } from '../src/lib/Cachette';
 import { LocalCache } from '../src/lib/LocalCache';
 import { RedisCache } from '../src/lib/RedisCache';
+import { FetchingFunction } from '../src/lib/CacheInstance';
 
 
 /**
@@ -97,8 +98,8 @@ describe('Cachette', () => {
 
   describe('getOrFetchValue', () => {
 
-    beforeEach(() => Cachette.connect());
-    afterEach(() => Cachette.disconnect());
+    const localCache = new LocalCache();
+    beforeEach(() => localCache.clear());
 
     it('does not fetch if value in cache', async () => {
       let numCalled = 0;
@@ -109,10 +110,9 @@ describe('Cachette', () => {
         },
       };
 
-      const cache = Cachette.getCacheInstance();
-      await cache.setValue('key', 'value');
+      await localCache.setValue('key', 'value');
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await Cachette.getOrFetchValue(
+      const value = await localCache.getOrFetchValue(
         'key',
         10,
         fetchFunction,
@@ -131,10 +131,9 @@ describe('Cachette', () => {
         },
       };
 
-      const cache = Cachette.getCacheInstance();
-      await cache.setValue('key2', 'value');
+      await localCache.setValue('key2', 'value');
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await Cachette.getOrFetchValue(
+      const value = await localCache.getOrFetchValue(
         'key',
         10,
         fetchFunction,
@@ -153,11 +152,10 @@ describe('Cachette', () => {
         },
       };
 
-      const cache = Cachette.getCacheInstance();
-      await cache.setValue('key2', 'value');
+      await localCache.setValue('key2', 'value');
 
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const callGetOrFetch = () => Cachette.getOrFetchValue(
+      const callGetOrFetch = () => localCache.getOrFetchValue(
         'key',
         10,
         fetchFunction,
@@ -193,7 +191,7 @@ describe('Cachette', () => {
 
       const callGetOrFetch = (key, fn) => {
         const fetchFunction = fn.bind(object, 'newvalue');
-        return Cachette.getOrFetchValue(
+        return localCache.getOrFetchValue(
           key,
           10,
           fetchFunction,
@@ -235,7 +233,7 @@ describe('Cachette', () => {
         },
       };
 
-      const callGetOrFetch = () => Cachette.getOrFetchValue(
+      const callGetOrFetch = () => localCache.getOrFetchValue(
         'key',
         10,
         object.fetch,
@@ -259,9 +257,6 @@ describe('Cachette', () => {
 
   describe('decorator cached()', () => {
 
-    beforeEach(() => Cachette.connect());
-    afterEach(() => Cachette.disconnect());
-
     interface Response {
       variant: string;
       value: number;
@@ -270,6 +265,7 @@ describe('Cachette', () => {
     class MyClass {
       numCalled: number = 0;
 
+      cache = new LocalCache();
       buildCacheKey(functionName: string, args: string[]): string {
         return [
           functionName,

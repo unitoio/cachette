@@ -6,59 +6,10 @@ import { LocalCache } from './LocalCache';
 import { RedisCache } from './RedisCache';
 
 
-export type FetchingFunction = () => Promise<CachableValue>;
-
 export namespace Cachette {
 
   let localCacheInstance: CacheInstance | null = null;
   let mainCacheInstance: CacheInstance | null = null;
-
-  /**
-   * Keep track of active fetches to prevent
-   * simultaneous requests to the same resource in parallel.
-   */
-  const activeFetches: { [key: string]: Promise<CachableValue> } = {};
-
-  /**
-   * Get or fetch a value
-   *
-   * @param key     The key of the value to get
-   * @param ttl     The time to live of the value in seconds.
-   * @param fetchFn The function that can retrieve the original value
-   *
-   * @returns       The cached or fetched value
-   */
-  export async function getOrFetchValue(
-    key: string,
-    ttl: number,
-    fetchFunction: FetchingFunction,
-  ): Promise<CachableValue> {
-    const instance = getCacheInstance();
-    // already cached?
-    const cached = await instance.getValue(key);
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    // already fetching?
-    const currentFetch = activeFetches[key];
-    if (currentFetch) {
-      return currentFetch;
-    }
-
-    // I'm the one fetching. It'll be the only await on the fetching function.
-    const fetchPromise = activeFetches[key] = fetchFunction();
-    try {
-      const result = await fetchPromise;
-      if (result !== undefined) {
-        await instance.setValue(key, result, ttl);
-      }
-      return result;
-    } finally {
-      delete activeFetches[key];
-    }
-  }
-
 
   /**
    * Returns the cache instance.
@@ -139,7 +90,7 @@ export namespace Cachette {
       const newFunction = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         const fetchFunction = origFunction.bind(this, ...args);
-        return getOrFetchValue(key, ttl, fetchFunction);
+        return this['cache'].getOrFetchValue(key, ttl, fetchFunction);
       };
       descriptor.value = newFunction;
       return descriptor;
