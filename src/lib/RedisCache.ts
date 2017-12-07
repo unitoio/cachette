@@ -41,6 +41,11 @@ export class RedisCache extends CacheInstance {
 
   constructor(redisUrl: string) {
     super();
+
+    if (!redisUrl.startsWith('redis://')) {
+      throw new Error(`Invalid redis url ${redisUrl}.`);
+    }
+
     this.emit('info', `Connecting to Redis at ${redisUrl}.`);
     this.client = redis.createClient({
       url: redisUrl,

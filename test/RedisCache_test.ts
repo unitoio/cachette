@@ -1,7 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
 
-import { Cachette } from '../src/lib/Cachette';
 import { RedisCache } from '../src/lib/RedisCache';
 
 
@@ -147,12 +146,17 @@ describe('RedisCache', () => {
 
   it('will not crash the application given an invalid Redis URL', async () => {
 
-    await Cachette.connect();
     const cache = new RedisCache('redis://localhost:9999');
     await cache.getValue('test');
     await cache.setValue('test', 'value');
     expect('still alive???').to.exist;
 
+  });
+
+  it('will raise an error if given an Redis URL without protocol', async () => {
+    expect(
+      () => new RedisCache('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com'),
+    ).to.throw();
   });
 
 });

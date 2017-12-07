@@ -57,7 +57,7 @@ export namespace Cachette {
       localCacheInstance = new LocalCache();
     }
 
-    if (redisUrl && redisUrl.startsWith('redis://')) {
+    if (redisUrl) {
       new RedisCache(redisUrl); // tslint:disable-line
     }
 
