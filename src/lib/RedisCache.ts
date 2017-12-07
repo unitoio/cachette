@@ -2,7 +2,6 @@ const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
-import { Cachette } from './Cachette';
 
 
 Bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -66,7 +65,6 @@ export class RedisCache extends CacheInstance {
    */
   public errorStrategy(): void {
     this.emit('warn', 'Error while connected to the Redis cache!');
-    Cachette.setCacheInstance(null);
   }
 
   /**
@@ -75,10 +73,6 @@ export class RedisCache extends CacheInstance {
    */
   public endConnectionStrategy(err): void {
     this.emit('warn', 'Connection lost to Redis.', err);
-    /**
-     * Falling back to using a local cache while we reconnect.
-     */
-    Cachette.setCacheInstance(null);
   }
 
   /**
@@ -87,7 +81,6 @@ export class RedisCache extends CacheInstance {
    */
   public startConnectionStrategy(): void {
     this.emit('info', 'Connection established to Redis.');
-    Cachette.setCacheInstance(this);
   }
 
   /**
