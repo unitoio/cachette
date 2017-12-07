@@ -1,6 +1,7 @@
 # cachette
 [![Run Status](https://api.shippable.com/projects/586da353e18a291000c53bc9/badge?branch=master)](https://app.shippable.com/github/unitoio/cachette)
 [![Coverage Badge](https://api.shippable.com/projects/586da353e18a291000c53bc9/coverageBadge?branch=master)](https://app.shippable.com/github/unitoio/cachette)
+[![npm version](https://badge.fury.io/js/cachette.svg)](https://badge.fury.io/js/cachette)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Resilient cache library supporting concurrent requests through local cache or Redis.
@@ -14,28 +15,27 @@ npm install --save cachette
 ## Basic usage
 
 ```javascript
-const { Cachette } = require('cachette');
+const { WriteThroughCache } = require('cachette');
 const request = require('request-promise');
+
+// First, initialize the redis connection.
+const cache = new WriteThroughCache(process.env.REDIS_URL);
 
 async function fetchUrl(url) {
   console.log('fetching', url);
-  return request.get(url);
+  const response = await request.get(url);
+  console.log('fetched', url);
 }
 
 async function fetchUrlCached(url) {
   const fetchFunction = fetchUrl.bind(undefined, url);
-  return Cachette.getOrFetchValue(url, 600, fetchFunction);
+  return cache.getOrFetchValue(url, 600, fetchFunction);
 }
 
-// First, initialize the redis connection.
-Cachette.connect(process.env.REDIS_URL).then(() => {
-
-  fetchUrlCached('https://unito.io').then(() => console.log('first call returned'));
-  // First call fetches the resource, the other calls use the cached value.
-  fetchUrlCached('https://unito.io').then(() => console.log('second call returned'));
-  fetchUrlCached('https://unito.io').then(() => console.log('third call returned'));
-
-});
+fetchUrlCached('https://unito.io').then(() => console.log('first call returned'));
+// First call fetches the resource, the other calls use the cached value.
+fetchUrlCached('https://unito.io').then(() => console.log('second call returned'));
+fetchUrlCached('https://unito.io').then(() => console.log('third call returned'));
 ```
 
 ## License

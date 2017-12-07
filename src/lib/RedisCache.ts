@@ -2,7 +2,6 @@ const redis = require('redis');
 import * as Bluebird from 'bluebird';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
-import { Cachette } from './Cachette';
 
 
 Bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -41,6 +40,11 @@ export class RedisCache extends CacheInstance {
 
   constructor(redisUrl: string) {
     super();
+
+    if (!redisUrl.startsWith('redis://')) {
+      throw new Error(`Invalid redis url ${redisUrl}.`);
+    }
+
     this.emit('info', `Connecting to Redis at ${redisUrl}.`);
     this.client = redis.createClient({
       url: redisUrl,
@@ -61,7 +65,6 @@ export class RedisCache extends CacheInstance {
    */
   public errorStrategy(): void {
     this.emit('warn', 'Error while connected to the Redis cache!');
-    Cachette.setCacheInstance(null);
   }
 
   /**
@@ -70,10 +73,6 @@ export class RedisCache extends CacheInstance {
    */
   public endConnectionStrategy(err): void {
     this.emit('warn', 'Connection lost to Redis.', err);
-    /**
-     * Falling back to using a local cache while we reconnect.
-     */
-    Cachette.setCacheInstance(null);
   }
 
   /**
@@ -82,7 +81,6 @@ export class RedisCache extends CacheInstance {
    */
   public startConnectionStrategy(): void {
     this.emit('info', 'Connection established to Redis.');
-    Cachette.setCacheInstance(this);
   }
 
   /**
@@ -188,7 +186,7 @@ export class RedisCache extends CacheInstance {
    * Returns the list of parameters to be sent to the set
    * function.
    */
-  public static buildSetArguments(key: string, value: CachableValue, ttl: number = 0, overwrite: boolean = true): any[] {
+  public static buildSetArguments(key: string, value: CachableValue, ttl: number = 0): any[] {
 
     const setArguments = [key, value];
 
@@ -196,10 +194,6 @@ export class RedisCache extends CacheInstance {
       // By default the keys do not expire in Redis.
       setArguments.push('EX');
       setArguments.push(ttl.toString());
-    }
-
-    if (overwrite === false) {
-      setArguments.push('NX');
     }
 
     return setArguments;
@@ -213,10 +207,9 @@ export class RedisCache extends CacheInstance {
     key: string,
     value: CachableValue,
     ttl: number = 0,
-    overwrite: boolean = true,
   ): Promise<boolean> {
     try {
-      return await this.setValueInternal(key, value, ttl, overwrite);
+      return await this.setValueInternal(key, value, ttl);
     } catch (error) {
       /**
        * A timeout can occur if the connection was broken during
@@ -231,7 +224,6 @@ export class RedisCache extends CacheInstance {
     key: string,
     value: CachableValue,
     ttl: number,
-    overwrite: boolean,
   ): Promise<boolean> {
     this.emit('set', key, value);
 
@@ -242,7 +234,7 @@ export class RedisCache extends CacheInstance {
 
     value = RedisCache.serializeValue(value);
 
-    const setArguments = RedisCache.buildSetArguments(key, value, ttl, overwrite);
+    const setArguments = RedisCache.buildSetArguments(key, value, ttl);
     // bind returns a new function, so it's safe to call it directly
     // on the redis client instance.
     const result = await this.client.setAsync(setArguments);
