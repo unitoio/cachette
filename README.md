@@ -6,7 +6,7 @@
 
 Resilient cache library supporting concurrent requests through local cache or Redis.
 
-> **: This repo is a work-in-progress and is not ready for general use just yet.**
+> **This repo is a work-in-progress and is not ready for general use.**
 
 ## Installation
 
