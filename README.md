@@ -1,6 +1,7 @@
 # cachette
 [![Run Status](https://api.shippable.com/projects/586da353e18a291000c53bc9/badge?branch=master)](https://app.shippable.com/github/unitoio/cachette)
 [![Coverage Badge](https://api.shippable.com/projects/586da353e18a291000c53bc9/coverageBadge?branch=master)](https://app.shippable.com/github/unitoio/cachette)
+[![Dependency Status](https://david-dm.org/unitoio/cachette.svg)](https://david-dm.org/unitoio/cachette)
 [![npm version](https://badge.fury.io/js/cachette.svg)](https://badge.fury.io/js/cachette)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
