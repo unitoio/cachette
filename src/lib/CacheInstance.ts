@@ -25,7 +25,7 @@ export abstract class CacheInstance extends EventEmitter {
    * @param ttl        The time to live of the value in seconds.
    *                   By default, the value will not expire
    *
-   * @return the now-cached value
+   * @return true if the value was stored, false otherwise.
    */
   abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<CachableValue>;
 

@@ -29,7 +29,7 @@ export class LocalCache extends CacheInstance {
     } else {
       this.cache.set(key, value, ttl * 1000);
     }
-    return value;
+    return true;
   }
 
   /**

@@ -8,7 +8,8 @@ describe('LocalCache', () => {
 
   it('can set values', async () => {
     const cache = new LocalCache();
-    await cache.setValue('key', 'value');
+    const wasSet = await cache.setValue('key', 'value');
+    expect(wasSet).to.be.true;
     const value = await cache.getValue('key');
     expect(value).to.equal('value');
   });
