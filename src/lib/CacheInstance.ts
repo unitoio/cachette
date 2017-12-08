@@ -27,7 +27,7 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @return true if the value was stored, false otherwise.
    */
-  abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<CachableValue>;
+  abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<boolean>;
 
   /**
    * Delete a value from the cache.
