@@ -40,11 +40,11 @@ export class WriteThroughCache extends CacheInstance {
    */
   public async getValue(key: string): Promise<CachableValue> {
     const localValue = await this.localCache.getValue(key);
-    if (localValue) {
+    if (localValue !== undefined) {
       return localValue;
     }
     const redisValue = this.redisCache.getValue(key);
-    if (redisValue) {
+    if (redisValue !== undefined) {
       await this.localCache.setValue(key, redisValue, 120);
     }
     return redisValue;
