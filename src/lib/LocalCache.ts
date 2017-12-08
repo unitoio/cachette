@@ -15,12 +15,12 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async setValue(key: string, value: CachableValue, ttl: number = 0): Promise<CachableValue> {
+  public async setValue(key: string, value: CachableValue, ttl: number = 0): Promise<boolean> {
     this.emit('set', key, value);
 
     if (value === undefined) {
       this.emit('warn', `Cannot set ${key} to undefined!`);
-      return;
+      return false;
     }
 
     // The lru cache interprets 0 as no expiration date.
@@ -29,7 +29,7 @@ export class LocalCache extends CacheInstance {
     } else {
       this.cache.set(key, value, ttl * 1000);
     }
-    return value;
+    return true;
   }
 
   /**

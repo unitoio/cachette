@@ -37,15 +37,16 @@ export class RedisCache extends CacheInstance {
   public static RETRY_DELAY: number = 5000;
 
   private client: any = null;
+  private url: string;
 
   constructor(redisUrl: string) {
     super();
 
-    if (!redisUrl.startsWith('redis://')) {
+    if (!redisUrl || !redisUrl.startsWith('redis://')) {
       throw new Error(`Invalid redis url ${redisUrl}.`);
     }
 
-    this.emit('info', `Connecting to Redis at ${redisUrl}.`);
+    this.url = redisUrl;
     this.client = redis.createClient({
       url: redisUrl,
       retry_strategy: RedisCache.retryStrategy,
@@ -53,6 +54,7 @@ export class RedisCache extends CacheInstance {
       // if there is no active connection.
       enable_offline_queue: false,
     });
+
     this.client.on('connect', this.startConnectionStrategy.bind(this));
     this.client.on('end', this.endConnectionStrategy.bind(this));
     this.client.on('error', this.errorStrategy.bind(this));
@@ -80,7 +82,7 @@ export class RedisCache extends CacheInstance {
    * soon as a new connection is established.
    */
   public startConnectionStrategy(): void {
-    this.emit('info', 'Connection established to Redis.');
+    this.emit('info', `Connection established to Redis at ${this.url}.`);
   }
 
   /**
@@ -235,8 +237,6 @@ export class RedisCache extends CacheInstance {
     value = RedisCache.serializeValue(value);
 
     const setArguments = RedisCache.buildSetArguments(key, value, ttl);
-    // bind returns a new function, so it's safe to call it directly
-    // on the redis client instance.
     const result = await this.client.setAsync(setArguments);
     return result === 'OK';
   }

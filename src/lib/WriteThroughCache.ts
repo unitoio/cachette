@@ -8,8 +8,8 @@ import { LocalCache } from './LocalCache';
  */
 export class WriteThroughCache extends CacheInstance {
 
-  private redisCache: RedisCache;
-  private localCache: LocalCache;
+  private redisCache: CacheInstance;
+  private localCache: CacheInstance;
 
   constructor(redisUrl: string) {
     super();
@@ -40,10 +40,14 @@ export class WriteThroughCache extends CacheInstance {
    */
   public async getValue(key: string): Promise<CachableValue> {
     const localValue = await this.localCache.getValue(key);
-    if (localValue) {
+    if (localValue !== undefined) {
       return localValue;
     }
-    return this.redisCache.getValue(key);
+    const redisValue = await this.redisCache.getValue(key);
+    if (redisValue !== undefined) {
+      await this.localCache.setValue(key, redisValue, 120);
+    }
+    return redisValue;
   }
 
   /**
