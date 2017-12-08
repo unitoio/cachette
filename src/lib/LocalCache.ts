@@ -20,7 +20,7 @@ export class LocalCache extends CacheInstance {
 
     if (value === undefined) {
       this.emit('warn', `Cannot set ${key} to undefined!`);
-      return;
+      return false;
     }
 
     // The lru cache interprets 0 as no expiration date.
