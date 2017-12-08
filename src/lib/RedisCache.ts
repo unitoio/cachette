@@ -235,8 +235,6 @@ export class RedisCache extends CacheInstance {
     value = RedisCache.serializeValue(value);
 
     const setArguments = RedisCache.buildSetArguments(key, value, ttl);
-    // bind returns a new function, so it's safe to call it directly
-    // on the redis client instance.
     const result = await this.client.setAsync(setArguments);
     return result === 'OK';
   }
