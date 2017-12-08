@@ -43,7 +43,12 @@ export class WriteThroughCache extends CacheInstance {
     if (localValue) {
       return localValue;
     }
-    return this.redisCache.getValue(key);
+    const redisValue = this.redisCache.getValue(key);
+    if (redisValue) {
+      // No need to await here.
+      await this.localCache.setValue(key, redisValue, 120);
+    }
+    return redisValue;
   }
 
   /**
