@@ -16,8 +16,8 @@ describe('LocalCache', () => {
 
   it('will not throw if we set a value of undefined', async () => {
     const cache = new LocalCache();
-    const valueWritten = await cache.setValue('key', undefined);
-    expect(valueWritten).to.be.undefined;
+    const wasSet = await cache.setValue('key', undefined);
+    expect(wasSet).to.be.false
     const value = await cache.getValue('key');
     expect(value).not.to.exist;
   });
