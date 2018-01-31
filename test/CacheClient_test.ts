@@ -62,6 +62,19 @@ describe('CacheClient', () => {
       expect(myObj.numCalled).to.eql(2);
     });
 
+    it('can clear the value of a function that was cached using the decorator.', async () => {
+      const myObj = new MyClass();
+
+      await myObj.fetchSomething('123');
+      expect(myObj.numCalled).to.eql(1);
+      let cachedValue = await myObj.getCachedFunctionCall('fetchSomething', '123');
+      expect(cachedValue).to.exist;
+
+      await myObj.clearCachedFunctionCall('fetchSomething', '123');
+      cachedValue = await myObj.getCachedFunctionCall('fetchSomething', '123');
+      expect(cachedValue).not.to.exist;
+    });
+
   });
 
   describe('buildCacheKey', () => {

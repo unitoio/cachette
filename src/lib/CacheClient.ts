@@ -40,4 +40,22 @@ export abstract class CacheClient {
     return this[functionName].bind(this);
   }
 
+  /**
+   * Clears the valued returned from a cached function call,
+   * using the CacheClient.cached.
+   */
+  public async clearCachedFunctionCall(functionName: string, ...args: any[]): Promise<void> {
+    const key = this.buildCacheKey(functionName, args);
+    await this.cacheInstance.delValue(key);
+  }
+
+  /**
+   * Gets the valued returned from a cached function call,
+   * using the CacheClient.cached.
+   */
+  public async getCachedFunctionCall(functionName: string, ...args: any[]): Promise<CachableValue> {
+    const key = this.buildCacheKey(functionName, args);
+    return this.cacheInstance.getValue(key);
+  }
+
 }
