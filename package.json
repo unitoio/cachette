@@ -6,6 +6,7 @@
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/src/index.js",
+  "typings": "dist/src/index.d.ts",
   "repository": "https://github.com/unitoio/cachette",
   "author": {
     "name": "Unito",
