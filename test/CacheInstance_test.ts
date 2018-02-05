@@ -14,9 +14,9 @@ describe('CacheInstance', () => {
     it('does not fetch if value in cache', async () => {
       let numCalled = 0;
       const object = {
-        fetch: async (value) => {
+        fetch: async (v) => {
           numCalled++;
-          return value;
+          return v;
         },
       };
 
@@ -35,9 +35,9 @@ describe('CacheInstance', () => {
     it('fetches if value not in cache', async () => {
       let numCalled = 0;
       const object = {
-        fetch: async (value) => {
+        fetch: async (v) => {
           numCalled++;
-          return value;
+          return v;
         },
       };
 
