@@ -1,5 +1,8 @@
 {
-  "rulesDirectory": "node_modules/tslint-eslint-rules/dist/rules",
+  "rulesDirectory": [
+    "node_modules/tslint-eslint-rules/dist/rules",
+    "tslint-no-unused-expression-chai"
+  ],
   "rules": {
     "align": [true, "parameters", "statements"],
     "class-name": true,
@@ -67,8 +70,7 @@
     "no-switch-case-fall-through": true,
     "no-multi-spaces": [true],
     "no-duplicate-variable": true,
-    "no-unused-expression": true,
-    "no-unused-new": true,
+    "no-unused-expression-chai": true,
     "radix": true,
     "no-shadowed-variable": true,
     "no-use-before-declare": false,

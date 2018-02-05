@@ -24,7 +24,7 @@
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
-    "lint": "tslint --type-check -c tslint.json --project tsconfig.json",
+    "lint": "tslint -c tslint.json --project tsconfig.json",
     "test": "npm run compile && npm run coverage",
     "test:ci": "mocha --ui tdd -R xunit 'dist/test/**/*.js' > shippable/testresults/result.xml",
     "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
@@ -50,9 +50,10 @@
     "remap-istanbul": "^0.10.1",
     "sinon": "^1.17.6",
     "source-map-support": "^0.4.8",
-    "tslint": "^4.5.1",
-    "tslint-eslint-rules": "^3.1.0",
-    "typescript": "^2.2.1"
+    "tslint": "~5.9.1",
+    "tslint-eslint-rules": "^4.1.1",
+    "tslint-no-unused-expression-chai": "0.0.3",
+    "typescript": "^2.7.1"
   },
   "dependencies": {
     "bluebird": "^3.4.7",
