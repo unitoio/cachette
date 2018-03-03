@@ -1,4 +1,4 @@
-const LRU = require('lru-cache');
+import * as LRU from 'lru-cache';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
