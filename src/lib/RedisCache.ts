@@ -1,4 +1,4 @@
-const redis = require('redis');
+import * as redis from 'redis';
 import * as Bluebird from 'bluebird';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
