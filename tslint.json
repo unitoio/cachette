@@ -87,6 +87,7 @@
     "quotemark": [true, "single", "avoid-escape"],
     "semicolon": [true, "always"],
     "no-var-keyword": true,
-    "ter-prefer-arrow-callback": [true]
+    "ter-prefer-arrow-callback": [true],
+    "prefer-const": true
   }
 }

@@ -23,7 +23,7 @@ describe('WriteThroughCache', () => {
       const cache = new WriteThroughCache('redis://localhost:9999');
       cache['redisCache'] = new LocalCache();
 
-      let response = await cache.setValue('key', 'value');
+      const response = await cache.setValue('key', 'value');
       expect(response).to.be.true;
 
       let value = await cache.getValue('key');
