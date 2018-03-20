@@ -31,7 +31,7 @@ export class WriteThroughCache extends CacheInstance {
     value: CachableValue,
     ttl: number = 0,
   ): Promise<boolean> {
-    let response = await this.localCache.setValue(key, value, ttl);
+    const response = await this.localCache.setValue(key, value, ttl);
     return await this.redisCache.setValue(key, value, ttl) && response;
   }
 
