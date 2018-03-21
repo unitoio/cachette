@@ -1,5 +1,6 @@
 import * as redis from 'redis';
 import * as Bluebird from 'bluebird';
+import * as Redlock from 'redlock';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
@@ -35,9 +36,13 @@ export class RedisCache extends CacheInstance {
    */
   public static MAX_RETRY_COUNT: number = 48;
   public static RETRY_DELAY: number = 5000;
+  public static MAX_REDLOCK_RETRY_COUNT: number = 20;
+  public static DEFAULT_REDLOCK_DELAY_MS: number = 200;
+  public static DEFAULT_REDLOCK_JITTER_MS: number = 200;
 
   private client: any = null;
   private url: string;
+  private redlock: Redlock;
 
   constructor(redisUrl: string) {
     super();
@@ -53,6 +58,11 @@ export class RedisCache extends CacheInstance {
       // This will prevent the get/setValue calls from hanging
       // if there is no active connection.
       enable_offline_queue: false,
+    });
+    this.redlock = new Redlock([this.client], {
+      retryCount: RedisCache.MAX_REDLOCK_RETRY_COUNT,
+      retryDelay: RedisCache.DEFAULT_REDLOCK_DELAY_MS,
+      retryJitter: RedisCache.DEFAULT_REDLOCK_JITTER_MS,
     });
 
     this.client.on('connect', this.startConnectionStrategy.bind(this));
