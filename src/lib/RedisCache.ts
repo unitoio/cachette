@@ -37,6 +37,7 @@ export class RedisCache extends CacheInstance {
   public static MAX_RETRY_COUNT: number = 48;
   public static RETRY_DELAY: number = 5000;
   public static MAX_REDLOCK_RETRY_COUNT: number = 20;
+  public static DEFAULT_REDIS_CLOCK_DRIFT_MS: number = 0.01;
   public static DEFAULT_REDLOCK_DELAY_MS: number = 200;
   public static DEFAULT_REDLOCK_JITTER_MS: number = 200;
 
@@ -60,6 +61,7 @@ export class RedisCache extends CacheInstance {
       enable_offline_queue: false,
     });
     this.redlock = new Redlock([this.client], {
+      driftFactor: RedisCache.DEFAULT_REDIS_CLOCK_DRIFT_MS,
       retryCount: RedisCache.MAX_REDLOCK_RETRY_COUNT,
       retryDelay: RedisCache.DEFAULT_REDLOCK_DELAY_MS,
       retryJitter: RedisCache.DEFAULT_REDLOCK_JITTER_MS,
@@ -281,4 +283,30 @@ export class RedisCache extends CacheInstance {
     return this.client.delAsync(key);
   }
 
+
+  /**
+   * Locking through the redlock algorithm
+   * https://redis.io/topics/distlock
+   */
+
+  /**
+   * @inheritdoc
+   */
+  public isLockSupported(): boolean {
+    return true;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  protected async lock(resource: string, ttlMs: number): Promise<Redlock.Lock> {
+    return this.redlock.lock(resource, ttlMs);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  protected async unlock(lock: Redlock.Lock): Promise<void> {
+    return this.redlock.unlock(lock);
+  }
 }

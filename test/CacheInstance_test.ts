@@ -29,7 +29,6 @@ describe('CacheInstance', () => {
       );
       expect(value).to.eql('value');
       expect(numCalled).to.eql(0);
-
     });
 
     it('fetches if value not in cache', async () => {
@@ -50,7 +49,6 @@ describe('CacheInstance', () => {
       );
       expect(value).to.eql('newvalue');
       expect(numCalled).to.eql(1);
-
     });
 
     it('fetches once if multiple simultaneous requests', async () => {
@@ -82,7 +80,6 @@ describe('CacheInstance', () => {
         expect(value).to.eql('newvalue');
       }
       expect(numCalled).to.eql(1);
-
     });
 
     it('fetches once each if multiple simultaneous of two requests', async () => {
@@ -133,7 +130,6 @@ describe('CacheInstance', () => {
       expect(numCalled2).to.eql(1);
       expect(count1).to.eql(50);
       expect(count2).to.eql(50);
-
     });
 
     it('handles errors during simultaneous requests', async () => {
@@ -160,7 +156,6 @@ describe('CacheInstance', () => {
       }
 
       expect(numExceptions).to.eql(10);
-
     });
 
   });

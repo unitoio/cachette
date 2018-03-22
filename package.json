@@ -42,6 +42,7 @@
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.35",
     "@types/node": "^6.0.54",
+    "@types/redlock": "^3.0.1",
     "@types/sinon": "^1.16.33",
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",

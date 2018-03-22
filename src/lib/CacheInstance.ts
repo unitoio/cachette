@@ -15,7 +15,7 @@ export abstract class CacheInstance extends EventEmitter {
    *              no such value exists.
    *
    */
-  abstract getValue(key: string): Promise<CachableValue>;
+  public abstract getValue(key: string): Promise<CachableValue>;
 
   /**
    * Set a value in the cache.
@@ -27,7 +27,7 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @return true if the value was stored, false otherwise.
    */
-  abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<boolean>;
+  public abstract setValue(key: string, value: CachableValue, ttl?: number): Promise<boolean>;
 
   /**
    * Delete a value from the cache.
@@ -35,7 +35,36 @@ export abstract class CacheInstance extends EventEmitter {
    * @param key        The key of the value to set.
    *
    */
-  abstract delValue(key: string): Promise<void>;
+  public abstract delValue(key: string): Promise<void>;
+
+  /**
+   * Determines if locking is supported in the cache implementation
+   */
+  public isLockSupported(): boolean {
+    return false;
+  }
+
+  /**
+   * Globally lock a named resource
+   *
+   * @param resource    The name of the resource to lock
+   * @param ttlMs       The time to live of the lock in ms
+   *
+   * @returns           The lock, an opaque object that must be passed to unlock()
+   */
+  protected lock(resource: string, ttlMs: number): Promise<any> {
+    throw new Error('unsupported');
+  }
+
+  /**
+   * Unlock a named resource aquired with lock()
+   *
+   * @param lock        The lock object
+   */
+  protected unlock(lock: any): Promise<void> {
+    throw new Error('unsupported');
+  }
+
 
   /**
    * Keep track of active fetches to prevent
@@ -49,6 +78,8 @@ export abstract class CacheInstance extends EventEmitter {
    * @param key     The key of the value to get
    * @param ttl     The time to live of the value in seconds.
    * @param fetchFn The function that can retrieve the original value
+   * @param lockTtl Global distributed lock TTL (in seconds) protecting fetching.
+   *                If undefined, 0 or falsy, locking is not preformed
    *
    * @returns       The cached or fetched value
    */
@@ -56,6 +87,7 @@ export abstract class CacheInstance extends EventEmitter {
     key: string,
     ttl: number,
     fetchFunction: FetchingFunction,
+    lockTtl?: number,
   ): Promise<CachableValue> {
 
     // already cached?
@@ -70,15 +102,32 @@ export abstract class CacheInstance extends EventEmitter {
       return currentFetch;
     }
 
-    // I'm the one fetching. It'll be the only await on the fetching function.
-    const fetchPromise = this.activeFetches[key] = fetchFunction();
+    // I'm the one fetching.
+    let lock: any;
     try {
+      // get the lock if needed
+      const lockName = `lock__${key}`;
+      if (lockTtl && this.isLockSupported()) {
+        lock = await this.lock(lockName, lockTtl * 1000);
+        // check if the value has been populated while we were locking
+        const cachedValue = await this.getValue(key);
+        if (cachedValue !== undefined) {
+          return cachedValue;
+        }
+      }
+
+      // fetch!
+      const fetchPromise = this.activeFetches[key] = fetchFunction();
+
       const result = await fetchPromise;
       if (result !== undefined) {
         await this.setValue(key, result, ttl);
       }
       return result;
     } finally {
+      if (lock) {
+        await this.unlock(lock);
+      }
       delete this.activeFetches[key];
     }
   }
