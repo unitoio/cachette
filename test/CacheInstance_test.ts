@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 
 import { LocalCache } from '../src/lib/LocalCache';
 import { RedisCache } from '../src/lib/RedisCache';
+import { WriteThroughCache } from '../src/lib/WriteThroughCache';
 import { CacheInstance, FetchingFunction } from '../src/lib/CacheInstance';
 
 
@@ -16,6 +17,9 @@ describe('CacheInstance', () => {
   if (process.env.TEST_REDIS_URL) {
     const redisCache = new RedisCache(process.env.TEST_REDIS_URL);
     runTests('redis', redisCache);
+
+    const writeThroughCache = new WriteThroughCache(process.env.TEST_REDIS_URL);
+    runTests('writeThrough', writeThroughCache);
   }
 
 });
