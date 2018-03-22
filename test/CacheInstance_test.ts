@@ -34,6 +34,13 @@ function runTests(name: string, cache: CacheInstance): void {
     }
   });
 
+  beforeEach(() => {
+    if (lockSupported) {
+      lockSpy.reset();
+      unlockSpy.reset();
+    }
+  });
+
   after(() => {
     if (lockSpy) {
       lockSpy.restore();
@@ -49,6 +56,7 @@ function runTests(name: string, cache: CacheInstance): void {
     beforeEach(() => cache.clear());
 
     it('does not fetch if value in cache', async () => {
+      const key = `key${Math.random()}`;
       let numCalled = 0;
       const object = {
         fetch: async (v) => {
@@ -57,13 +65,9 @@ function runTests(name: string, cache: CacheInstance): void {
         },
       };
 
-      await cache.setValue('key', 'value');
+      await cache.setValue(key, 'value');
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await cache.getOrFetchValue(
-        'key',
-        10,
-        fetchFunction,
-      );
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction);
       expect(value).to.eql('value');
       expect(numCalled).to.eql(0);
       if (lockSupported) {
@@ -204,6 +208,7 @@ function runTests(name: string, cache: CacheInstance): void {
     });
 
     ifLockIt('locks before fetching if value not in cache', async () => {
+      const key = `key${Math.random()}`;
       let numCalled = 0;
       const object = {
         fetch: async (v) => {
@@ -213,16 +218,39 @@ function runTests(name: string, cache: CacheInstance): void {
       };
 
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await cache.getOrFetchValue(
-        'key256',
-        10,
-        fetchFunction,
-        1,  // enable locking
-      );
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction, 1);  // enable locking
+
       expect(value).to.eql('newvalue');
       expect(numCalled).to.eql(1);
       sinon.assert.calledOnce(lockSpy);
       sinon.assert.calledOnce(unlockSpy);
+    });
+
+    ifLockIt('does not fetch if value already in cache after lock', async () => {
+      const key = `key${Math.random()}`;
+      // steal the lock
+      const lock = await cache.lock(`lock__${key}`, 10);
+
+      let numCalled = 0;
+      const object = {
+        fetch: async (v) => {
+          numCalled++;
+          return v;
+        },
+      };
+
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
+
+      setTimeout(async () => {
+        await cache.setValue(key, 'abcd');
+        await cache.unlock(lock);
+      }, 50);
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction, 1);
+
+      expect(value).to.eql('abcd');
+      expect(numCalled).to.eql(0);
+      sinon.assert.calledTwice(lockSpy);   // includes our own call above
+      sinon.assert.calledTwice(unlockSpy);
     });
 
   });
