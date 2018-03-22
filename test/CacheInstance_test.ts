@@ -1,12 +1,30 @@
 import { expect } from 'chai';
 
 import { LocalCache } from '../src/lib/LocalCache';
-import { FetchingFunction } from '../src/lib/CacheInstance';
+import { RedisCache } from '../src/lib/RedisCache';
+import { CacheInstance, FetchingFunction } from '../src/lib/CacheInstance';
 
+
+// set env var TEST_REDIS_URL (e.g. redis://localhost:6379) to enable running
+// the tests with Redis
 
 describe('CacheInstance', () => {
 
-  describe('getOrFetchValue', () => {
+  runTests('local', new LocalCache());
+
+  let redisCache: RedisCache | undefined;
+  if (process.env.TEST_REDIS_URL) {
+    redisCache = new RedisCache(process.env.TEST_REDIS_URL);
+  }
+  runTests('redis', redisCache);
+
+});
+
+function runTests(name: string, cache: CacheInstance | undefined): void {
+
+  const cdescribe = cache ? describe : describe.skip;
+
+  cdescribe(`getOrFetchValue - ${name}`, () => {
 
     const localCache = new LocalCache();
     beforeEach(() => localCache.clear());
@@ -160,4 +178,4 @@ describe('CacheInstance', () => {
 
   });
 
-});
+}
