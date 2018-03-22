@@ -229,7 +229,7 @@ function runTests(name: string, cache: CacheInstance): void {
     ifLockIt('does not fetch if value already in cache after lock', async () => {
       const key = `key${Math.random()}`;
       // steal the lock
-      const lock = await cache.lock(`lock__${key}`, 10);
+      const lock = await cache.lock(`lock__${key}`, 1000);
 
       let numCalled = 0;
       const object = {
@@ -244,7 +244,7 @@ function runTests(name: string, cache: CacheInstance): void {
       setTimeout(async () => {
         await cache.setValue(key, 'abcd');
         await cache.unlock(lock);
-      }, 50);
+      }, 40);
       const value = await cache.getOrFetchValue(key, 10, fetchFunction, 1);
 
       expect(value).to.eql('abcd');
