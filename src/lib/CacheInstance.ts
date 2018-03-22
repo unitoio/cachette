@@ -37,6 +37,12 @@ export abstract class CacheInstance extends EventEmitter {
    */
   public abstract delValue(key: string): Promise<void>;
 
+
+  /**
+   * clear the whole cache
+   */
+  public abstract clear(): Promise<void>;
+
   /**
    * Determines if locking is supported in the cache implementation
    */
@@ -52,7 +58,7 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @returns           The lock, an opaque object that must be passed to unlock()
    */
-  protected lock(resource: string, ttlMs: number): Promise<any> {
+  public lock(resource: string, ttlMs: number): Promise<any> {
     throw new Error('unsupported');
   }
 
@@ -61,7 +67,7 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @param lock        The lock object
    */
-  protected unlock(lock: any): Promise<void> {
+  public unlock(lock: any): Promise<void> {
     throw new Error('unsupported');
   }
 

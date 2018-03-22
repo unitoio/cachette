@@ -283,6 +283,13 @@ export class RedisCache extends CacheInstance {
     return this.client.delAsync(key);
   }
 
+  /**
+   * @inheritdoc
+   */
+  public async clear(): Promise<void> {
+    return this.client.flushallAsync();
+  }
+
 
   /**
    * Locking through the redlock algorithm
@@ -299,14 +306,14 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  protected async lock(resource: string, ttlMs: number): Promise<Redlock.Lock> {
+  public async lock(resource: string, ttlMs: number): Promise<Redlock.Lock> {
     return this.redlock.lock(resource, ttlMs);
   }
 
   /**
    * @inheritdoc
    */
-  protected async unlock(lock: Redlock.Lock): Promise<void> {
+  public async unlock(lock: Redlock.Lock): Promise<void> {
     return this.redlock.unlock(lock);
   }
 }
