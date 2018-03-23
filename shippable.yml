@@ -3,11 +3,15 @@ language: node_js
 node_js:
   - 6.10.0
 
+services:
+  - redis
+
 env:
   global:
     # The path for Xunit to output test reports
     - XUNIT_FILE=shippable/testresults/result.xml
     - LC_ALL=C
+    - TEST_REDIS_URL=redis://localhost:6379
 
 branches:
   only:
