@@ -290,14 +290,10 @@ export class RedisCache extends CacheInstance {
     return this.client.flushallAsync();
   }
 
-
-  /**
-   * Locking through the redlock algorithm
-   * https://redis.io/topics/distlock
-   */
-
   /**
    * @inheritdoc
+   * Locking through the redlock algorithm
+   * https://redis.io/topics/distlock
    */
   public isLockingSupported(): boolean {
     return true;

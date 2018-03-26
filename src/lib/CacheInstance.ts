@@ -131,10 +131,10 @@ export abstract class CacheInstance extends EventEmitter {
       }
       return result;
     } finally {
+      delete this.activeFetches[key];
       if (lock) {
         await this.unlock(lock);
       }
-      delete this.activeFetches[key];
     }
   }
 
