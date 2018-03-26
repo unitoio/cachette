@@ -26,8 +26,8 @@ describe('CacheInstance', () => {
 
 function runTests(name: string, cache: CacheInstance): void {
 
-  const lockSupported = cache.isLockSupported();
-  const ifLockIt = (cache && cache.isLockSupported()) ? it : it.skip;
+  const lockSupported = cache.isLockingSupported();
+  const ifLockIt = (cache && cache.isLockingSupported()) ? it : it.skip;
   let lockSpy: sinon.SinonSpy;
   let unlockSpy: sinon.SinonSpy;
 

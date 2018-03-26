@@ -67,7 +67,7 @@ export class WriteThroughCache extends CacheInstance {
     await this.redisCache.clear();
   }
 
-  public isLockSupported(): boolean {
+  public isLockingSupported(): boolean {
     return true;
   }
 

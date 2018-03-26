@@ -46,7 +46,7 @@ export abstract class CacheInstance extends EventEmitter {
   /**
    * Determines if locking is supported in the cache implementation
    */
-  public isLockSupported(): boolean {
+  public isLockingSupported(): boolean {
     return false;
   }
 
@@ -113,7 +113,7 @@ export abstract class CacheInstance extends EventEmitter {
     try {
       // get the lock if needed
       const lockName = `lock__${key}`;
-      if (lockTtl && this.isLockSupported()) {
+      if (lockTtl && this.isLockingSupported()) {
         lock = await this.lock(lockName, lockTtl * 1000);
         // check if the value has been populated while we were locking
         const cachedValue = await this.getValue(key);

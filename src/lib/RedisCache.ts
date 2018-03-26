@@ -299,7 +299,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public isLockSupported(): boolean {
+  public isLockingSupported(): boolean {
     return true;
   }
 
