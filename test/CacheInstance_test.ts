@@ -1,17 +1,66 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import { LocalCache } from '../src/lib/LocalCache';
-import { FetchingFunction } from '../src/lib/CacheInstance';
+import { RedisCache } from '../src/lib/RedisCache';
+import { WriteThroughCache } from '../src/lib/WriteThroughCache';
+import { CacheInstance, FetchingFunction } from '../src/lib/CacheInstance';
 
+
+// set env var TEST_REDIS_URL (e.g. redis://localhost:6379) to enable running
+// the tests with Redis
 
 describe('CacheInstance', () => {
 
-  describe('getOrFetchValue', () => {
+  runTests('local', new LocalCache());
 
-    const localCache = new LocalCache();
-    beforeEach(() => localCache.clear());
+  if (process.env.TEST_REDIS_URL) {
+    const redisCache = new RedisCache(process.env.TEST_REDIS_URL);
+    runTests('redis', redisCache);
+
+    const writeThroughCache = new WriteThroughCache(process.env.TEST_REDIS_URL);
+    runTests('writeThrough', writeThroughCache);
+  }
+
+});
+
+function runTests(name: string, cache: CacheInstance): void {
+
+  const lockSupported = cache.isLockingSupported();
+  const ifLockIt = (cache && cache.isLockingSupported()) ? it : it.skip;
+  let lockSpy: sinon.SinonSpy;
+  let unlockSpy: sinon.SinonSpy;
+
+  before(() => {
+    if (lockSupported) {
+      lockSpy = sinon.spy(cache, 'lock');
+      unlockSpy = sinon.spy(cache, 'unlock');
+    }
+  });
+
+  beforeEach(() => {
+    if (lockSupported) {
+      lockSpy.reset();
+      unlockSpy.reset();
+    }
+  });
+
+  after(() => {
+    if (lockSpy) {
+      lockSpy.restore();
+    }
+    if (unlockSpy) {
+      unlockSpy.restore();
+    }
+  });
+
+
+  describe(`getOrFetchValue - ${name}`, () => {
+
+    beforeEach(() => cache.clear());
 
     it('does not fetch if value in cache', async () => {
+      const key = `key${Math.random()}`;
       let numCalled = 0;
       const object = {
         fetch: async (v) => {
@@ -20,16 +69,15 @@ describe('CacheInstance', () => {
         },
       };
 
-      await localCache.setValue('key', 'value');
+      await cache.setValue(key, 'value');
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await localCache.getOrFetchValue(
-        'key',
-        10,
-        fetchFunction,
-      );
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction);
       expect(value).to.eql('value');
       expect(numCalled).to.eql(0);
-
+      if (lockSupported) {
+        sinon.assert.notCalled(lockSpy);
+        sinon.assert.notCalled(unlockSpy);
+      }
     });
 
     it('fetches if value not in cache', async () => {
@@ -41,16 +89,19 @@ describe('CacheInstance', () => {
         },
       };
 
-      await localCache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const value = await localCache.getOrFetchValue(
+      const value = await cache.getOrFetchValue(
         'key',
         10,
         fetchFunction,
       );
       expect(value).to.eql('newvalue');
       expect(numCalled).to.eql(1);
-
+      if (lockSupported) {
+        sinon.assert.notCalled(lockSpy);
+        sinon.assert.notCalled(unlockSpy);
+      }
     });
 
     it('fetches once if multiple simultaneous requests', async () => {
@@ -62,10 +113,10 @@ describe('CacheInstance', () => {
         },
       };
 
-      await localCache.setValue('key2', 'value');
+      await cache.setValue('key2', 'value');
 
       const fetchFunction = object.fetch.bind(object, 'newvalue');
-      const callGetOrFetch = () => localCache.getOrFetchValue(
+      const callGetOrFetch = () => cache.getOrFetchValue(
         'key',
         10,
         fetchFunction,
@@ -82,7 +133,6 @@ describe('CacheInstance', () => {
         expect(value).to.eql('newvalue');
       }
       expect(numCalled).to.eql(1);
-
     });
 
     it('fetches once each if multiple simultaneous of two requests', async () => {
@@ -101,7 +151,7 @@ describe('CacheInstance', () => {
 
       const callGetOrFetch = (key, fn) => {
         const fetchFunction = fn.bind(object, 'newvalue');
-        return localCache.getOrFetchValue(
+        return cache.getOrFetchValue(
           key,
           10,
           fetchFunction,
@@ -133,7 +183,6 @@ describe('CacheInstance', () => {
       expect(numCalled2).to.eql(1);
       expect(count1).to.eql(50);
       expect(count2).to.eql(50);
-
     });
 
     it('handles errors during simultaneous requests', async () => {
@@ -143,7 +192,7 @@ describe('CacheInstance', () => {
         },
       };
 
-      const callGetOrFetch = () => localCache.getOrFetchValue(
+      const callGetOrFetch = () => cache.getOrFetchValue(
         'key',
         10,
         object.fetch,
@@ -160,9 +209,54 @@ describe('CacheInstance', () => {
       }
 
       expect(numExceptions).to.eql(10);
+    });
 
+    ifLockIt('locks before fetching if value not in cache', async () => {
+      const key = `key${Math.random()}`;
+      let numCalled = 0;
+      const object = {
+        fetch: async (v) => {
+          numCalled++;
+          return v;
+        },
+      };
+
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction, 1);  // enable locking
+
+      expect(value).to.eql('newvalue');
+      expect(numCalled).to.eql(1);
+      sinon.assert.calledOnce(lockSpy);
+      sinon.assert.calledOnce(unlockSpy);
+    });
+
+    ifLockIt('does not fetch if value already in cache after lock', async () => {
+      const key = `key${Math.random()}`;
+      // steal the lock
+      const lock = await cache.lock(`lock__${key}`, 1000);
+
+      let numCalled = 0;
+      const object = {
+        fetch: async (v) => {
+          numCalled++;
+          return v;
+        },
+      };
+
+      const fetchFunction = object.fetch.bind(object, 'newvalue');
+
+      setTimeout(async () => {
+        await cache.setValue(key, 'abcd');
+        await cache.unlock(lock);
+      }, 40);
+      const value = await cache.getOrFetchValue(key, 10, fetchFunction, 1);
+
+      expect(value).to.eql('abcd');
+      expect(numCalled).to.eql(0);
+      sinon.assert.calledTwice(lockSpy);   // includes our own call above
+      sinon.assert.calledTwice(unlockSpy);
     });
 
   });
 
-});
+}

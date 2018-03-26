@@ -59,4 +59,24 @@ export class WriteThroughCache extends CacheInstance {
     await this.redisCache.delValue(key);
   }
 
+  /**
+   * @inheritdoc
+   */
+  public async clear(): Promise<void> {
+    await this.localCache.clear();
+    await this.redisCache.clear();
+  }
+
+  public isLockingSupported(): boolean {
+    return true;
+  }
+
+  public lock(resource: string, ttlMs: number): Promise<any> {
+    return this.redisCache.lock(resource, ttlMs);
+  }
+
+  public unlock(lock: any): Promise<void> {
+    return this.redisCache.unlock(lock);
+  }
+
 }

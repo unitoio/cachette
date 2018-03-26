@@ -130,4 +130,24 @@ describe('WriteThroughCache', () => {
 
   });
 
+  describe('clear', () => {
+
+    it('clears from both caches', async () => {
+      const cache = new WriteThroughCache('redis://localhost:9999');
+      cache['redisCache'] = new LocalCache();
+
+      const base = [...Array(10).keys()];
+      await Promise.all(base.map(i => cache.setValue(`key${i}`, i)));
+
+      let values = await Promise.all(base.map(i => cache.getValue(`key${i}`)));
+      expect(values.sort()).to.eql(base);
+
+      await cache.clear();
+
+      values = await Promise.all(base.map(i => cache.getValue(`key${i}`)));
+      values.forEach(value => expect(value).to.be.undefined);
+    });
+
+  });
+
 });
