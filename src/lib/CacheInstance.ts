@@ -7,6 +7,11 @@ export type FetchingFunction = () => Promise<CachableValue>;
 export abstract class CacheInstance extends EventEmitter {
 
   /**
+   * Function that can be awaited for the cache instance connection to be ready.
+   */
+  public abstract isReady(): Promise<void>;
+
+  /**
    * Get a value from the cache.
    *
    * @param key   The key of the value to get.
@@ -16,6 +21,17 @@ export abstract class CacheInstance extends EventEmitter {
    *
    */
   public abstract getValue(key: string): Promise<CachableValue>;
+
+  /**
+   * Get the TTL of an entry, in ms
+   *
+   * @param key   The key of the entry whose ttl to retrieve
+   *
+   * @return      The remaining TTL on the entry, in ms.
+   *              undefined if the entry does not exist.
+   *              0 if the entry does not expire.
+   */
+  public abstract getTtl(key: string): Promise<number | undefined>;
 
   /**
    * Set a value in the cache.

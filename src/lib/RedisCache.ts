@@ -42,6 +42,7 @@ export class RedisCache extends CacheInstance {
   public static DEFAULT_REDLOCK_JITTER_MS: number = 200;
 
   private client: any = null;
+  private ready: boolean = false;
   private url: string;
   private redlock: Redlock;
 
@@ -67,9 +68,19 @@ export class RedisCache extends CacheInstance {
       retryJitter: RedisCache.DEFAULT_REDLOCK_JITTER_MS,
     });
 
-    this.client.on('connect', this.startConnectionStrategy.bind(this));
+    this.client.on('ready', this.startConnectionStrategy.bind(this));
     this.client.on('end', this.endConnectionStrategy.bind(this));
     this.client.on('error', this.errorStrategy.bind(this));
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async isReady(): Promise<void> {
+    if (this.ready) {
+      return;
+    }
+    return new Promise<void>(resolve => this.client.on('ready', resolve));
   }
 
   /**
@@ -94,6 +105,7 @@ export class RedisCache extends CacheInstance {
    * soon as a new connection is established.
    */
   public startConnectionStrategy(): void {
+    this.ready = true;
     this.emit('info', `Connection established to Redis at ${this.url}.`);
   }
 
@@ -273,6 +285,25 @@ export class RedisCache extends CacheInstance {
     const value = await this.client.getAsync(key);
     this.emit('get', key, value);
     return RedisCache.deserializeValue(value);
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getTtl(key: string): Promise<number | undefined> {
+    try {
+      const ttl = await this.client.pttlAsync(key);
+      if (ttl === -1) {
+        return 0;
+      }
+      if (ttl <= 0) {
+        return undefined;
+      }
+      return ttl;
+    } catch (error) {
+      this.emit('warn', 'Error while fetching ttl from the Redis cache', error);
+      return -1;
+    }
   }
 
   /**
