@@ -302,7 +302,7 @@ export class RedisCache extends CacheInstance {
       return ttl;
     } catch (error) {
       this.emit('warn', 'Error while fetching ttl from the Redis cache', error);
-      return -1;
+      return undefined;
     }
   }
 
