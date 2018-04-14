@@ -1,6 +1,6 @@
 {
   "name": "cachette",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "engines": {
     "node": ">=6.10.0"
   },
