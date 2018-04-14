@@ -26,6 +26,13 @@ export class WriteThroughCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async isReady(): Promise<void> {
+    return this.redisCache.isReady();
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async setValue(
     key: string,
     value: CachableValue,
@@ -43,11 +50,22 @@ export class WriteThroughCache extends CacheInstance {
     if (localValue !== undefined) {
       return localValue;
     }
-    const redisValue = await this.redisCache.getValue(key);
-    if (redisValue !== undefined) {
-      await this.localCache.setValue(key, redisValue, 120);
+    const [redisValue, ttl] = await Promise.all([
+      this.redisCache.getValue(key),
+      this.redisCache.getTtl(key),
+    ]);
+
+    if (redisValue !== undefined && ttl !== undefined) {
+      await this.localCache.setValue(key, redisValue, ttl / 1000);
     }
     return redisValue;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getTtl(key: string): Promise<number | undefined> {
+    return this.redisCache.getTtl(key);
   }
 
   /**

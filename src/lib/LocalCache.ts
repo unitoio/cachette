@@ -15,6 +15,13 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async isReady(): Promise<void> {
+    return;
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async setValue(key: string, value: CachableValue, ttl: number = 0): Promise<boolean> {
     this.emit('set', key, value);
 
@@ -39,6 +46,13 @@ export class LocalCache extends CacheInstance {
     const value = await this.cache.get(key);
     this.emit('get', key, value);
     return value;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async getTtl(key: string): Promise<number | undefined> {
+    throw new Error('not implemented');
   }
 
   /**

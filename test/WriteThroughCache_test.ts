@@ -1,6 +1,14 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import { WriteThroughCache, LocalCache } from '../src/';
+
+function makeFakeWriteThroughCache(): WriteThroughCache {
+  const cache = new WriteThroughCache('redis://localhost:9999');
+  cache['redisCache'] = new LocalCache();
+  cache['redisCache'].getTtl = async () => 1;
+  return cache;
+}
 
 
 describe('WriteThroughCache', () => {
@@ -20,8 +28,7 @@ describe('WriteThroughCache', () => {
 
     it('will write the value in both caches', async () => {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       const response = await cache.setValue('key', 'value');
       expect(response).to.be.true;
@@ -41,15 +48,22 @@ describe('WriteThroughCache', () => {
 
   describe('getValue', () => {
 
-    it('will populate the local cache when fetching from redis', async () => {
+    it('will populate the local cache with right ttl when fetching from redis', async function (): Promise<void> {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL);
+      const spy = sinon.spy(cache['localCache'], 'setValue');
 
-      await cache['redisCache'].setValue('key', 'value');
+      // await for Redis connection to be up
+      await cache.isReady();
+
+      await cache['redisCache'].setValue('key', 'value', 100);
 
       let value = await cache.getValue('key');
       expect(value).to.equal('value');
+      sinon.assert.calledWithMatch(spy, 'key', 'value', sinon.match(ttl => ttl > 99.9 && ttl <= 100));
 
       value = await cache['localCache'].getValue('key');
       expect(value).to.equal('value');
@@ -58,8 +72,7 @@ describe('WriteThroughCache', () => {
 
     it('will get directly from the local cache if available', async () => {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       await cache['localCache'].setValue('key', 'value');
 
@@ -73,8 +86,7 @@ describe('WriteThroughCache', () => {
 
     it('will populate the local cache for a null value', async () => {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       await cache['redisCache'].setValue('key', null);
 
@@ -88,8 +100,7 @@ describe('WriteThroughCache', () => {
 
     it('will populate the local cache for an empty string', async () => {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       await cache['redisCache'].setValue('key', '');
 
@@ -107,8 +118,7 @@ describe('WriteThroughCache', () => {
 
     it('will delete values from both caches', async () => {
 
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       await cache.setValue('key', 'value');
 
@@ -133,8 +143,7 @@ describe('WriteThroughCache', () => {
   describe('clear', () => {
 
     it('clears from both caches', async () => {
-      const cache = new WriteThroughCache('redis://localhost:9999');
-      cache['redisCache'] = new LocalCache();
+      const cache = makeFakeWriteThroughCache();
 
       const base = [...Array(10).keys()];
       await Promise.all(base.map(i => cache.setValue(`key${i}`, i)));
