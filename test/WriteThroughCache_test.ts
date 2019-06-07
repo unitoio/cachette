@@ -63,7 +63,7 @@ describe('WriteThroughCache', () => {
 
       let value = await cache.getValue('key');
       expect(value).to.equal('value');
-      sinon.assert.calledWithMatch(spy, 'key', 'value', sinon.match(ttl => ttl > 99.9 && ttl <= 100));
+      sinon.assert.calledWith(spy, 'key', 'value', sinon.match(ttl => ttl > 99.9 && ttl <= 100));
 
       value = await cache['localCache'].getValue('key');
       expect(value).to.equal('value');
