@@ -26,9 +26,8 @@
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint -c tslint.json --project tsconfig.json",
-    "test": "npm run compile && npm run coverage",
-    "test:ci": "mocha --ui tdd -R xunit > shippable/testresults/result.xml",
-    "coverage": "nyc mocha"
+    "test": "npm run compile && nyc mocha",
+    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts"
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
