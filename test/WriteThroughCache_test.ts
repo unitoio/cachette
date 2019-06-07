@@ -53,7 +53,7 @@ describe('WriteThroughCache', () => {
       if (!process.env.TEST_REDIS_URL) {
         this.skip();
       }
-      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL);
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
       const spy = sinon.spy(cache['localCache'], 'setValue');
 
       // await for Redis connection to be up

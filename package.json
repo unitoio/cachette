@@ -2,7 +2,8 @@
   "name": "cachette",
   "version": "0.1.0",
   "engines": {
-    "node": ">=6.10.0"
+    "node": ">=10.14.1",
+    "npm": ">=6.4.1"
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/src/index.js",
@@ -40,19 +41,19 @@
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.35",
-    "@types/node": "^6.0.54",
+    "@types/node": "^10.14.8",
     "@types/sinon": "^1.16.36",
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.0",
     "pre-commit": "^1.2.2",
-    "remap-istanbul": "^0.10.1",
+    "remap-istanbul": "^0.13.0",
     "sinon": "^1.17.7",
-    "source-map-support": "^0.4.8",
-    "tslint": "~5.9.1",
-    "tslint-eslint-rules": "^4.1.1",
-    "tslint-no-unused-expression-chai": "0.0.3",
-    "typescript": "^2.7.1"
+    "source-map-support": "^0.5.12",
+    "tslint": "^5.17.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-no-unused-expression-chai": "0.1.4",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
     "@types/bluebird": "^3.0.36",
