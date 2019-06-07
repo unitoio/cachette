@@ -7,7 +7,7 @@ export class LocalCache extends CacheInstance {
 
   public static MAXIMUM_CACHE_SIZE: number = 5000;
 
-  private cache: any = LRU({
+  private cache: any = new LRU({
     max: LocalCache.MAXIMUM_CACHE_SIZE,
     stale: false,
   });
