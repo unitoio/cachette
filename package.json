@@ -27,18 +27,20 @@
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint -c tslint.json --project tsconfig.json",
     "test": "npm run compile && npm run coverage",
-    "test:ci": "mocha --ui tdd -R xunit 'dist/test/**/*.js' > shippable/testresults/result.xml",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
-    "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
-    "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
-    "coverage:remap:xml": "cd coverage && remap-istanbul -i coverage.json -o coverage.xml -t cobertura",
-    "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"
+    "test:ci": "mocha --ui tdd -R xunit > shippable/testresults/result.xml",
+    "coverage": "nyc mocha"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "check-coverage": true,
+    "all": true
   },
   "pre-commit": [
     "lint",
     "test"
   ],
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^0.1.3",
     "@types/chai": "^3.4.34",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.8",
@@ -46,10 +48,12 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
     "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "pre-commit": "^1.2.2",
     "remap-istanbul": "^0.13.0",
     "sinon": "^1.17.7",
     "source-map-support": "^0.5.12",
+    "ts-node": "^8.2.0",
     "tslint": "^5.17.0",
     "tslint-eslint-rules": "^5.4.0",
     "tslint-no-unused-expression-chai": "0.1.4",
