@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - 6.10.0
+  - 10.15.1
 
 services:
   - redis
@@ -19,15 +19,10 @@ branches:
 
 build:
   ci:
-    - shippable_retry npm install
-    - npm run compile
-    - mkdir -p shippable/testresults
-    - mkdir -p shippable/codecoverage
+    - shippable_retry npm ci
+    - mkdir -p shippable/testresults shippable/codecoverage
     - npm run lint
     - npm run test:ci
-  on_success:
-    - npm run coverage
-    - cp coverage/coverage.xml shippable/codecoverage/coverage.xml
 
 integrations:
   notifications:

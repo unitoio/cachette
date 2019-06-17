@@ -25,14 +25,17 @@
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
-    "lint": "tslint -c tslint.json --project tsconfig.json",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "npm run compile && nyc mocha",
-    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts"
+    "test:ci": "npm run compile && npm run audit && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts",
+    "test:watch": "nyc mocha -- --watch --watch-extensions ts",
+    "packages:lock:regenerate": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "check-coverage": true,
-    "all": true
+    "all": true,
+    "lines": 75
   },
   "pre-commit": [
     "lint",
@@ -45,11 +48,9 @@
     "@types/node": "^10.14.8",
     "@types/sinon": "^7.0.12",
     "chai": "^4.2.0",
-    "istanbul": "^0.4.5",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
     "pre-commit": "^1.2.2",
-    "remap-istanbul": "^0.13.0",
     "sinon": "^7.3.2",
     "source-map-support": "^0.5.12",
     "ts-node": "^8.2.0",
