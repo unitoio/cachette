@@ -40,7 +40,7 @@ function runTests(name: string, cache: CacheInstance): void {
 
   beforeEach(() => {
     if (lockSupported) {
-      lockSpy.resetHistory()
+      lockSpy.resetHistory();
       unlockSpy.resetHistory();
     }
   });
