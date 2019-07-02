@@ -31,6 +31,7 @@
     "packages:lock:regenerate": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
   },
   "nyc": {
+    "cache": false,
     "check-coverage": true,
     "all": true,
     "lines": 75,
