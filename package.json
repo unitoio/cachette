@@ -27,7 +27,7 @@
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "nyc mocha",
-    "test:ci": "npm audit && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts",
+    "test:ci": "mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts",
     "test:watch": "nyc mocha -- --watch --watch-extensions ts",
     "packages:lock:regenerate": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
   },
