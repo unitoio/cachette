@@ -2,7 +2,8 @@
   "name": "cachette",
   "version": "0.1.0",
   "engines": {
-    "node": ">=6.10.0"
+    "node": ">=10.14.1",
+    "npm": ">=6.4.1"
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/src/index.js",
@@ -24,41 +25,54 @@
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
-    "lint": "tslint -c tslint.json --project tsconfig.json",
-    "test": "npm run compile && npm run coverage",
-    "test:ci": "mocha --ui tdd -R xunit 'dist/test/**/*.js' > shippable/testresults/result.xml",
-    "coverage": "istanbul cover -x '**/data/**' --print none _mocha 'dist/test/**/*_test.js' && npm run coverage:remap:json && npm run coverage:remap:html && npm run coverage:remap:xml && npm run coverage:report",
-    "coverage:remap:json": "cd coverage && remap-istanbul -i coverage.json -o coverage-remap.json",
-    "coverage:remap:html": "cd coverage && remap-istanbul -i coverage.json -o html-report -t html",
-    "coverage:remap:xml": "cd coverage && remap-istanbul -i coverage.json -o coverage.xml -t cobertura",
-    "coverage:report": "istanbul report -i coverage/coverage-remap.json --print text-summary"
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "test": "npm run compile && nyc mocha",
+    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts",
+    "packages:lock:regenerate": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
+  },
+  "nyc": {
+    "cache": false,
+    "check-coverage": true,
+    "all": true,
+    "lines": 75,
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/scripts/**",
+      "**/*.d.ts",
+      "coverage/**",
+      "test/**",
+      "test{,-*}.ts",
+      "**/*{.,-}{test,spec}.ts",
+      "**/node_modules/**"
+    ]
   },
   "pre-commit": [
     "lint",
     "test"
   ],
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/mocha": "^2.2.35",
-    "@types/node": "^6.0.54",
-    "@types/sinon": "^1.16.36",
-    "chai": "^3.5.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.1.0",
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.14.8",
+    "@types/sinon": "^7.0.12",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "pre-commit": "^1.2.2",
-    "remap-istanbul": "^0.10.1",
-    "sinon": "^1.17.7",
-    "source-map-support": "^0.4.8",
-    "tslint": "~5.9.1",
-    "tslint-eslint-rules": "^4.1.1",
-    "tslint-no-unused-expression-chai": "0.0.3",
-    "typescript": "^2.7.1"
+    "sinon": "^7.3.2",
+    "source-map-support": "^0.5.12",
+    "tslint": "^5.17.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-no-unused-expression-chai": "0.1.4",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
     "@types/bluebird": "^3.0.36",
     "@types/redlock": "^3.0.1",
     "bluebird": "^3.4.7",
-    "lru-cache": "^4.0.2",
+    "lru-cache": "^5.1.1",
     "redis": "^2.6.3",
     "redlock": "^3.1.2"
   }

@@ -4,3 +4,4 @@ coverage/
 *.swo
 *.swp
 shippable/
+.nyc_output/

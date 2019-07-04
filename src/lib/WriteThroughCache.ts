@@ -17,7 +17,7 @@ export class WriteThroughCache extends CacheInstance {
     this.localCache = new LocalCache();
   }
 
-  public on(eventName: string | symbol, listener: Function): this {
+  public on(eventName: string | symbol, listener: (...args: any[]) => void): this {
     this.redisCache.on(eventName, listener);
     this.localCache.on(eventName, listener);
     return this;

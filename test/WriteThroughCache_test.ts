@@ -53,7 +53,7 @@ describe('WriteThroughCache', () => {
       if (!process.env.TEST_REDIS_URL) {
         this.skip();
       }
-      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL);
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
       const spy = sinon.spy(cache['localCache'], 'setValue');
 
       // await for Redis connection to be up
@@ -63,7 +63,7 @@ describe('WriteThroughCache', () => {
 
       let value = await cache.getValue('key');
       expect(value).to.equal('value');
-      sinon.assert.calledWithMatch(spy, 'key', 'value', sinon.match(ttl => ttl > 99.9 && ttl <= 100));
+      sinon.assert.calledWith(spy, 'key', 'value', sinon.match(ttl => ttl > 99.9 && ttl <= 100));
 
       value = await cache['localCache'].getValue('key');
       expect(value).to.equal('value');
