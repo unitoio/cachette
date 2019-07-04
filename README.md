@@ -12,6 +12,8 @@ Resilient cache library supporting concurrent requests through local cache or Re
 ## Installation
 
 ```
+# Making sure you have the correct node version!
+nvm install
 npm install --save cachette
 ```
 
