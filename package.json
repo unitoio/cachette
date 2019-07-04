@@ -2,7 +2,7 @@
   "name": "cachette",
   "version": "0.1.0",
   "engines": {
-    "node": ">=6.10.0"
+    "node": ">=8.10.0"
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/src/index.js",
