@@ -7,9 +7,14 @@ export type FetchingFunction = () => Promise<CachableValue>;
 export abstract class CacheInstance extends EventEmitter {
 
   /**
-   * Function that can be awaited for the cache instance connection to be ready.
+   * Will resolve when the cache instance connection is ready.
    */
   public abstract isReady(): Promise<void>;
+
+  /**
+   * Get the number of items in the cache.
+   */
+  public abstract itemCount(): Promise<number>;
 
   /**
    * Get a value from the cache.

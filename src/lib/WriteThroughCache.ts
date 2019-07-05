@@ -33,6 +33,13 @@ export class WriteThroughCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async itemCount(): Promise<number> {
+    return await this.redisCache.itemCount() + await this.localCache.itemCount();
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async setValue(
     key: string,
     value: CachableValue,

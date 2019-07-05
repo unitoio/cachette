@@ -22,6 +22,13 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async itemCount(): Promise<number> {
+    return this.cache.itemCount;
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async setValue(key: string, value: CachableValue, ttl: number = 0): Promise<boolean> {
     this.emit('set', key, value);
 
