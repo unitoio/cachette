@@ -5,10 +5,15 @@ import { CachableValue, CacheInstance } from './CacheInstance';
 
 export class LocalCache extends CacheInstance {
 
-  public static MAXIMUM_CACHE_SIZE: number = 5000;
+  public static DEFAULT_MAX_ITEMS: number = 5000;
+  // Default maximum age for the items, in MS.
+  public static DEFAULT_MAX_AGE: number = 30 * 60 * 1000;
 
+  // See https://github.com/isaacs/node-lru-cache#options
+  // for options.
   private cache: any = new LRU({
-    max: LocalCache.MAXIMUM_CACHE_SIZE,
+    max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS as string, 10) || LocalCache.DEFAULT_MAX_ITEMS,
+    maxAge: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
     stale: false,
   });
 
