@@ -323,6 +323,13 @@ export class RedisCache extends CacheInstance {
 
   /**
    * @inheritdoc
+   */
+  public async clearMemory(): Promise<void> {
+    return;
+  }
+
+  /**
+   * @inheritdoc
    * Locking through the redlock algorithm
    * https://redis.io/topics/distlock
    */

@@ -85,6 +85,14 @@ export class WriteThroughCache extends CacheInstance {
     await this.redisCache.clear();
   }
 
+  /**
+   * @inheritdoc
+   */
+  public async clearMemory(): Promise<void> {
+    await this.localCache.clearMemory();
+    await this.redisCache.clearMemory();
+  }
+
   public isLockingSupported(): boolean {
     return true;
   }
