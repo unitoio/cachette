@@ -60,6 +60,11 @@ export abstract class CacheInstance extends EventEmitter {
   public abstract clear(): Promise<void>;
 
   /**
+   * clear any in-memory cache item.
+   */
+  public abstract clearMemory(): Promise<void>;
+
+  /**
    * Determines if locking is supported in the cache implementation
    */
   public isLockingSupported(): boolean {

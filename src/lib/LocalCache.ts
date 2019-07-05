@@ -62,7 +62,17 @@ export class LocalCache extends CacheInstance {
     this.cache.del(key);
   }
 
+  /**
+   * @inheritdoc
+   */
   public async clear(): Promise<void> {
+    this.cache.reset();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public async clearMemory(): Promise<void> {
     this.cache.reset();
   }
 
