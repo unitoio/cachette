@@ -12,8 +12,8 @@ export class LocalCache extends CacheInstance {
   // See https://github.com/isaacs/node-lru-cache#options
   // for options.
   private cache: any = new LRU({
-    max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS, 10) || LocalCache.DEFAULT_MAX_ITEMS,
-    maxAge: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE, 10) || LocalCache.DEFAULT_MAX_AGE,
+    max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS as string, 10) || LocalCache.DEFAULT_MAX_ITEMS,
+    maxAge: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
     stale: false,
   });
 

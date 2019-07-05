@@ -47,8 +47,8 @@ describe('LocalCache', () => {
   });
 
   it('will not grow in size past the maximum size', async () => {
-    const origMax = LocalCache['MAXIMUM_CACHE_SIZE'];
-    LocalCache['MAXIMUM_CACHE_SIZE'] = 5;
+    const origMax = LocalCache['DEFAULT_MAX_ITEMS'];
+    LocalCache['DEFAULT_MAX_ITEMS'] = 5;
 
     const cache = new LocalCache();
     await cache.setValue('1', '1');
@@ -57,6 +57,8 @@ describe('LocalCache', () => {
     await cache.setValue('4', '4');
     await cache.setValue('5', '5');
     await cache.setValue('6', '6');
+    await cache.setValue('7', '7');
+    await cache.setValue('8', '8');
 
     const cacheSize = cache['cache'].length;
     expect(cacheSize).to.equal(5);
@@ -65,7 +67,7 @@ describe('LocalCache', () => {
     expect(oldestValue).to.equal(undefined);
 
     // restore
-    LocalCache['MAXIMUM_CACHE_SIZE'] = origMax;
+    LocalCache['DEFAULT_MAX_ITEMS'] = origMax;
 
   });
 
