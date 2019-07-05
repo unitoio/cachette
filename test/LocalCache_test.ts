@@ -10,15 +10,20 @@ describe('LocalCache', () => {
     const cache = new LocalCache();
     const wasSet = await cache.setValue('key', 'value');
     expect(wasSet).to.be.true;
+    expect(await cache.itemCount()).to.equal(1);
     const value = await cache.getValue('key');
     expect(value).to.equal('value');
+    expect(await cache.itemCount()).to.equal(1);
   });
 
   it('will not throw if we set a value of undefined', async () => {
     const cache = new LocalCache();
+    expect(await cache.itemCount()).to.equal(0);
     const wasSet = await cache.setValue('key', undefined);
+    expect(await cache.itemCount()).to.equal(0);
     expect(wasSet).to.be.false;
     const value = await cache.getValue('key');
+    expect(await cache.itemCount()).to.equal(0);
     expect(value).not.to.exist;
   });
 
@@ -60,7 +65,7 @@ describe('LocalCache', () => {
     await cache.setValue('7', '7');
     await cache.setValue('8', '8');
 
-    const cacheSize = cache['cache'].length;
+    const cacheSize = await cache.itemCount();
     expect(cacheSize).to.equal(5);
 
     const oldestValue = await cache.getValue('1');

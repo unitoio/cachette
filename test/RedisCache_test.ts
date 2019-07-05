@@ -112,6 +112,28 @@ describe('RedisCache', () => {
 
   });
 
+  describe('itemCount', async () => {
+
+    it('can count the items in the redis cache.', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      await cache.setValue('test1', 'value1');
+      await cache.setValue('test2', 'value2');
+      await cache.setValue('test3', 'value3');
+      expect(await cache.itemCount()).to.equal(3);
+      await cache.clear();
+      expect(await cache.itemCount()).to.equal(0);
+    });
+  });
+
   describe('constructor', () => {
     it('will not crash the application given an invalid Redis URL', async () => {
       const cache = new RedisCache('redis://localhost:9999');

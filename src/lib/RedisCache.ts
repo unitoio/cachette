@@ -84,6 +84,13 @@ export class RedisCache extends CacheInstance {
   }
 
   /**
+   * @inheritdoc
+   */
+  public async itemCount(): Promise<number> {
+    return this.client.dbsizeAsync();
+  }
+
+  /**
    * The error event is emitted on stream error.
    * We must catch it, otherwise it will crash the process
    * with an UncaughtException.

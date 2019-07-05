@@ -147,11 +147,13 @@ describe('WriteThroughCache', () => {
 
       const base = [...Array(10).keys()];
       await Promise.all(base.map(i => cache.setValue(`key${i}`, i)));
+      expect(await cache.itemCount()).to.equal(20);
 
       let values = await Promise.all(base.map(i => cache.getValue(`key${i}`)));
       expect(values.sort()).to.eql(base);
 
       await cache.clear();
+      expect(await cache.itemCount()).to.equal(0);
 
       values = await Promise.all(base.map(i => cache.getValue(`key${i}`)));
       values.forEach(value => expect(value).to.be.undefined);
