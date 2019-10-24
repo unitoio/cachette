@@ -74,6 +74,6 @@
     "bluebird": "^3.5.5",
     "lru-cache": "^5.1.1",
     "redis": "^2.8.0",
-    "redlock": "^3.1.2"
+    "redlock": "^4.0.0"
   }
 }
