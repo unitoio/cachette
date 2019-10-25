@@ -10,7 +10,6 @@ describe('RedisCache', () => {
       const cache = new RedisCache('redis://localhost:9999');
       await cache.getValue('test');
       await cache.setValue('test', 'value');
-      expect('still alive???').to.exist;
     });
 
     it('will raise an error if given an Redis URL without protocol', async () => {
@@ -113,7 +112,7 @@ describe('RedisCache', () => {
       const ttl = await cache.getTtl('key');
       expect(ttl).to.exist;
       expect(ttl).to.be.above(0);
-      expect(ttl).to.be.below(30000000);
+      expect(ttl).to.not.be.above(30000000);
     });
 
   });
