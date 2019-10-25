@@ -115,6 +115,29 @@ describe('RedisCache', () => {
       expect(ttl).to.not.be.above(30000000);
     });
 
+    it('can set a boolean value', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      let wasSet = await cache.setValue('key', true);
+      expect(wasSet).to.be.true;
+      let value = await cache.getValue('key');
+      expect(value).to.be.true;
+
+      wasSet = await cache.setValue('key', false);
+      expect(wasSet).to.be.true;
+      value = await cache.getValue('key');
+      expect(value).to.be.false;
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
   });
 
   describe('itemCount', async () => {

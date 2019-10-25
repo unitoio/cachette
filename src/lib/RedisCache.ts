@@ -219,7 +219,7 @@ export class RedisCache extends CacheInstance {
 
     let result;
     if (ttl !== 0) {
-      result = await this.redisClient.set(key, value, 'EX', ttl);
+      result = await this.redisClient.set(key, value, 'ex', ttl);
     } else {
       result = await this.redisClient.set(key, value);
     }
