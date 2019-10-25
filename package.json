@@ -54,6 +54,7 @@
   ],
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/ioredis": "^4.0.18",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.12",
     "@types/sinon": "^7.0.12",
@@ -72,8 +73,8 @@
     "@types/bluebird": "^3.0.36",
     "@types/redlock": "^4.0.0",
     "bluebird": "^3.5.5",
+    "ioredis": "^4.14.2",
     "lru-cache": "^5.1.1",
-    "redis": "^2.8.0",
     "redlock": "^4.0.0"
   }
 }

@@ -1,12 +1,7 @@
-import * as redis from 'redis';
-import * as Bluebird from 'bluebird';
+import * as Redis from 'ioredis';
 import * as Redlock from 'redlock';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
-
-
-Bluebird.promisifyAll(redis.RedisClient.prototype);
-Bluebird.promisifyAll(redis.Multi.prototype);
 
 
 /**
@@ -34,14 +29,13 @@ export class RedisCache extends CacheInstance {
    * at least 4 minutes before permanently fallbacking to
    * a local cache.
    */
-  public static MAX_RETRY_COUNT: number = 48;
   public static RETRY_DELAY: number = 5000;
   public static MAX_REDLOCK_RETRY_COUNT: number = 20;
   public static DEFAULT_REDIS_CLOCK_DRIFT_MS: number = 0.01;
   public static DEFAULT_REDLOCK_DELAY_MS: number = 200;
   public static DEFAULT_REDLOCK_JITTER_MS: number = 200;
 
-  private client: any = null;
+  private redisClient: Redis.Redis;
   private ready: boolean = false;
   private url: string;
   private redlock: Redlock;
@@ -54,23 +48,24 @@ export class RedisCache extends CacheInstance {
     }
 
     this.url = redisUrl;
-    this.client = redis.createClient({
-      url: redisUrl,
-      retry_strategy: RedisCache.retryStrategy,
+    this.redisClient = new Redis(redisUrl, {
+      retryStrategy: () => RedisCache.RETRY_DELAY,
+      // master failover
+      reconnectOnError: (err: any) => err.message.startsWith('READONLY'),
       // This will prevent the get/setValue calls from hanging
       // if there is no active connection.
-      enable_offline_queue: false,
+      enableOfflineQueue: false,
     });
-    this.redlock = new Redlock([this.client], {
+    this.redlock = new Redlock([this.redisClient], {
       driftFactor: RedisCache.DEFAULT_REDIS_CLOCK_DRIFT_MS,
       retryCount: RedisCache.MAX_REDLOCK_RETRY_COUNT,
       retryDelay: RedisCache.DEFAULT_REDLOCK_DELAY_MS,
       retryJitter: RedisCache.DEFAULT_REDLOCK_JITTER_MS,
     });
 
-    this.client.on('ready', this.startConnectionStrategy.bind(this));
-    this.client.on('end', this.endConnectionStrategy.bind(this));
-    this.client.on('error', this.errorStrategy.bind(this));
+    this.redisClient.on('ready', this.startConnectionStrategy.bind(this));
+    this.redisClient.on('end', this.endConnectionStrategy.bind(this));
+    this.redisClient.on('error', this.errorStrategy.bind(this));
   }
 
   /**
@@ -80,14 +75,14 @@ export class RedisCache extends CacheInstance {
     if (this.ready) {
       return;
     }
-    return new Promise<void>(resolve => this.client.on('ready', resolve));
+    return new Promise<void>(resolve => this.redisClient.on('ready', resolve));
   }
 
   /**
    * @inheritdoc
    */
   public async itemCount(): Promise<number> {
-    return this.client.dbsizeAsync();
+    return this.redisClient.dbsize();
   }
 
   /**
@@ -114,33 +109,6 @@ export class RedisCache extends CacheInstance {
   public startConnectionStrategy(): void {
     this.ready = true;
     this.emit('info', `Connection established to Redis at ${this.url}.`);
-  }
-
-  /**
-   * Custom connection retry strategy used by the redis client.
-   *
-   * For details of the properties of the options object,
-   * see https://github.com/NodeRedis/node_redis#options-object-properties
-   *
-   * > If you return a non-number, no further retry will happen
-   * > and all offline commands are flushed with errors.
-   * > Return an error to return that specific error to all offline commands.
-   */
-  public static retryStrategy(options): number | Error {
-
-    // This means we are unable to connect when starting the service.
-    if (options.times_connected === 0) {
-      return new Error('Unable to connect to the Redis instance!');
-    }
-
-    // The attempt counter goes back to 0 everytime the connection
-    // is re-established.
-    if (options.attempt > RedisCache.MAX_RETRY_COUNT) {
-      return new Error('Maximum number of connection attempts reached.');
-    }
-
-    return RedisCache.RETRY_DELAY;
-
   }
 
   /**
@@ -216,24 +184,6 @@ export class RedisCache extends CacheInstance {
   }
 
   /**
-   * Returns the list of parameters to be sent to the set
-   * function.
-   */
-  public static buildSetArguments(key: string, value: CachableValue, ttl: number = 0): any[] {
-
-    const setArguments = [key, value];
-
-    if (ttl !== 0) {
-      // By default the keys do not expire in Redis.
-      setArguments.push('EX');
-      setArguments.push(ttl.toString());
-    }
-
-    return setArguments;
-
-  }
-
-  /**
    * @inheritdoc
    */
   public async setValue(
@@ -267,8 +217,13 @@ export class RedisCache extends CacheInstance {
 
     value = RedisCache.serializeValue(value);
 
-    const setArguments = RedisCache.buildSetArguments(key, value, ttl);
-    const result = await this.client.setAsync(setArguments);
+    let result;
+    if (ttl !== 0) {
+      result = await this.redisClient.set(key, value, 'EX', ttl.toString());
+    } else {
+      result = await this.redisClient.set(key, value);
+    }
+
     return result === 'OK';
   }
 
@@ -289,7 +244,7 @@ export class RedisCache extends CacheInstance {
   }
 
   private async getValueInternal(key: string): Promise<CachableValue> {
-    const value = await this.client.getAsync(key);
+    const value = await this.redisClient.get(key);
     this.emit('get', key, value);
     return RedisCache.deserializeValue(value);
   }
@@ -299,7 +254,7 @@ export class RedisCache extends CacheInstance {
    */
   public async getTtl(key: string): Promise<number | undefined> {
     try {
-      const ttl = await this.client.pttlAsync(key);
+      const ttl = await this.redisClient.pttl(key);
       if (ttl === -1) {
         return 0;
       }
@@ -318,14 +273,14 @@ export class RedisCache extends CacheInstance {
    */
   public async delValue(key: string): Promise<void> {
     this.emit('del', key);
-    return this.client.delAsync(key);
+    await this.redisClient.del(key);
   }
 
   /**
    * @inheritdoc
    */
   public async clear(): Promise<void> {
-    return this.client.flushallAsync();
+    await this.redisClient.flushall();
   }
 
   /**
