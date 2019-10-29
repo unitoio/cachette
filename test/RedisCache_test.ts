@@ -5,60 +5,18 @@ import { RedisCache } from '../src/lib/RedisCache';
 
 describe('RedisCache', () => {
 
-  describe('buildSetArguments', () => {
-
-    it('can return only the key and the value', () => {
-      const setArguments = RedisCache.buildSetArguments('key', 'value');
-      expect(setArguments).to.eql(['key', 'value']);
+  describe('constructor', () => {
+    it('will not crash the application given an invalid Redis URL', async () => {
+      const cache = new RedisCache('redis://localhost:9999');
+      await cache.getValue('test');
+      await cache.setValue('test', 'value');
     });
 
-    it('will set the arguments when using time to live', () => {
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 20);
-      expect(setArguments).to.eql(['key', 'value', 'EX', '20']);
+    it('will raise an error if given an Redis URL without protocol', async () => {
+      expect(
+        () => new RedisCache('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com'),
+      ).to.throw();
     });
-
-    it('supports setting the time to live to 0', () => {
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 0);
-      expect(setArguments).to.eql(['key', 'value']);
-    });
-
-    it('supports setting all the arguments at the same time', () => {
-      const setArguments = RedisCache.buildSetArguments('key', 'value', 14);
-      expect(setArguments).to.eql(['key', 'value', 'EX', '14']);
-    });
-
-  });
-
-  describe('retryStrategy', () => {
-
-    it('will not try to reconnect when it was never able to connect', () => {
-      const options = { times_connected: 0 };
-      const retryDirective = RedisCache.retryStrategy(options);
-      expect(typeof retryDirective).not.to.equal('number');
-      expect(retryDirective instanceof Error).to.be.true;
-      expect((<Error> retryDirective).message).to.include('Unable to connect');
-    });
-
-    it('will not try to reconnect when the maximum retry count has been reached', () => {
-      const options = { times_connected: 1, attempt: RedisCache.MAX_RETRY_COUNT + 1 };
-      const retryDirective = RedisCache.retryStrategy(options);
-      expect(typeof retryDirective).not.to.equal('number');
-      expect(retryDirective instanceof Error).to.be.true;
-      expect((<Error> retryDirective).message).to.include('connection attempts reached');
-    });
-
-    it('will try to reconnect when the maximum retry count has not been reached', () => {
-      const options = { times_connected: 1, attempt: 1 };
-      let retryDirective = RedisCache.retryStrategy(options);
-      expect(typeof retryDirective).to.equal('number');
-      expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
-
-      options.attempt = RedisCache.MAX_RETRY_COUNT;
-      retryDirective = RedisCache.retryStrategy(options);
-      expect(typeof retryDirective).to.equal('number');
-      expect(retryDirective).to.equal(RedisCache.RETRY_DELAY);
-    });
-
   });
 
   describe('value serialization', () => {
@@ -112,6 +70,76 @@ describe('RedisCache', () => {
 
   });
 
+  describe('setValue', async () => {
+    it('can set values', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      const wasSet = await cache.setValue('key', 'value');
+      expect(wasSet).to.be.true;
+      expect(await cache.itemCount()).to.equal(1);
+      const value = await cache.getValue('key');
+      expect(value).to.equal('value');
+      expect(await cache.itemCount()).to.equal(1);
+    });
+
+    it('can set values with a TTL', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      const wasSet = await cache.setValue('key', 'value', 30000);
+      expect(wasSet).to.be.true;
+
+      const value = await cache.getValue('key');
+      expect(value).to.equal('value');
+
+      expect(await cache.itemCount()).to.equal(1);
+
+      const ttl = await cache.getTtl('key');
+      expect(ttl).to.exist;
+      expect(ttl).to.be.above(0);
+      expect(ttl).to.not.be.above(30000000);
+    });
+
+    it('can set a boolean value', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      let wasSet = await cache.setValue('key', true);
+      expect(wasSet).to.be.true;
+      let value = await cache.getValue('key');
+      expect(value).to.be.true;
+
+      wasSet = await cache.setValue('key', false);
+      expect(wasSet).to.be.true;
+      value = await cache.getValue('key');
+      expect(value).to.be.false;
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
+  });
+
   describe('itemCount', async () => {
 
     it('can count the items in the redis cache.', async function (): Promise<void> {
@@ -131,21 +159,6 @@ describe('RedisCache', () => {
       expect(await cache.itemCount()).to.equal(3);
       await cache.clear();
       expect(await cache.itemCount()).to.equal(0);
-    });
-  });
-
-  describe('constructor', () => {
-    it('will not crash the application given an invalid Redis URL', async () => {
-      const cache = new RedisCache('redis://localhost:9999');
-      await cache.getValue('test');
-      await cache.setValue('test', 'value');
-      expect('still alive???').to.exist;
-    });
-
-    it('will raise an error if given an Redis URL without protocol', async () => {
-      expect(
-        () => new RedisCache('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com'),
-      ).to.throw();
     });
   });
 
