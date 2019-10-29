@@ -22,13 +22,6 @@ export class RedisCache extends CacheInstance {
   public static FALSE_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
 
-  /**
-   * If a primary cluster goes down, it might take a few
-   * minutes for ElastiCache to promote a read replica
-   * to the new primary cluster. Here, we retry connecting for
-   * at least 4 minutes before permanently fallbacking to
-   * a local cache.
-   */
   public static RETRY_DELAY: number = 5000;
   public static MAX_REDLOCK_RETRY_COUNT: number = 20;
   public static DEFAULT_REDIS_CLOCK_DRIFT_MS: number = 0.01;
