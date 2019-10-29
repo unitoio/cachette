@@ -36,7 +36,7 @@ export class RedisCache extends CacheInstance {
   constructor(redisUrl: string) {
     super();
 
-    if (!redisUrl || !redisUrl.startsWith('redis://')) {
+    if (!redisUrl || (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://'))) {
       throw new Error(`Invalid redis url ${redisUrl}.`);
     }
 
