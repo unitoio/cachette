@@ -7,14 +7,23 @@ describe('RedisCache', () => {
 
   describe('constructor', () => {
     it('will not crash the application given an invalid Redis URL', async () => {
-      const cache = new RedisCache('redis://localhost:9999');
+      let cache = new RedisCache('redis://localhost:9999');
+      await cache.getValue('test');
+      await cache.setValue('test', 'value');
+      cache = new RedisCache('rediss://localhost:9999');
       await cache.getValue('test');
       await cache.setValue('test', 'value');
     });
 
-    it('will raise an error if given an Redis URL without protocol', async () => {
+    it('will raise an error if given a Redis URL without protocol', async () => {
       expect(
         () => new RedisCache('rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com'),
+      ).to.throw();
+    });
+
+    it('will raise an error if given a Redis URL with an invalid protocol', async () => {
+      expect(
+        () => new RedisCache('potato://rer17kq3qdwc5wmy.4gzf3f.ng.0001.use1.cache.amazonaws.com'),
       ).to.throw();
     });
   });
