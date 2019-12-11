@@ -27,8 +27,8 @@
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "npm run compile && nyc mocha 'dist/test/**/*.js'",
-    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha -- --opts test/mocha.ci.opts 'dist/test/**/*.js'",
-    "packages:lock:regenerate": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
+    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha --opts test/mocha.ci.opts 'dist/test/**/*.js'",
+    "relock": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
   },
   "nyc": {
     "cache": false,
@@ -49,32 +49,33 @@
     ]
   },
   "pre-commit": [
+    "audit",
     "lint",
     "test"
   ],
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/ioredis": "^4.0.18",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^10.14.12",
-    "@types/sinon": "^7.0.12",
-    "chai": "^4.2.0",
-    "mocha": "^6.1.4",
-    "nyc": "^14.1.1",
-    "pre-commit": "^1.2.2",
-    "sinon": "^7.3.2",
-    "source-map-support": "^0.5.12",
-    "tslint": "^5.17.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-no-unused-expression-chai": "0.1.4",
-    "typescript": "^3.5.1"
+    "@types/chai": "4.x",
+    "@types/ioredis": "4.x",
+    "@types/mocha": "5.x",
+    "@types/node": "10.x",
+    "@types/sinon": "7.x",
+    "chai": "4.x",
+    "mocha": "6.x",
+    "nyc": "14.x",
+    "pre-commit": "1.x",
+    "sinon": "7.x",
+    "source-map-support": "0.x",
+    "tslint": "5.x",
+    "tslint-eslint-rules": "5.x",
+    "tslint-no-unused-expression-chai": "0.x",
+    "typescript": "3.x"
   },
   "dependencies": {
-    "@types/bluebird": "^3.0.36",
-    "@types/redlock": "^4.0.0",
-    "bluebird": "^3.5.5",
-    "ioredis": "^4.14.2",
-    "lru-cache": "^5.1.1",
-    "redlock": "^4.0.0"
+    "@types/bluebird": "3.x",
+    "@types/redlock": "4.x",
+    "bluebird": "3.x",
+    "ioredis": "4.x",
+    "lru-cache": "5.x",
+    "redlock": "4.x"
   }
 }
