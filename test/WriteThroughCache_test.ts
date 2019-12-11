@@ -3,7 +3,6 @@ import * as sinon from 'sinon';
 
 import { WriteThroughCache, LocalCache } from '../src/';
 
-
 function makeFakeWriteThroughCache(): WriteThroughCache {
   const cache = new WriteThroughCache('redis://localhost:9999');
   cache['redisCache'] = new LocalCache();
