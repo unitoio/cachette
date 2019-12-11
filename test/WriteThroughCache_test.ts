@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 
 import { WriteThroughCache, LocalCache } from '../src/';
 
+
 function makeFakeWriteThroughCache(): WriteThroughCache {
   const cache = new WriteThroughCache('redis://localhost:9999');
   cache['redisCache'] = new LocalCache();
@@ -110,6 +111,18 @@ describe('WriteThroughCache', () => {
       value = await cache['localCache'].getValue('key');
       expect(value).to.equal('');
 
+    });
+
+    it('returns nothing if value in cache has expired', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.setValue('fakeKey', 'fakeValue', 0.1);
+      // sleep 100 ms
+      await new Promise(resolve => setTimeout(resolve, 150));
+      const fakeValue = await cache.getValue('fakeKey');
+      expect(fakeValue).to.be.undefined;
     });
 
   });
