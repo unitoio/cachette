@@ -54,11 +54,13 @@
     "test"
   ],
   "devDependencies": {
+    "@types/bluebird": "3.x",
     "@types/chai": "4.x",
     "@types/ioredis": "4.x",
     "@types/mocha": "5.x",
     "@types/node": "10.x",
     "@types/sinon": "7.x",
+    "bluebird": "3.x",
     "chai": "4.x",
     "mocha": "6.x",
     "nyc": "14.x",
@@ -71,9 +73,7 @@
     "typescript": "3.x"
   },
   "dependencies": {
-    "@types/bluebird": "3.x",
     "@types/redlock": "4.x",
-    "bluebird": "3.x",
     "ioredis": "4.x",
     "lru-cache": "5.x",
     "redlock": "4.x"
