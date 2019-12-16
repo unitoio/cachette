@@ -112,6 +112,18 @@ describe('WriteThroughCache', () => {
 
     });
 
+    it('returns nothing if value in cache has expired', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.setValue('fakeKey', 'fakeValue', 0.1);
+      // sleep 100 ms
+      await new Promise(resolve => setTimeout(resolve, 150));
+      const fakeValue = await cache.getValue('fakeKey');
+      expect(fakeValue).to.be.undefined;
+    });
+
   });
 
   describe('delValue', () => {
