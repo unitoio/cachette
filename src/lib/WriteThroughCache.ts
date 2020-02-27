@@ -110,11 +110,12 @@ export class WriteThroughCache extends CacheInstance {
   }
 
   public lock(resource: string, ttlMs: number): Promise<any> {
-    return this.redisCacheForWriting.lock(resource, ttlMs) && this.redisCacheForReading.lock(resource, ttlMs) ;
+    return this.redisCacheForReading.lock(resource, ttlMs) ;
   }
 
+
   public unlock(lock: any): Promise<void> {
-    return this.redisCacheForWriting.unlock(lock) && this.redisCacheForReading.unlock(lock);
+    return this.redisCacheForReading.unlock(lock);
   }
 
 }
