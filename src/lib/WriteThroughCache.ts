@@ -8,17 +8,22 @@ import { LocalCache } from './LocalCache';
  */
 export class WriteThroughCache extends CacheInstance {
 
-  private redisCache: CacheInstance;
+  private redisCacheForWriting: CacheInstance;
+  private redisCacheForReading: CacheInstance;
   private localCache: CacheInstance;
 
   constructor(redisUrl: string) {
     super();
-    this.redisCache = new RedisCache(redisUrl);
+    this.redisCacheForWriting = new RedisCache(redisUrl);
+    // Please note that redisCacheForReading will not guarantee a connection with an AWS replica
+    // We might hit the primary instance, but we should not get readonly errors on this connections.
+    this.redisCacheForReading = new RedisCache(redisUrl);
     this.localCache = new LocalCache();
   }
 
   public on(eventName: string | symbol, listener: (...args: any[]) => void): this {
-    this.redisCache.on(eventName, listener);
+    this.redisCacheForWriting.on(eventName, listener);
+    this.redisCacheForReading.on(eventName, listener);
     this.localCache.on(eventName, listener);
     return this;
   }
@@ -26,15 +31,15 @@ export class WriteThroughCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async isReady(): Promise<void> {
-    return this.redisCache.isReady();
+  public async isReady(): Promise<any> {
+    return Promise.all([this.redisCacheForWriting.isReady(), this.redisCacheForReading.isReady()]);
   }
 
   /**
    * @inheritdoc
    */
   public async itemCount(): Promise<number> {
-    return await this.redisCache.itemCount() + await this.localCache.itemCount();
+    return await this.redisCacheForReading.itemCount() + await this.localCache.itemCount();
   }
 
   /**
@@ -46,7 +51,7 @@ export class WriteThroughCache extends CacheInstance {
     ttl: number = 0,
   ): Promise<boolean> {
     const response = await this.localCache.setValue(key, value, ttl);
-    return await this.redisCache.setValue(key, value, ttl) && response;
+    return await this.redisCacheForWriting.setValue(key, value, ttl) && response;
   }
 
   /**
@@ -58,8 +63,8 @@ export class WriteThroughCache extends CacheInstance {
       return localValue;
     }
     const [redisValue, ttl] = await Promise.all([
-      this.redisCache.getValue(key),
-      this.redisCache.getTtl(key),
+      this.redisCacheForReading.getValue(key),
+      this.redisCacheForReading.getTtl(key),
     ]);
 
     if (redisValue !== undefined && ttl !== undefined) {
@@ -72,7 +77,7 @@ export class WriteThroughCache extends CacheInstance {
    * @inheritdoc
    */
   public async getTtl(key: string): Promise<number | undefined> {
-    return this.redisCache.getTtl(key);
+    return this.redisCacheForReading.getTtl(key);
   }
 
   /**
@@ -81,7 +86,7 @@ export class WriteThroughCache extends CacheInstance {
   public async delValue(key: string): Promise<void> {
     this.emit('del', key);
     await this.localCache.delValue(key);
-    await this.redisCache.delValue(key);
+    await this.redisCacheForWriting.delValue(key);
   }
 
   /**
@@ -89,7 +94,8 @@ export class WriteThroughCache extends CacheInstance {
    */
   public async clear(): Promise<void> {
     await this.localCache.clear();
-    await this.redisCache.clear();
+    await this.redisCacheForWriting.clear();
+    await this.redisCacheForReading.clear();
   }
 
   /**
@@ -97,7 +103,8 @@ export class WriteThroughCache extends CacheInstance {
    */
   public async clearMemory(): Promise<void> {
     await this.localCache.clearMemory();
-    await this.redisCache.clearMemory();
+    await this.redisCacheForWriting.clearMemory();
+    await this.redisCacheForReading.clearMemory();
   }
 
   public isLockingSupported(): boolean {
@@ -105,11 +112,11 @@ export class WriteThroughCache extends CacheInstance {
   }
 
   public lock(resource: string, ttlMs: number): Promise<any> {
-    return this.redisCache.lock(resource, ttlMs);
+    return this.redisCacheForWriting.lock(resource, ttlMs) && this.redisCacheForReading.lock(resource, ttlMs) ;
   }
 
   public unlock(lock: any): Promise<void> {
-    return this.redisCache.unlock(lock);
+    return this.redisCacheForWriting.unlock(lock) && this.redisCacheForReading.unlock(lock);
   }
 
 }
