@@ -93,7 +93,6 @@ export class WriteThroughCache extends CacheInstance {
   public async clear(): Promise<void> {
     await this.localCache.clear();
     await this.redisCacheForWriting.clear();
-    await this.redisCacheForReading.clear();
   }
 
   /**
@@ -102,7 +101,6 @@ export class WriteThroughCache extends CacheInstance {
   public async clearMemory(): Promise<void> {
     await this.localCache.clearMemory();
     await this.redisCacheForWriting.clearMemory();
-    await this.redisCacheForReading.clearMemory();
   }
 
   public isLockingSupported(): boolean {
@@ -110,12 +108,12 @@ export class WriteThroughCache extends CacheInstance {
   }
 
   public lock(resource: string, ttlMs: number): Promise<any> {
-    return this.redisCacheForReading.lock(resource, ttlMs) ;
+    return this.redisCacheForWriting.lock(resource, ttlMs);
   }
 
 
   public unlock(lock: any): Promise<void> {
-    return this.redisCacheForReading.unlock(lock);
+    return this.redisCacheForWriting.unlock(lock);
   }
 
 }

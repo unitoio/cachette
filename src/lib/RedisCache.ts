@@ -33,7 +33,7 @@ export class RedisCache extends CacheInstance {
   private url: string;
   private redlock: Redlock;
 
-  constructor(redisUrl: string, readOnly: boolean = false ) {
+  constructor(redisUrl: string, readOnly: boolean = false) {
     super();
 
     if (!redisUrl || (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://'))) {
