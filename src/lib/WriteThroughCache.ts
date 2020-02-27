@@ -15,9 +15,7 @@ export class WriteThroughCache extends CacheInstance {
   constructor(redisUrl: string) {
     super();
     this.redisCacheForWriting = new RedisCache(redisUrl);
-    // Please note that redisCacheForReading will not guarantee a connection with an AWS replica
-    // We might hit the primary instance, but we should not get readonly errors on this connections.
-    this.redisCacheForReading = new RedisCache(redisUrl);
+    this.redisCacheForReading = new RedisCache(redisUrl, true);
     this.localCache = new LocalCache();
   }
 

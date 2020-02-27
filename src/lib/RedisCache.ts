@@ -33,7 +33,7 @@ export class RedisCache extends CacheInstance {
   private url: string;
   private redlock: Redlock;
 
-  constructor(redisUrl: string) {
+  constructor(redisUrl: string, readOnly: boolean = false ) {
     super();
 
     if (!redisUrl || (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://'))) {
@@ -42,9 +42,10 @@ export class RedisCache extends CacheInstance {
 
     this.url = redisUrl;
     this.redisClient = new Redis(redisUrl, {
+      readOnly,
       retryStrategy: () => RedisCache.RETRY_DELAY,
       // master failover
-      reconnectOnError: (err: any) => err.message.startsWith('READONLY'),
+      reconnectOnError: (err: any) => !readOnly && err.message.startsWith('READONLY'),
       // This will prevent the get/setValue calls from hanging
       // if there is no active connection.
       enableOfflineQueue: false,
