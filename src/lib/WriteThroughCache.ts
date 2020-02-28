@@ -75,7 +75,7 @@ export class WriteThroughCache extends CacheInstance {
    * @inheritdoc
    */
   public async getTtl(key: string): Promise<number | undefined> {
-    return this.redisCacheForReading.getTtl(key);
+    return this.redisCacheForWriting.getTtl(key);
   }
 
   /**
