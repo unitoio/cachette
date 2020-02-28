@@ -62,7 +62,7 @@ export class WriteThroughCache extends CacheInstance {
     }
     const [redisValue, ttl] = await Promise.all([
       this.redisCacheForReading.getValue(key),
-      this.redisCacheForReading.getTtl(key),
+      this.redisCacheForWriting.getTtl(key),
     ]);
 
     if (redisValue !== undefined && ttl !== undefined) {
