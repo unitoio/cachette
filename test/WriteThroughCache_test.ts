@@ -5,8 +5,9 @@ import { WriteThroughCache, LocalCache } from '../src/';
 
 function makeFakeWriteThroughCache(): WriteThroughCache {
   const cache = new WriteThroughCache('redis://localhost:9999');
-  cache['redisCache'] = new LocalCache();
-  cache['redisCache'].getTtl = async () => 1;
+  cache['redisCacheForWriting'] = new LocalCache();
+  cache['redisCacheForWriting'].getTtl = async () => 1;
+  cache['redisCacheForReading'] = cache['redisCacheForWriting'];
   return cache;
 }
 
@@ -39,7 +40,7 @@ describe('WriteThroughCache', () => {
       value = await cache['localCache'].getValue('key');
       expect(value).to.equal('value');
 
-      value = await cache['redisCache'].getValue('key');
+      value = await cache['redisCacheForReading'].getValue('key');
       expect(value).to.equal('value');
 
     });
@@ -59,7 +60,7 @@ describe('WriteThroughCache', () => {
       // await for Redis connection to be up
       await cache.isReady();
 
-      await cache['redisCache'].setValue('key', 'value', 100);
+      await cache['redisCacheForWriting'].setValue('key', 'value', 100);
 
       let value = await cache.getValue('key');
       expect(value).to.equal('value');
@@ -79,7 +80,7 @@ describe('WriteThroughCache', () => {
       let value = await cache.getValue('key');
       expect(value).to.equal('value');
 
-      value = await cache['redisCache'].getValue('key');
+      value = await cache['redisCacheForReading'].getValue('key');
       expect(value).not.to.exist;
 
     });
@@ -88,7 +89,7 @@ describe('WriteThroughCache', () => {
 
       const cache = makeFakeWriteThroughCache();
 
-      await cache['redisCache'].setValue('key', null);
+      await cache['redisCacheForWriting'].setValue('key', null);
 
       let value = await cache.getValue('key');
       expect(value).to.equal(null);
@@ -102,7 +103,7 @@ describe('WriteThroughCache', () => {
 
       const cache = makeFakeWriteThroughCache();
 
-      await cache['redisCache'].setValue('key', '');
+      await cache['redisCacheForWriting'].setValue('key', '');
 
       let value = await cache.getValue('key');
       expect(value).to.equal('');
