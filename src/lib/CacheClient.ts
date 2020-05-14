@@ -17,14 +17,23 @@ export abstract class CacheClient {
   /**
    * Decorator to cache the calls to a function.
    */
-  public static cached(ttl: number = 0): any {
+  public static cached(
+    ttl: number = 0,
+    shouldCacheError = (err: Error) => false,
+  ): any {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
       const origFunction = descriptor.value;
       // don't use an => function here, or you lose access to 'this'
       const newFunction = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         const fetchFunction = origFunction.bind(this, ...args);
-        return this.cacheInstance.getOrFetchValue(key, ttl, fetchFunction);
+        return this.cacheInstance.getOrFetchValue(
+          key,
+          ttl,
+          fetchFunction,
+          undefined,
+          shouldCacheError,
+        );
       };
       // create a NoCache version
       target[`${propertyKey}NoCache`] = origFunction;
