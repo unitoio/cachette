@@ -59,13 +59,13 @@
     "@types/ioredis": "4.x",
     "@types/mocha": "7.x",
     "@types/node": "12.x",
-    "@types/sinon": "7.x",
+    "@types/sinon": "9.x",
     "bluebird": "3.x",
     "chai": "4.x",
     "mocha": "7.x",
     "nyc": "15.x",
     "pre-commit": "1.x",
-    "sinon": "8.x",
+    "sinon": "9.x",
     "source-map-support": "0.x",
     "tslint": "6.x",
     "tslint-eslint-rules": "5.x",
@@ -75,7 +75,7 @@
   "dependencies": {
     "@types/redlock": "4.x",
     "ioredis": "4.x",
-    "lru-cache": "5.x",
+    "lru-cache": "6.x",
     "redlock": "4.x"
   }
 }

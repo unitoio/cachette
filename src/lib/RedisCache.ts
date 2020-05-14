@@ -21,6 +21,7 @@ export class RedisCache extends CacheInstance {
   public static TRUE_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-TRUE';
   public static FALSE_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
+  public static ERROR_PREFIX: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
 
   public static RETRY_DELAY: number = 5000;
   public static MAX_REDLOCK_RETRY_COUNT: number = 20;
@@ -130,6 +131,13 @@ export class RedisCache extends CacheInstance {
       return RedisCache.FALSE_VALUE;
     }
 
+    if (value instanceof Error) {
+      return RedisCache.ERROR_PREFIX + JSON.stringify({
+        ...value, // serialize potential Error metadata set as object properties
+        message: value.message,
+      });
+    }
+
     if (value instanceof Object) {
       return RedisCache.JSON_PREFIX + JSON.stringify(value);
     }
@@ -167,6 +175,16 @@ export class RedisCache extends CacheInstance {
 
     if (value === RedisCache.FALSE_VALUE) {
       return false;
+    }
+
+    if (value.startsWith(RedisCache.ERROR_PREFIX)) {
+      const deserializedError = JSON.parse(value.substring(RedisCache.ERROR_PREFIX.length));
+      const error = new Error(deserializedError.message);
+      // restore potential Error metadata set as object properties
+      for (const [k, v] of Object.entries(deserializedError)) {
+        error[k] = v;
+      }
+      return error;
     }
 
     if (value.startsWith(RedisCache.JSON_PREFIX)) {

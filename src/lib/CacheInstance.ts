@@ -112,6 +112,8 @@ export abstract class CacheInstance extends EventEmitter {
    * @param fetchFn The function that can retrieve the original value
    * @param lockTtl Global distributed lock TTL (in seconds) protecting fetching.
    *                If undefined, 0 or falsy, locking is not preformed
+   * @param shouldCacheError A callback being passed errors, controlling whether
+   *                         to cache or not errors. Defaults to never cache.
    *
    * @returns       The cached or fetched value
    */
@@ -120,10 +122,14 @@ export abstract class CacheInstance extends EventEmitter {
     ttl: number,
     fetchFunction: FetchingFunction,
     lockTtl?: number,
+    shouldCacheError = (err: Error) => false,
   ): Promise<CachableValue> {
 
     // already cached?
     const cached = await this.getValue(key);
+    if (cached instanceof Error) {
+      throw cached;
+    }
     if (cached !== undefined) {
       return cached;
     }
@@ -143,17 +149,35 @@ export abstract class CacheInstance extends EventEmitter {
         lock = await this.lock(lockName, lockTtl * 1000);
         // check if the value has been populated while we were locking
         const cachedValue = await this.getValue(key);
+        if (cachedValue instanceof Error) {
+          throw cachedValue;
+        }
         if (cachedValue !== undefined) {
           return cachedValue;
         }
       }
 
       // fetch!
-      const fetchPromise = this.activeFetches[key] = fetchFunction();
+      let error: Error | undefined;
+      let result: any;
+      try {
+        const fetchPromise = this.activeFetches[key] = fetchFunction();
+        result = await fetchPromise;
+      } catch (err) {
+        error = err;
+      }
 
-      const result = await fetchPromise;
-      if (result !== undefined) {
-        await this.setValue(key, result, ttl);
+      // cache! results: always, errors: only if satisfying user assertion
+      let errorToCache: Error | undefined;
+      if (error && shouldCacheError(error)) {
+        errorToCache = error;
+      }
+      if ((errorToCache || result) !== undefined) {
+        await this.setValue(key, errorToCache || result, ttl);
+      }
+
+      if (error) {
+        throw error;
       }
       return result;
     } finally {
