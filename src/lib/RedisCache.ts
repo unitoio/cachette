@@ -179,12 +179,8 @@ export class RedisCache extends CacheInstance {
 
     if (value.startsWith(RedisCache.ERROR_PREFIX)) {
       const deserializedError = JSON.parse(value.substring(RedisCache.ERROR_PREFIX.length));
-      const error = new Error(deserializedError.message);
-      // restore potential Error metadata set as object properties
-      for (const [k, v] of Object.entries(deserializedError)) {
-        error[k] = v;
-      }
-      return error;
+      // return error, restoring potential Error metadata set as object properties
+      return Object.assign(new Error(deserializedError.message), deserializedError);
     }
 
     if (value.startsWith(RedisCache.JSON_PREFIX)) {
