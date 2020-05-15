@@ -168,12 +168,10 @@ export abstract class CacheInstance extends EventEmitter {
       }
 
       // cache! results: always, errors: only if satisfying user assertion
-      let errorToCache: Error | undefined;
       if (error && shouldCacheError(error)) {
-        errorToCache = error;
-      }
-      if ((errorToCache || result) !== undefined) {
-        await this.setValue(key, errorToCache || result, ttl);
+        await this.setValue(key, error, ttl);
+      } else if (result !== undefined) {
+        await this.setValue(key, result, ttl);
       }
 
       if (error) {
