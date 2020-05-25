@@ -122,13 +122,17 @@ export abstract class CacheInstance extends EventEmitter {
     ttl: number,
     fetchFunction: FetchingFunction,
     lockTtl?: number,
-    shouldCacheError = (err: Error) => false,
+    shouldCacheError?: (err: Error) => boolean,
   ): Promise<CachableValue> {
 
     // already cached?
-    const cached = await this.getValue(key);
+    let cached = await this.getValue(key);
     if (cached instanceof Error) {
-      throw cached;
+      if (shouldCacheError) {
+        throw cached;
+      } else {
+        cached = undefined;
+      }
     }
     if (cached !== undefined) {
       return cached;
@@ -148,9 +152,13 @@ export abstract class CacheInstance extends EventEmitter {
       if (lockTtl && this.isLockingSupported()) {
         lock = await this.lock(lockName, lockTtl * 1000);
         // check if the value has been populated while we were locking
-        const cachedValue = await this.getValue(key);
+        let cachedValue = await this.getValue(key);
         if (cachedValue instanceof Error) {
-          throw cachedValue;
+          if (shouldCacheError) {
+            throw cachedValue;
+          } else {
+            cachedValue = undefined;
+          }
         }
         if (cachedValue !== undefined) {
           return cachedValue;
@@ -168,7 +176,7 @@ export abstract class CacheInstance extends EventEmitter {
       }
 
       // cache! results: always, errors: only if satisfying user assertion
-      if (error && shouldCacheError(error)) {
+      if (error && shouldCacheError && shouldCacheError(error)) {
         await this.setValue(key, error, ttl);
       } else if (result !== undefined) {
         await this.setValue(key, result, ttl);

@@ -19,12 +19,23 @@ export abstract class CacheClient {
    */
   public static cached(
     ttl: number = 0,
-    shouldCacheError = (err: Error) => false,
+    shouldCacheError = (err: Error) => true,
   ): any {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
       const origFunction = descriptor.value;
+
       // don't use an => function here, or you lose access to 'this'
-      const newFunction = function (...args): Promise<CachableValue> {
+      const functionCachingResults = function (...args): Promise<CachableValue> {
+        const key = this.buildCacheKey(propertyKey, args);
+        const fetchFunction = origFunction.bind(this, ...args);
+        return this.cacheInstance.getOrFetchValue(
+          key,
+          ttl,
+          fetchFunction,
+          undefined,
+        );
+      };
+      const functionCachingResultsAndErrors = function (...args): Promise<CachableValue> {
         const key = this.buildCacheKey(propertyKey, args);
         const fetchFunction = origFunction.bind(this, ...args);
         return this.cacheInstance.getOrFetchValue(
@@ -35,9 +46,11 @@ export abstract class CacheClient {
           shouldCacheError,
         );
       };
-      // create a NoCache version
+
       target[`${propertyKey}NoCache`] = origFunction;
-      descriptor.value = newFunction;
+      target[`${propertyKey}ErrorCaching`] = functionCachingResultsAndErrors;
+
+      descriptor.value = functionCachingResults;
       return descriptor;
     };
   }
@@ -45,6 +58,13 @@ export abstract class CacheClient {
   public getUncachedFunction(functionName: string): Function {
     if (this[`${functionName}NoCache`]) {
       return this[`${functionName}NoCache`].bind(this);
+    }
+    return this[functionName].bind(this);
+  }
+
+  public getErrorCachingFunction(functionName: string): Function {
+    if (this[`${functionName}ErrorCaching`]) {
+      return this[`${functionName}ErrorCaching`].bind(this);
     }
     return this[functionName].bind(this);
   }
