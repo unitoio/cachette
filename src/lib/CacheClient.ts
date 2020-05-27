@@ -62,6 +62,15 @@ export abstract class CacheClient {
     return this[functionName].bind(this);
   }
 
+  // TODO needs tests:
+  // 1. calling getErrorCachingFunction
+  // 2. testing that the cache of non-error-cached function is not polluted:
+  //    a. setup cache on getFoo who throws
+  //    b. call getFoo, assert throws and assert getFoo called
+  //    c. call getFoo, assert again throws and assert getFoo called
+  //    d. call getErrorCachingFunction(getFoo), assert throws and assert getFoo called
+  //    e. call getErrorCachingFunction(getFoo), assert throws and assert getFoo *NOT* called
+  //    f. call getFoo, assert throws and assert getFoo called
   public getErrorCachingFunction(functionName: string): (...args: any) => Promise<any> {
     if (this[`${functionName}ErrorCaching`]) {
       return this[`${functionName}ErrorCaching`].bind(this);
