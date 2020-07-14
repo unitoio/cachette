@@ -26,7 +26,115 @@ describe('CacheClient', () => {
           value: 100 + parseInt(variant, 10),
         };
       }
+
+      @CacheClient.cached() // default error-caching function: caches all errors
+      async throwingMachine1(): Promise<string> {
+        this.numCalled++;
+        throw new Error('nope');
+      }
+
+      @CacheClient.cached(undefined, err => err['retryable'] === false) // custom error-caching function: caches only 'retryable' errors
+      async throwingMachine2(): Promise<string> {
+        this.numCalled++;
+        // initially throws a retryable (to assert we don't cache),
+        // then switch to a non-retryable (to assert we do cache from that point)
+        if (this.numCalled > 1) {
+          const nonRetryableError = new Error('nope');
+          nonRetryableError['retryable'] = false;
+          throw nonRetryableError;
+        }
+        throw new Error('nope');
+      }
+
     }
+
+    it ('1. provides an error-caching function that caches all errors by default, 2. cohabits with the non-caching function', async () => {
+      const myObj = new MyClass();
+      const myObjThrowingMachine1WithErrorCaching = myObj.getErrorCachingFunction('throwingMachine1');
+
+      // 1. Initial calls with *NO* caching
+      let didThrow1 = false;
+      try {
+        await myObj.throwingMachine1();
+      } catch (err) {
+        didThrow1 = true;
+      }
+      expect(didThrow1).to.be.true;
+      expect(myObj.numCalled).to.equal(1); // initial call -> increase
+
+      let didThrow2 = false;
+      try {
+        await myObj.throwingMachine1();
+      } catch (err) {
+        didThrow2 = true;
+      }
+      expect(didThrow2).to.be.true;
+      expect(myObj.numCalled).to.equal(2); // no caching -> increase
+
+      // 2. Interleaving calls *WITH* caching
+      let didThrow3WithCaching = false;
+      try {
+        await myObjThrowingMachine1WithErrorCaching(true);
+      } catch (err) {
+        didThrow3WithCaching = true;
+      }
+      expect(didThrow3WithCaching).to.be.true;
+      expect(myObj.numCalled).to.equal(3); // first call with caching -> increase
+
+      let didThrow4WithCaching = false;
+      try {
+        await myObjThrowingMachine1WithErrorCaching(true);
+      } catch (err) {
+        didThrow4WithCaching = true;
+      }
+      expect(didThrow4WithCaching).to.be.true;
+      expect(myObj.numCalled).to.equal(3); // second call with caching -> NO increase
+
+      // 3. Back to calls with *NO* caching
+      let didThrow5 = false;
+      try {
+        await myObj.throwingMachine1();
+      } catch (err) {
+        didThrow5 = true;
+      }
+      expect(didThrow5).to.be.true;
+      expect(myObj.numCalled).to.equal(4); // back to no caching -> increase
+    });
+
+    it('honors the shouldCacheError callback letting users specify which errors to cache', async () => {
+      const myObj = new MyClass();
+      const myObjThrowingMachine2WithErrorCaching = myObj.getErrorCachingFunction('throwingMachine2');
+
+      // 1. Initial call *WITH* caching, which will throw a retryable error (not cached)
+      let didThrow1 = false;
+      try {
+        await myObjThrowingMachine2WithErrorCaching();
+      } catch (err) {
+        didThrow1 = true;
+      }
+      expect(didThrow1).to.be.true;
+      expect(myObj.numCalled).to.equal(1); // initial call -> increase
+
+      // 2. Second call *WITH* caching, which will this time throw a non-retryable error (cached)
+      let didThrow2 = false;
+      try {
+        await myObjThrowingMachine2WithErrorCaching();
+      } catch (err) {
+        didThrow2 = true;
+      }
+      expect(didThrow2).to.be.true;
+      expect(myObj.numCalled).to.equal(2); // it got called again -> increase
+
+      // 3. Third call *WITH* caching, now fetched from cache
+      let didThrow3 = false;
+      try {
+        await myObjThrowingMachine2WithErrorCaching();
+      } catch (err) {
+        didThrow3 = true;
+      }
+      expect(didThrow3).to.be.true;
+      expect(myObj.numCalled).to.equal(2); // from cache -> NO increase
+    });
 
     it('protect against concurrent fetches', async () => {
       const myObj = new MyClass();
