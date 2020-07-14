@@ -16,6 +16,14 @@ export abstract class CacheClient {
 
   /**
    * Decorator to cache the calls to a function.
+   *
+   * @param ttl How long the cache should last, in seconds
+   * @param shouldCacheError How the error-caching function (accessible by calling
+   *        `getErrorCachingFunction`) should decide which errors to cache.
+   *        Defaults to caching *all* errors. *Again, to insist*: this does not
+   *        mean the _decorated function_ will cache all errors, it means that
+   *        _the error-caching function_ will. They live apart and each honors
+   *        its behavior (decorated function *never* caches errors, the other does)
    */
   public static cached(
     ttl: number = 0,
