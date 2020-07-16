@@ -104,6 +104,145 @@ function runTests(name: string, cache: CacheInstance): void {
       }
     });
 
+    it('does not cache exceptions by default', async () => {
+      let numCalled = 0;
+      const object = {
+        fetchThatThrows: async () => {
+          numCalled++;
+          throw new Error(`nope ${numCalled}`);
+        },
+      };
+
+      const fetchFunction = object.fetchThatThrows.bind(object, 'newvalue');
+      try {
+        await cache.getOrFetchValue('key', 10, fetchFunction);
+      } catch (err) {
+        expect(err.message).to.equal('nope 1');
+      }
+      expect(numCalled).to.equal(1);
+
+      try {
+        await cache.getOrFetchValue('key', 10, fetchFunction);
+      } catch (err) {
+        expect(err.message).to.equal('nope 2'); // <- no caching happened
+      }
+      expect(numCalled).to.equal(2);
+    });
+
+    it('caches exceptions if asked to', async () => {
+      let numCalled = 0;
+      const object = {
+        fetchThatThrows: async () => {
+          numCalled++;
+          const error = new Error(`nope ${numCalled}`);
+          error.name = 'MyCustomError';
+          // Some people enrich their errors objects with metadata.
+          // We ensure to preserve these.
+          error['myStringProperty'] = 'foo';
+          error['myBooleanProperty'] = true;
+          error['myNumberProperty'] = 1789.1789;
+          throw error;
+        },
+      };
+      const fetchFunction = object.fetchThatThrows.bind(object, 'newvalue');
+
+      let didThrow = false;
+      const getFromCache = async () => cache.getOrFetchValue('key', 10, fetchFunction, undefined, () => true);
+      try {
+        await getFromCache();
+      } catch (err) {
+        // initial throw, without cache
+        didThrow = true;
+        expect(err.message).to.equal('nope 1');
+        expect(err.name).to.equal('MyCustomError');
+        expect(err.myStringProperty).to.equal('foo');
+        expect(err.myBooleanProperty).to.equal(true);
+        expect(err.myNumberProperty).to.equal(1789.1789);
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(1);
+
+      didThrow = false;
+      try {
+        await getFromCache();
+      } catch (err) {
+        // second throw, cached
+        didThrow = true;
+        expect(err.message).to.equal('nope 1'); // <-- from cache; didn't increase
+        expect(err.name).to.equal('MyCustomError');
+        expect(err.myStringProperty).to.equal('foo');
+        expect(err.myBooleanProperty).to.equal(true);
+        expect(err.myNumberProperty).to.equal(1789.1789);
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(1); // <-- from cache; didn't increase
+    });
+
+    it('honors the shouldCacheError callback to determine whether to cache or not to cache -- (?, that is the question)', async () => {
+      let numCalled = 0;
+      const object = {
+        fetchThatThrowsAfterThree: async () => {
+          numCalled++;
+          const error = new Error(`nope ${numCalled}`);
+          error.name = numCalled >= 3 ? 'CacheableError' : 'NonCacheableError';
+          throw error;
+        },
+      };
+      const fetchFunction = object.fetchThatThrowsAfterThree.bind(object, 'newvalue');
+
+      let didThrow = false;
+      const getFromCache = async () => cache.getOrFetchValue(
+        'key',
+        10,
+        fetchFunction,
+        undefined,
+        (err) => err.name !== 'NonCacheableError',
+      );
+      try {
+        await getFromCache();
+      } catch (err) {
+        didThrow = true;
+        expect(err.message).to.equal('nope 1');
+        expect(err.name).to.equal('NonCacheableError');
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(1);
+
+      didThrow = false;
+      try {
+        await getFromCache();
+      } catch (err) {
+        didThrow = true;
+        expect(err.message).to.equal('nope 2');
+        expect(err.name).to.equal('NonCacheableError');
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(2); // <-- from actuall call, did increase
+
+      // next calls (after third call) will produce a cacheable error
+      didThrow = false;
+      try {
+        await getFromCache();
+      } catch (err) {
+        didThrow = true;
+        expect(err.message).to.equal('nope 3');
+        expect(err.name).to.equal('CacheableError');
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(3); // <-- from actual call, did increase
+
+      didThrow = false;
+      try {
+        await getFromCache();
+      } catch (err) {
+        didThrow = true;
+        expect(err.message).to.equal('nope 3');
+        expect(err.name).to.equal('CacheableError');
+      }
+      expect(didThrow).to.be.true;
+      expect(numCalled).to.equal(3); // <-- from cache, didn't increase
+    });
+
     it('fetches once if multiple simultaneous requests', async () => {
       let numCalled = 0;
       const object = {

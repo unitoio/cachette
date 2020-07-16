@@ -112,6 +112,8 @@ export abstract class CacheInstance extends EventEmitter {
    * @param fetchFn The function that can retrieve the original value
    * @param lockTtl Global distributed lock TTL (in seconds) protecting fetching.
    *                If undefined, 0 or falsy, locking is not preformed
+   * @param shouldCacheError A callback being passed errors, controlling whether
+   *                         to cache or not errors. Defaults to never cache.
    *
    * @returns       The cached or fetched value
    */
@@ -120,10 +122,18 @@ export abstract class CacheInstance extends EventEmitter {
     ttl: number,
     fetchFunction: FetchingFunction,
     lockTtl?: number,
+    shouldCacheError?: (err: Error) => boolean,
   ): Promise<CachableValue> {
 
     // already cached?
-    const cached = await this.getValue(key);
+    let cached = await this.getValue(key);
+    if (cached instanceof Error) {
+      if (shouldCacheError) {
+        throw cached;
+      } else {
+        cached = undefined;
+      }
+    }
     if (cached !== undefined) {
       return cached;
     }
@@ -142,18 +152,38 @@ export abstract class CacheInstance extends EventEmitter {
       if (lockTtl && this.isLockingSupported()) {
         lock = await this.lock(lockName, lockTtl * 1000);
         // check if the value has been populated while we were locking
-        const cachedValue = await this.getValue(key);
+        let cachedValue = await this.getValue(key);
+        if (cachedValue instanceof Error) {
+          if (shouldCacheError) {
+            throw cachedValue;
+          } else {
+            cachedValue = undefined;
+          }
+        }
         if (cachedValue !== undefined) {
           return cachedValue;
         }
       }
 
       // fetch!
-      const fetchPromise = this.activeFetches[key] = fetchFunction();
+      let error: Error | undefined;
+      let result: any;
+      try {
+        const fetchPromise = this.activeFetches[key] = fetchFunction();
+        result = await fetchPromise;
+      } catch (err) {
+        error = err;
+      }
 
-      const result = await fetchPromise;
-      if (result !== undefined) {
+      // cache! results: always, errors: only if satisfying user assertion
+      if (error && shouldCacheError && shouldCacheError(error)) {
+        await this.setValue(key, error, ttl);
+      } else if (result !== undefined) {
         await this.setValue(key, result, ttl);
+      }
+
+      if (error) {
+        throw error;
       }
       return result;
     } finally {
