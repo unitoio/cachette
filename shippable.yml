@@ -25,6 +25,7 @@ build:
     - npm run audit
     - npm run lint
     - npm run test:ci
+    - npm config set '//registry.npmjs.org/:_authToken' "${UNITO_NPM_REGISTRY_TOKEN}"
     - npm run publish-to-npm
 
 integrations:
