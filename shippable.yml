@@ -14,7 +14,6 @@ env:
     # UNITO_NPM_REGISTRY_TOKEN
     - secure: xnqiMhMErBMRoz9ltgf/t0HNjz9mEaSN2zyj+5jrKd9YInNy5BawOPpp66gQ4NpQzyxC4WJYAP9bbnlV1Pq4xte0uJxYqLu2U01i3EhELl/TMIM/8izgYYgUeuo+HbXU9Lbf9K1QSwHEJHIdDuxKF/8XLdZjsPQl62Jb2bfImna1yJ3UUqt1cUkpRxAOE/1yw5CzBI+3fdYkhY0s+M3gCob9YQco0f108GmnK36EK7x9kAtvbEZzXXZe2lsRVKt+CSKnKh3MO16LNrJmNs4lGJM+3GISfVeLCIHTG0h4+7GssCGMHBKRsPL/4g/L2FyHAuN8xfSgvb2iybrjs/g9YA==
 
-
 branches:
   only:
     - master
@@ -25,8 +24,12 @@ build:
     - npm run audit
     - npm run lint
     - npm run test:ci
+  on_success:
+    - git remote set-url origin $REPOSITORY_URL
+    - git config --get remote.origin.url
+    - bash bump_node_package_version.sh
+    - bash publish_node_package.sh
     - npm config set '//registry.npmjs.org/:_authToken' "${UNITO_NPM_REGISTRY_TOKEN}"
-    - npm run publish-to-npm
 
 integrations:
   notifications:
