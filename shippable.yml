@@ -12,7 +12,7 @@ env:
     - LC_ALL=C
     - TEST_REDIS_URL=redis://localhost:6379
     # UNITO_NPM_REGISTRY_TOKEN
-    - secure: xnqiMhMErBMRoz9ltgf/t0HNjz9mEaSN2zyj+5jrKd9YInNy5BawOPpp66gQ4NpQzyxC4WJYAP9bbnlV1Pq4xte0uJxYqLu2U01i3EhELl/TMIM/8izgYYgUeuo+HbXU9Lbf9K1QSwHEJHIdDuxKF/8XLdZjsPQl62Jb2bfImna1yJ3UUqt1cUkpRxAOE/1yw5CzBI+3fdYkhY0s+M3gCob9YQco0f108GmnK36EK7x9kAtvbEZzXXZe2lsRVKt+CSKnKh3MO16LNrJmNs4lGJM+3GISfVeLCIHTG0h4+7GssCGMHBKRsPL/4g/L2FyHAuN8xfSgvb2iybrjs/g9YA==
+    - secure: KfyQxQx/yotDaysG4pLNtbyuOJIQjYWT4WCmrqgOrY/ReCyrNmfNkx5KGJD1LOijifyISNbOVzig5OgZJDOelC5E+vskx9Qx2qZq6r1/ZeQm7YIn1dD+ghlFSTHtT04oanWgCtA7e/JPkkV/feDsTQACreQt+Rd3gpPoYJCLqrofNIbDTP2Xz5xmX8LsqbYpqHQTA+MyHWZFqbmzMBGjXmGfaPhGMw+M8v2fKxL9jZ8JKRLqgRMJffZZRdJdcFs1IoYm0+Z09vW++VruURGdm1g+d/UzT1kRVi3N+fFwy9Dbb4XtXWw8kqGodfwtfYKzBLBOAR90+oBy8fWQUNcrTQ==
 
 branches:
   only:
