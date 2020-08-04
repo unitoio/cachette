@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
 
 # Exit if PULL_REQUEST is true or else publish
-[[ "$PULL_REQUEST" == "true" ]] || npm run publish-to-npm
+
+if [[ -n "$PULL_REQUEST" && "$PULL_REQUEST" != "false" ]]; then
+  echo "Not publishing the package from a Pull Request."
+  exit 0
+fi
+
+npm run publish-to-npm
