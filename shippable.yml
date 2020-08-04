@@ -20,7 +20,7 @@ branches:
 build:
   ci:
     - shippable_retry npm ci
-    - npm audit
+    - npm run audit
     - npm run lint
     - npm run test:ci
 
