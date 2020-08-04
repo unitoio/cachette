@@ -22,7 +22,7 @@
     "decorator"
   ],
   "scripts": {
-    "audit": "check-audit --production",
+    "audit-with-ignore": "check-audit --production",
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ .nyc_output/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
@@ -51,7 +51,7 @@
     ]
   },
   "pre-commit": [
-    "audit",
+    "audit-with-ignore",
     "lint",
     "test"
   ],
