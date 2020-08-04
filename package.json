@@ -22,6 +22,7 @@
     "decorator"
   ],
   "scripts": {
+    "audit": "check-audit --production",
     "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ .nyc_output/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
@@ -63,6 +64,7 @@
     "bluebird": "3.x",
     "chai": "4.x",
     "mocha": "7.x",
+    "npm-audit-resolver": "2.x",
     "nyc": "15.x",
     "pre-commit": "1.x",
     "sinon": "9.x",
