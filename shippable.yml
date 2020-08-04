@@ -21,7 +21,7 @@ branches:
 build:
   ci:
     - shippable_retry npm ci
-    - npm run audit
+    - npm run audit-with-ignore
     - npm run lint
     - npm run test:ci
   on_success:
