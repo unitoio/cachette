@@ -28,7 +28,7 @@ build:
     - git remote set-url origin $REPOSITORY_URL
     - git config --get remote.origin.url
     - npm config set '//registry.npmjs.org/:_authToken' "${UNITO_NPM_REGISTRY_TOKEN}"
-    - [[ "$PULL_REQUEST" \=\= "true" ]] || npm run publish-to-npm
+    - ./scripts/publish_public_npm.sh
 
 integrations:
   notifications:
