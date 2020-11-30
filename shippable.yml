@@ -46,3 +46,8 @@ integrations:
       on_success: never
       on_pull_request: never
       on_start: never
+  hub:
+    - integrationName: shippable-docker-images
+      type: ecr
+      region: us-east-1
+
