@@ -25,6 +25,7 @@ build:
     - npm run audit-with-ignore
     - npm run lint
     - npm run test:ci
+    - ./scripts/cleanup_tests.sh
   on_success:
     - git remote set-url origin $REPOSITORY_URL
     - git config --get remote.origin.url
