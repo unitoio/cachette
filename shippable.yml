@@ -20,11 +20,6 @@ branches:
     - master
 
 build:
-  pre_ci_boot:
-    image_name: 418344807563.dkr.ecr.us-east-1.amazonaws.com/shippable-docker-images
-    image_tag: latest
-    pull: true
-    options: "-e HOME=/root" 
   ci:
     - shippable_retry npm ci
     - npm run audit-with-ignore
@@ -34,8 +29,8 @@ build:
     - git remote set-url origin $REPOSITORY_URL
     - git config --get remote.origin.url
     - npm config set '//registry.npmjs.org/:_authToken' "${UNITO_NPM_REGISTRY_TOKEN}"
-    - bash bump_node_package_version.sh
-    - bash publish_node_package.sh
+    - ./scripts/bump_node_package_version.sh
+    - ./scripts/publish_public_npm.sh
 
 integrations:
   notifications:
@@ -47,8 +42,4 @@ integrations:
       on_success: never
       on_pull_request: never
       on_start: never
-  hub:
-    - integrationName: shippable-docker-images
-      type: ecr
-      region: us-east-1
 
