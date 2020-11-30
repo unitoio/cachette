@@ -1,6 +1,10 @@
 language: node_js 
+
 node_js:
   - 12.18.1
+
+services:
+  - redis
 
 env:
   global:
@@ -10,9 +14,6 @@ env:
     - TEST_REDIS_URL=redis://localhost:6379
     # UNITO_NPM_REGISTRY_TOKEN
     - secure: KfyQxQx/yotDaysG4pLNtbyuOJIQjYWT4WCmrqgOrY/ReCyrNmfNkx5KGJD1LOijifyISNbOVzig5OgZJDOelC5E+vskx9Qx2qZq6r1/ZeQm7YIn1dD+ghlFSTHtT04oanWgCtA7e/JPkkV/feDsTQACreQt+Rd3gpPoYJCLqrofNIbDTP2Xz5xmX8LsqbYpqHQTA+MyHWZFqbmzMBGjXmGfaPhGMw+M8v2fKxL9jZ8JKRLqgRMJffZZRdJdcFs1IoYm0+Z09vW++VruURGdm1g+d/UzT1kRVi3N+fFwy9Dbb4XtXWw8kqGodfwtfYKzBLBOAR90+oBy8fWQUNcrTQ==
-
-services:
-  - redis
 
 branches:
   only:
