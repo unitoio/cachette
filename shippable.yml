@@ -19,6 +19,11 @@ branches:
     - master
 
 build:
+  pre_ci_boot:
+    image_name: 418344807563.dkr.ecr.us-east-1.amazonaws.com/shippable-docker-images
+    image_tag: latest
+    pull: true
+    options: "-e HOME=/root" 
   ci:
     - shippable_retry npm ci
     - npm run audit-with-ignore
