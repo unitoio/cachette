@@ -3,7 +3,11 @@ shippable/
 src/
 test/
 dist/test/
+.nyc_output/
+scripts/
 shippable.yml
 tsconfig.json
+dist/tsconfig.tsbuildinfo
 .eslintrc.js
 .npmignore
+.nvmrc
