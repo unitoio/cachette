@@ -13,7 +13,7 @@ describe('CacheClient', () => {
     }
 
     class MyClass extends CacheClient {
-      numCalled: number = 0;
+      numCalled = 0;
 
       cacheInstance = new LocalCache();
 
