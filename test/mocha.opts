@@ -1,5 +1,0 @@
-# https://mochajs.org/#mochaopts
-
---require source-map-support/register
---recursive
---exit
