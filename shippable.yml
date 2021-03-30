@@ -12,8 +12,8 @@ env:
     - XUNIT_FILE=shippable/testresults/result.xml
     - LC_ALL=C
     - TEST_REDIS_URL=redis://localhost:6379
-    # UNITO_NPM_REGISTRY_TOKEN
-    - secure: KfyQxQx/yotDaysG4pLNtbyuOJIQjYWT4WCmrqgOrY/ReCyrNmfNkx5KGJD1LOijifyISNbOVzig5OgZJDOelC5E+vskx9Qx2qZq6r1/ZeQm7YIn1dD+ghlFSTHtT04oanWgCtA7e/JPkkV/feDsTQACreQt+Rd3gpPoYJCLqrofNIbDTP2Xz5xmX8LsqbYpqHQTA+MyHWZFqbmzMBGjXmGfaPhGMw+M8v2fKxL9jZ8JKRLqgRMJffZZRdJdcFs1IoYm0+Z09vW++VruURGdm1g+d/UzT1kRVi3N+fFwy9Dbb4XtXWw8kqGodfwtfYKzBLBOAR90+oBy8fWQUNcrTQ==
+    # UNITO_NPM_REGISTRY_TOKEN, used in .npmrc
+    - secure: KePo1+ekIM2ILQav5Sex78SHJLvuz+/L/IyO5FHBZ+ohb3WfhwKjrHcXE25TzUM8HrGYvAfLsCf01MBIC7EdiGtzWtndzwh53r8WwsXPp+yabHHKIzlkY6VZ0n2B/PQepOdxfrHhznEkYgD3mSaD+VW1qDG8eOyZN7rCPI1DNTUbwNbTprIemrLFfgziVNkaPw8S4/xInxxbrLifw7pALB19ydhMlHUqPHktftrQvmU9zqDKtTf5JJcTmvx2j4BJQ/kBtRruQasE7Zgjk5qq+L+/ngIMzHk7DcwyOygJzv7Pqg1/irOWHiZdgIc+HyxEO8QYUSkCRKLLrz7AYwHMvA==
 
 branches:
   only:
