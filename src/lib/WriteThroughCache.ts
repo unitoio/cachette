@@ -46,7 +46,7 @@ export class WriteThroughCache extends CacheInstance {
   public async setValue(
     key: string,
     value: CachableValue,
-    ttl: number = 0,
+    ttl = 0,
   ): Promise<boolean> {
     const response = await this.localCache.setValue(key, value, ttl);
     return await this.redisCacheForWriting.setValue(key, value, ttl) && response;

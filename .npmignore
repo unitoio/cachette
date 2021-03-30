@@ -5,5 +5,5 @@ test/
 dist/test/
 shippable.yml
 tsconfig.json
-tslint.json
+.eslintrc.js
 .npmignore

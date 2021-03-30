@@ -17,24 +17,24 @@ export class RedisCache extends CacheInstance {
    * We cannot store null and booleans in Redis, so we store
    * random values representing these values instead.
    */
-  public static NULL_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-NULL';
-  public static TRUE_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-TRUE';
-  public static FALSE_VALUE: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
-  public static JSON_PREFIX: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
-  public static ERROR_PREFIX: string = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
+  public static NULL_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-NULL';
+  public static TRUE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-TRUE';
+  public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
+  public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
+  public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
 
-  public static RETRY_DELAY: number = 5000;
-  public static MAX_REDLOCK_RETRY_COUNT: number = 20;
-  public static DEFAULT_REDIS_CLOCK_DRIFT_MS: number = 0.01;
-  public static DEFAULT_REDLOCK_DELAY_MS: number = 200;
-  public static DEFAULT_REDLOCK_JITTER_MS: number = 200;
+  public static RETRY_DELAY = 5000;
+  public static MAX_REDLOCK_RETRY_COUNT = 20;
+  public static DEFAULT_REDIS_CLOCK_DRIFT_MS = 0.01;
+  public static DEFAULT_REDLOCK_DELAY_MS = 200;
+  public static DEFAULT_REDLOCK_JITTER_MS = 200;
 
   private redisClient: Redis.Redis;
-  private ready: boolean = false;
+  private ready = false;
   private url: string;
   private redlock: Redlock;
 
-  constructor(redisUrl: string, readOnly: boolean = false) {
+  constructor(redisUrl: string, readOnly = false) {
     super();
 
     if (!redisUrl || (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://'))) {
@@ -197,7 +197,7 @@ export class RedisCache extends CacheInstance {
   public async setValue(
     key: string,
     value: CachableValue,
-    ttl: number = 0,
+    ttl = 0,
   ): Promise<boolean> {
     try {
       return await this.setValueInternal(key, value, ttl);

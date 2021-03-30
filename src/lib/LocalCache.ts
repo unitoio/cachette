@@ -5,7 +5,7 @@ import { CachableValue, CacheInstance } from './CacheInstance';
 
 export class LocalCache extends CacheInstance {
 
-  public static DEFAULT_MAX_ITEMS: number = 5000;
+  public static DEFAULT_MAX_ITEMS = 5000;
   // Default maximum age for the items, in MS.
   public static DEFAULT_MAX_AGE: number = 30 * 60 * 1000;
 
@@ -34,7 +34,7 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async setValue(key: string, value: CachableValue, ttl: number = 0): Promise<boolean> {
+  public async setValue(key: string, value: CachableValue, ttl = 0): Promise<boolean> {
     this.emit('set', key, value);
 
     if (value === undefined) {

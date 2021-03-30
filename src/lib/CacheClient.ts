@@ -26,7 +26,7 @@ export abstract class CacheClient {
    *        its behavior (decorated function *never* caches errors, the other does)
    */
   public static cached(
-    ttl: number = 0,
+    ttl = 0,
     shouldCacheError = (err: Error) => true,
   ): any {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
@@ -63,6 +63,7 @@ export abstract class CacheClient {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   public getUncachedFunction(functionName: string): Function {
     if (this[`${functionName}NoCache`]) {
       return this[`${functionName}NoCache`].bind(this);
