@@ -13,7 +13,7 @@ env:
     - LC_ALL=C
     - TEST_REDIS_URL=redis://localhost:6379
     # UNITO_NPM_REGISTRY_TOKEN, used in .npmrc
-    - secure: KePo1+ekIM2ILQav5Sex78SHJLvuz+/L/IyO5FHBZ+ohb3WfhwKjrHcXE25TzUM8HrGYvAfLsCf01MBIC7EdiGtzWtndzwh53r8WwsXPp+yabHHKIzlkY6VZ0n2B/PQepOdxfrHhznEkYgD3mSaD+VW1qDG8eOyZN7rCPI1DNTUbwNbTprIemrLFfgziVNkaPw8S4/xInxxbrLifw7pALB19ydhMlHUqPHktftrQvmU9zqDKtTf5JJcTmvx2j4BJQ/kBtRruQasE7Zgjk5qq+L+/ngIMzHk7DcwyOygJzv7Pqg1/irOWHiZdgIc+HyxEO8QYUSkCRKLLrz7AYwHMvA==
+    - secure: Fu3+g7ByMIJOiKuv/vDD8tNLZuLe5jkwOJrNztQaba8vVwkEn8oSqc7LZx9kYhgKEyu8lsMEDzNYNvfTZb8tsTO/gRvi77P4XYRImD8ywpZBRZkbJWHTihIUALYfzcFCbxqfCMAFkpqoyygfU7VUpN1vkH1G8WYVsTY+Gbku7/MyP5nCbSl3zcb4WSpBFZFgL/GAGEFSujsGZ+Og7ZH255JYPE176EEi53ndc1tpk/IqF1joATjEIOfiKar1LvdxvBEuqyLbCsUKqeItWRL1tsi4oqxg89W6dlGepB9Sjg5GQ0/g3n5EqgGibt44c8d1NByvJlmmccDSCOpRRTAlOA==
 
 branches:
   only:
