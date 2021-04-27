@@ -1,37 +1,23 @@
-name: 🚦 Npm Tests
+name: 🚦 Npm Lint
 
 env:
   APPLICATION_NAME: cachette
-  TEST_REDIS_URL: redis://localhost:6379
+
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, updated, synchronize]
     branches:
       - master
     paths:
       - "**/*.js"
       - "**/*.ts"
       - "**/*.json"
+      - "**/*.md"
 
 jobs:
-  tests:
+  linter:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, '[force-build]') && !contains(github.event.head_commit.message, '[skip ci]')}}
-
-    services:
-      # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
     steps:
       # https://github.com/actions/checkout
       - name: Checkout 🛎️
@@ -58,6 +44,6 @@ jobs:
         run: |
           npm ci
 
-      - name: Run tests ✅
+      - name: Npm lint 💅
         run: |
-          npm run test:ci
+          npm run lint
