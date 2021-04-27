@@ -62,4 +62,5 @@ jobs:
       - name: Pushes the package to NPM
         run: |
           echo "Running npm publish"
+          npm config set '//registry.npmjs.org/:_authToken' "${UNITO_NPM_REGISTRY_TOKEN}"
           # npm publish
