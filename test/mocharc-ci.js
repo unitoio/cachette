@@ -9,5 +9,5 @@ module.exports = {
   timeout: 60000,
   reporter: 'xunit',
   'no-colors': true,
-  'reporter-options': 'output=shippable/testresults/result.xml',
+  'reporter-options': 'output=ci_output/testresults/result.xml',
 };
