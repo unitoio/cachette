@@ -1,0 +1,20 @@
+name: 🚓 PR naming convention
+# description: Enforces a Pull Request title convention, based on our emojis convention.
+# You can find a reference of the emoji list in the description of the [#production](https://unitoinc.slack.com/archives/C44SLBB4L) channel on Slack
+
+on:
+  pull_request:
+    types: [opened, edited]
+    branches:
+      - master
+
+jobs:
+  pr_naming_convention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: "^(?:🐛|🚑|🕴|🐎|🏎|⚗|🔒|💸|😀|🔍|🔧|🌪|💨|📦) .+$" # Regex the title should match.
+          prefix_case_sensitive: false # title prefix are case insensitive
+          min_length: 5 # Min length of the title
+          max_length: 100 # Max length of the title
