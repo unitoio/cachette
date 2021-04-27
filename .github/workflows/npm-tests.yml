@@ -2,6 +2,7 @@ name: 🚦 Npm Tests
 
 env:
   APPLICATION_NAME: cachette
+  TEST_REDIS_URL: redis://localhost:6379
 on:
   pull_request:
     types: [opened, edited, synchronize]
