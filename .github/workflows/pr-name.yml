@@ -1,5 +1,4 @@
 name: 🚓 PR naming convention
-# description: Enforces a Pull Request title convention, based on our emojis convention.
 # You can find a reference of the emoji list in the description of the [#production](https://unitoinc.slack.com/archives/C44SLBB4L) channel on Slack
 
 on:

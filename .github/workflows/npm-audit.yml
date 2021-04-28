@@ -1,5 +1,4 @@
 name: 🔒️ Npm Audit
-# description: Runs `npm run audit-with-ignore` excluding the dev dependencies
 
 env:
   APPLICATION_NAME: cachette
