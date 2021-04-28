@@ -2,7 +2,6 @@ name: 📦 Publish package
 
 env:
   APPLICATION_NAME: cachette
-  UNITO_GITHUB_PKG_TOKEN: ${{secrets.UNITO_GITHUB_PKG_TOKEN}}
 
 on:
   push:
