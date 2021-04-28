@@ -3,5 +3,5 @@ node_modules/
 coverage/
 *.swo
 *.swp
-shippable/
+ci_output/
 .nyc_output/

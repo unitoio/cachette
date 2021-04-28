@@ -23,12 +23,12 @@
   ],
   "scripts": {
     "audit-with-ignore": "check-audit --production",
-    "clean": "rm -rf dist/ node_modules/ shippable/ coverage/ .nyc_output/ *.tgz",
+    "clean": "rm -rf dist/ node_modules/ ci_output/ coverage/ .nyc_output/ *.tgz",
     "compile": "tsc",
     "prepublishOnly": "npm run clean && npm install && npm run compile",
     "lint": "eslint 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
     "test": "npm run compile && nyc mocha --config test/mocharc.js 'dist/test/**/*.js'; test -z \"$TEST_REDIS_URL\" && echo '!!! Warning: TEST_REDIS_URL unset, Redis tests did not run !!!' || true",
-    "test:ci": "npm run compile && mkdir -p shippable/testresults shippable/codecoverage && nyc --reporter cobertura --report-dir shippable/codecoverage mocha --config test/mocharc-ci.js 'dist/test/**/*.js'",
+    "test:ci": "npm run compile && mkdir -p ci_output/testresults && mocha --config test/mocharc-ci.js 'dist/test/**/*.js'",
     "relock": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true"
   },
   "nyc": {

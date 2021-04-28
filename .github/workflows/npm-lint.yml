@@ -1,0 +1,49 @@
+name: 🚦 Npm Lint
+
+env:
+  APPLICATION_NAME: cachette
+
+on:
+  pull_request:
+    types: [opened, updated, synchronize]
+    branches:
+      - master
+    paths:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.json"
+      - "**/*.md"
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[force-build]') && !contains(github.event.head_commit.message, '[skip ci]')}}
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+
+      - name: Get node version ⭐️
+        run: |
+          echo "NODE_VERSION=$(echo $(jq '.engines.node' package.json) | sed -E 's/"[<>=]*([0-9]([\.0-9a-z]+)?)*.*"/\1/')" >> $GITHUB_ENV
+          echo "${{ env.NODE_VERSION }}"
+      - name: Setup Node ${{ env.NODE_VERSION }}📍️
+        uses: actions/setup-node@v1
+        env:
+          CI: true
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # https://github.com/actions/cache
+      - name: NPM cache 📦
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ env.APPLICATION_NAME }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+      - name: NPM install 📦
+        run: |
+          npm ci
+
+      - name: Npm lint 💅
+        run: |
+          npm run lint
