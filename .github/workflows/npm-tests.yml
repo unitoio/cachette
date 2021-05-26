@@ -5,7 +5,7 @@ env:
   TEST_REDIS_URL: redis://localhost:6379
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, updated, synchronize, ready_for_review, review_requested]
     branches:
       - master
     paths:
@@ -16,7 +16,7 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[force-build]') && !contains(github.event.head_commit.message, '[skip ci]')}}
+    if: ${{ github.event.pull_request.draft == false }}
 
     services:
       # Label used to access the service container
