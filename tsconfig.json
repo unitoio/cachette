@@ -13,7 +13,7 @@
     "rootDir": ".",
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "es2019"
+    "target": "es2020"
   },
   "include": [
     "src/**/*",
