@@ -11,7 +11,7 @@ export abstract class CacheClient {
         typeof x === 'number' ||
         typeof x === 'boolean' ||
         // If the arg is an object, we check that it's not a instance of a class
-        (typeof x === 'object' && x.constructor.name !== 'Object')
+        (typeof x === 'object' && x.constructor.name === 'Object')
       ).map(x => {
         if (typeof x === 'object') {
           return Object.values(x).join('-');
