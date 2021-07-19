@@ -6,8 +6,18 @@ export abstract class CacheClient {
   protected buildCacheKey(propertyKey: string, args: any[]): string {
     const keyParts = args
       .filter(x => x !== undefined && x !== null)
-      .filter(x => typeof x === 'string' || typeof x === 'number' || typeof x === 'boolean')
-      .map(x => x.toString());
+      .filter(x =>
+        typeof x === 'string' ||
+        typeof x === 'number' ||
+        typeof x === 'boolean' ||
+        // If the arg is an object, we check that it's not a instance of a class
+        (typeof x === 'object' && x.constructor.name !== 'Object')
+      ).map(x => {
+        if (typeof x === 'object') {
+          return Object.values(x).join('-');
+        }
+        return x.toString();
+      });
     return [
       propertyKey,
       ...keyParts,
