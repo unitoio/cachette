@@ -15,7 +15,7 @@ export abstract class CacheClient {
         (typeof x === 'object' && x.constructor.name === 'Object')
       ).map(x => {
         if (typeof x === 'object') {
-          return Object.entries(x).map(([key, value]) => {
+          return Object.entries(x).sort().map(([key, value]) => {
             if (typeof value === 'object') {
               const nestedObjectKeys = buildKeyArgs([value])
               return `${key}-${nestedObjectKeys}`

@@ -217,8 +217,18 @@ describe('CacheClient', () => {
 
     it('will convert plain object values', async () => {
       const cacheClient = new MyCacheClient();
-      const key = cacheClient['buildCacheKey']('functionName', ['argument', { argument1: 'arg1', argument2: 'arg2', argument3: { nestedArg1: 'nestedArg1' } }, new Date()]);
-      expect(key).to.equal('functionName-argument-argument1-arg1-argument2-arg2-argument3-nestedArg1-nestedArg1');
+      const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { argument1: 'arg1', argument2: 'arg2', argument3: { nestedArg1: 'nestedArg1', nestedArg2: 'nestedArg2' } },
+        new Date(),
+      ]);
+      expect(keyWithSortedObjectProperties).to.equal('functionName-argument-argument1-arg1-argument2-arg2-argument3-nestedArg1-nestedArg1-nestedArg2-nestedArg2');
+      const keyWithUnsortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { argument2: 'arg2', argument1: 'arg1', argument3: { nestedArg2: 'nestedArg2', nestedArg1: 'nestedArg1' } },
+        new Date(),
+      ]);
+      expect(keyWithUnsortedObjectProperties).to.equal('functionName-argument-argument1-arg1-argument2-arg2-argument3-nestedArg1-nestedArg1-nestedArg2-nestedArg2');
     })
 
   });
