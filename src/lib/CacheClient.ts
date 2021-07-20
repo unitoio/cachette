@@ -5,7 +5,7 @@ export abstract class CacheClient {
   protected cacheInstance: CacheInstance;
   protected buildCacheKey(propertyKey: string, args: any[]): string {
 
-    const buildKeyArgs = (args) => args
+    const buildKeyArgs = (args: any[]) => args
       .filter(x => x !== undefined && x !== null)
       .filter(x =>
         typeof x === 'string' ||
