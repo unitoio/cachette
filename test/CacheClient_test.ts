@@ -217,23 +217,31 @@ describe('CacheClient', () => {
 
     it('will convert plain object values', async () => {
       const cacheClient = new MyCacheClient();
-      const expectedKey = 'functionName-argument-argument1-arg1-argument2-arg2-argument3-nestedArg1-nestedArg1-nestedArg2-nestedArg2';
+      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2';
 
       const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
         'argument',
-        { argument1: 'arg1', argument2: 'arg2', argument3: { nestedArg1: 'nestedArg1', nestedArg2: 'nestedArg2' } },
+        { property1: 'prop1', property2: 'prop2', property3: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
         new Date(),
       ]);
       expect(keyWithSortedObjectProperties).to.equal(expectedKey);
+    })
+
+    it('will convert plain object values and the result should be the same key if two objects have the same properties but not in the same order', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' }, property2: 'prop2' },
+      ]);
 
       const keyWithUnsortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
         'argument',
-        { argument2: 'arg2', argument1: 'arg1', argument3: { nestedArg2: 'nestedArg2', nestedArg1: 'nestedArg1' } },
+        {  property2: 'prop2' , property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
         new Date(),
       ]);
-      expect(keyWithUnsortedObjectProperties).to.equal(expectedKey);
+      expect(keyWithUnsortedObjectProperties).to.equal(keyWithSortedObjectProperties);
     })
-
   });
 
 });
