@@ -218,7 +218,7 @@ describe('CacheClient', () => {
     it('will convert plain object values', async () => {
       const cacheClient = new MyCacheClient();
       const key = cacheClient['buildCacheKey']('functionName', ['argument', { argument1: 'arg1', argument2: 'arg2' }, new Date()]);
-      expect(key).to.equal('functionName-argument-arg1-arg2');
+      expect(key).to.equal('functionName-argument-argument1-arg1-argument2-arg2');
     })
 
   });

@@ -14,7 +14,7 @@ export abstract class CacheClient {
         (typeof x === 'object' && x.constructor.name === 'Object')
       ).map(x => {
         if (typeof x === 'object') {
-          return Object.values(x).join('-');
+          return Object.entries(x).map(([key, value]) => `${key}-${value}`).join('-');
         }
         return x.toString();
       });
