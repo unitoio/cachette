@@ -237,7 +237,7 @@ describe('CacheClient', () => {
 
       const keyWithUnsortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
         'argument',
-        { property2: 'prop2' , property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
+        { property2: 'prop2', property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
         new Date(),
       ]);
       expect(keyWithUnsortedObjectProperties).to.equal(keyWithSortedObjectProperties);
