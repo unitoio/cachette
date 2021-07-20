@@ -4,7 +4,8 @@ export abstract class CacheClient {
 
   protected cacheInstance: CacheInstance;
   protected buildCacheKey(propertyKey: string, args: any[]): string {
-    const keyParts = args
+
+    const buildKeyArgs = (args) => args
       .filter(x => x !== undefined && x !== null)
       .filter(x =>
         typeof x === 'string' ||
@@ -14,13 +15,20 @@ export abstract class CacheClient {
         (typeof x === 'object' && x.constructor.name === 'Object')
       ).map(x => {
         if (typeof x === 'object') {
-          return Object.entries(x).map(([key, value]) => `${key}-${value}`).join('-');
+          return Object.entries(x).map(([key, value]) => {
+            if (typeof value === 'object' && value) {
+              const nestedObjectKeys = buildKeyArgs([value])
+              return `${key}-${nestedObjectKeys}`
+            }
+            return `${key}-${value}`
+          }).join('-');
         }
         return x.toString();
       });
+
     return [
       propertyKey,
-      ...keyParts,
+      ...buildKeyArgs(args),
     ].join('-');
   }
 
