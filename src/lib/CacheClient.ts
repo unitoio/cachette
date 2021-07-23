@@ -14,6 +14,9 @@ export abstract class CacheClient {
         x === null
       ).map(x => {
         if (typeof x === 'object' && !Array.isArray(x) && x) {
+          // Check if we have a circular reference in the plain object
+          JSON.stringify(x);
+
           return Object.entries(x).sort().map(([key, value]) => {
             if (typeof value === 'object') {
               const nestedObjectKeys = buildKeyArgs([value])

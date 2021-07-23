@@ -289,6 +289,19 @@ describe('CacheClient', () => {
 
       expect(() => cacheClient['buildCacheKey']('functionName', [bigArray])).to.throw();
     })
+
+    it('should detect circular reference in an object', async () => {
+      const cacheClient = new MyCacheClient();
+      const obj2: any = {};
+      const obj: any = {
+        property1: 'hello',
+        property2: obj2,
+      };
+
+      obj2.property1 = obj;
+
+      expect(() => cacheClient['buildCacheKey']('functionName', [obj2])).to.throw();
+    })
   });
 
 });
