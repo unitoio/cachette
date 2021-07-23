@@ -191,11 +191,11 @@ describe('CacheClient', () => {
       cacheInstance = new LocalCache();
     }
 
-    it('will ignore null or undefined', async () => {
+    it('will add null or undefined to the key', async () => {
 
       const cacheClient = new MyCacheClient();
       const key = cacheClient['buildCacheKey']('functionName', [null, undefined, 'argument']);
-      expect(key).to.equal('functionName-argument');
+      expect(key).to.equal('functionName-null-undefined-argument');
 
     });
 
@@ -217,12 +217,13 @@ describe('CacheClient', () => {
 
     it('will convert plain object values', async () => {
       const cacheClient = new MyCacheClient();
-      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2';
+      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2-value1-value2';
 
       const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
         'argument',
         { property1: 'prop1', property2: 'prop2', property3: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
         new Date(),
+        ['value1', 'value2']
       ]);
       expect(keyWithSortedObjectProperties).to.equal(expectedKey);
     })
@@ -240,6 +241,17 @@ describe('CacheClient', () => {
         { property2: 'prop2', property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
       ]);
       expect(keyWithUnsortedObjectProperties).to.equal(keyWithSortedObjectProperties);
+    })
+
+    it('should throw if key is bigger than 1000', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const bigArray: string[] = [];
+      while (bigArray.length < 1000) {
+        bigArray.push('myValue');
+      }
+
+      expect(() => cacheClient['buildCacheKey']('functionName', [bigArray])).to.throw();
     })
   });
 

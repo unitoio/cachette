@@ -6,15 +6,14 @@ export abstract class CacheClient {
   protected buildCacheKey(propertyKey: string, args: any[]): string {
 
     const buildKeyArgs = (args: any[]) => args
-      .filter(x => x !== undefined && x !== null)
       .filter(x =>
-        typeof x === 'string' ||
-        typeof x === 'number' ||
-        typeof x === 'boolean' ||
+        typeof x !== 'object' ||
         // If the arg is an object, we check that it's not a instance of a class
-        (typeof x === 'object' && x.constructor.name === 'Object')
+        (typeof x === 'object' && (x?.constructor.name === 'Object' || x?.constructor.name === 'Array')) ||
+        // typeof null === object, then we need to have another condition to accept null as well
+        x === null
       ).map(x => {
-        if (typeof x === 'object') {
+        if (typeof x === 'object' && !Array.isArray(x) && x) {
           return Object.entries(x).sort().map(([key, value]) => {
             if (typeof value === 'object') {
               const nestedObjectKeys = buildKeyArgs([value])
@@ -23,13 +22,23 @@ export abstract class CacheClient {
             return `${key}-${value}`
           }).join('-');
         }
-        return x.toString();
+
+        if (Array.isArray(x)) {
+          return x.sort().join('-');
+        }
+        return new String(x).valueOf();
       });
 
-    return [
+    const builtKey = [
       propertyKey,
       ...buildKeyArgs(args),
     ].join('-');
+
+    if (builtKey.length > 1000) {
+      throw new Error('Built key is bigger than 1000 chars');
+    }
+
+    return builtKey;
   }
 
   /**
