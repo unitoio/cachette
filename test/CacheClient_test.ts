@@ -303,5 +303,4 @@ describe('CacheClient', () => {
       expect(() => cacheClient['buildCacheKey']('functionName', [obj2])).to.throw();
     })
   });
-
 });

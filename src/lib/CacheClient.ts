@@ -38,8 +38,9 @@ export abstract class CacheClient {
       ...buildKeyArgs(args),
     ].join('-');
 
-    if (builtKey.length > 1000) {
-      throw new Error('Built key is bigger than 1000 chars');
+    const maxKeyLength = process.env.UNITO_CACHE_MAX_KEY_LENGTH || 1000;
+    if (builtKey.length > maxKeyLength) {
+      throw new Error(`Built key is bigger than ${maxKeyLength} chars`);
     }
 
     return builtKey;
