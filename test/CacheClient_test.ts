@@ -217,15 +217,49 @@ describe('CacheClient', () => {
 
     it('will convert plain object values', async () => {
       const cacheClient = new MyCacheClient();
-      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2-value1-value2';
+      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2';
 
       const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
         'argument',
         { property1: 'prop1', property2: 'prop2', property3: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
         new Date(),
-        ['value1', 'value2']
       ]);
       expect(keyWithSortedObjectProperties).to.equal(expectedKey);
+    })
+
+    it('will convert array values', async () => {
+      const cacheClient = new MyCacheClient();
+      const expectedKey = 'functionName-prop1-propValue1-prop2-propValue2-value1-value2';
+
+      const keyWithArrayValues = cacheClient['buildCacheKey']('functionName', [
+       [
+         { prop1: 'propValue1', prop2: 'propValue2' },
+         'value1',
+         'value2',
+       ],
+      ]);
+      expect(keyWithArrayValues).to.equal(expectedKey);
+    })
+
+    it('will convert array values and the result should be the same key if two array own the same properties but not in the same order', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const keyWithSortedArrayValues= cacheClient['buildCacheKey']('functionName', [
+        [
+          { prop1: 'propValue1', prop2: 'propValue2' },
+          'value1',
+          'value2',
+        ],
+      ]);
+
+      const keyWithUnsortedArrayValues= cacheClient['buildCacheKey']('functionName', [
+        [
+          'value1',
+          'value2',
+          { prop1: 'propValue1', prop2: 'propValue2' },
+        ],
+      ]);
+      expect(keyWithSortedArrayValues).to.equal(keyWithUnsortedArrayValues);
     })
 
     it('will convert plain object values and the result should be the same key if two objects have the same properties but not in the same order', async () => {
