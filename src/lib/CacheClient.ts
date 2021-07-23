@@ -24,7 +24,8 @@ export abstract class CacheClient {
         }
 
         if (Array.isArray(x)) {
-          return x.sort().join('-');
+          const builtKey = buildKeyArgs(x.sort());
+          return builtKey.join('-');
         }
         return new String(x).valueOf();
       });
