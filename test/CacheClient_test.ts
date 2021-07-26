@@ -191,11 +191,11 @@ describe('CacheClient', () => {
       cacheInstance = new LocalCache();
     }
 
-    it('will ignore null or undefined', async () => {
+    it('will add null or undefined to the key', async () => {
 
       const cacheClient = new MyCacheClient();
       const key = cacheClient['buildCacheKey']('functionName', [null, undefined, 'argument']);
-      expect(key).to.equal('functionName-argument');
+      expect(key).to.equal('functionName-null-undefined-argument');
 
     });
 
@@ -215,6 +215,92 @@ describe('CacheClient', () => {
 
     });
 
-  });
+    it('will convert plain object values', async () => {
+      const cacheClient = new MyCacheClient();
+      const expectedKey = 'functionName-argument-property1-prop1-property2-prop2-property3-nestedProp1-nestedProp1-nestedProp2-nestedProp2';
 
+      const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { property1: 'prop1', property2: 'prop2', property3: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
+        new Date(),
+      ]);
+      expect(keyWithSortedObjectProperties).to.equal(expectedKey);
+    })
+
+    it('will convert array values', async () => {
+      const cacheClient = new MyCacheClient();
+      const expectedKey = 'functionName-prop1-propValue1-prop2-propValue2-value1-value2';
+
+      const keyWithArrayValues = cacheClient['buildCacheKey']('functionName', [
+       [
+         { prop1: 'propValue1', prop2: 'propValue2' },
+         'value1',
+         'value2',
+       ],
+      ]);
+      expect(keyWithArrayValues).to.equal(expectedKey);
+    })
+
+    it('will convert array values and the result should be the same key if two array own the same properties but not in the same order', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const keyWithSortedArrayValues= cacheClient['buildCacheKey']('functionName', [
+        [
+          { prop1: 'propValue1', prop2: 'propValue2' },
+          'value1',
+          'value2',
+        ],
+      ]);
+
+      const keyWithUnsortedArrayValues= cacheClient['buildCacheKey']('functionName', [
+        [
+          'value1',
+          'value2',
+          { prop1: 'propValue1', prop2: 'propValue2' },
+        ],
+      ]);
+      expect(keyWithSortedArrayValues).to.equal(keyWithUnsortedArrayValues);
+    })
+
+    it('will convert plain object values and the result should be the same key if two objects have the same properties but not in the same order', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const keyWithSortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' }, property2: 'prop2' },
+        ['value1', 'value2'],
+      ]);
+
+      const keyWithUnsortedObjectProperties = cacheClient['buildCacheKey']('functionName', [
+        'argument',
+        { property2: 'prop2', property1: { nestedProp1: 'nestedProp1', nestedProp2: 'nestedProp2' } },
+        ['value2', 'value1'],
+      ]);
+      expect(keyWithUnsortedObjectProperties).to.equal(keyWithSortedObjectProperties);
+    })
+
+    it('should throw if key is bigger than 1000', async () => {
+      const cacheClient = new MyCacheClient();
+
+      const bigArray: string[] = [];
+      while (bigArray.length < 1000) {
+        bigArray.push('myValue');
+      }
+
+      expect(() => cacheClient['buildCacheKey']('functionName', [bigArray])).to.throw();
+    })
+
+    it('should detect circular reference in an object', async () => {
+      const cacheClient = new MyCacheClient();
+      const obj2: any = {};
+      const obj: any = {
+        property1: 'hello',
+        property2: obj2,
+      };
+
+      obj2.property1 = obj;
+
+      expect(() => cacheClient['buildCacheKey']('functionName', [obj2])).to.throw();
+    })
+  });
 });

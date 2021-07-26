@@ -4,14 +4,46 @@ export abstract class CacheClient {
 
   protected cacheInstance: CacheInstance;
   protected buildCacheKey(propertyKey: string, args: any[]): string {
-    const keyParts = args
-      .filter(x => x !== undefined && x !== null)
-      .filter(x => typeof x === 'string' || typeof x === 'number' || typeof x === 'boolean')
-      .map(x => x.toString());
-    return [
+
+    const buildKeyArgs = (args: any[]) => args
+      .filter(x =>
+        typeof x !== 'object' ||
+        // If the arg is an object, we check that it's not a instance of a class
+        (typeof x === 'object' && (x?.constructor.name === 'Object' || x?.constructor.name === 'Array')) ||
+        // typeof null === object, then we need to have another condition to accept null as well
+        x === null
+      ).map(x => {
+        if (typeof x === 'object' && !Array.isArray(x) && x) {
+          // Check if we have a circular reference in the plain object
+          JSON.stringify(x);
+
+          return Object.entries(x).sort().map(([key, value]) => {
+            if (typeof value === 'object') {
+              const nestedObjectKeys = buildKeyArgs([value])
+              return `${key}-${nestedObjectKeys}`
+            }
+            return `${key}-${value}`
+          }).join('-');
+        }
+
+        if (Array.isArray(x)) {
+          const builtKey = buildKeyArgs(x.sort());
+          return builtKey.join('-');
+        }
+        return new String(x).valueOf();
+      });
+
+    const builtKey = [
       propertyKey,
-      ...keyParts,
+      ...buildKeyArgs(args),
     ].join('-');
+
+    const maxKeyLength = process.env.UNITO_CACHE_MAX_KEY_LENGTH || 1000;
+    if (builtKey.length > maxKeyLength) {
+      throw new Error(`Built key is bigger than ${maxKeyLength} chars`);
+    }
+
+    return builtKey;
   }
 
   /**
