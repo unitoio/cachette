@@ -16,7 +16,7 @@ export class LocalCache extends CacheInstance {
 
   // See https://github.com/isaacs/node-lru-cache#options
   // for options.
-  private cache = new LRU({
+  private cache: LRU<string, any> = new LRU({
     max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS as string, 10) || LocalCache.DEFAULT_MAX_ITEMS,
     maxAge: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
     stale: false,
@@ -140,7 +140,7 @@ export class LocalCache extends CacheInstance {
     let found = false;
     this.cache.prune();
     this.cache.forEach((value, key) => {
-      if (typeof key === 'string' && key.startsWith(startsWithPattern)) {
+      if (key.startsWith(startsWithPattern)) {
         found = true;
       }
     });
