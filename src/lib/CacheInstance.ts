@@ -97,6 +97,21 @@ export abstract class CacheInstance extends EventEmitter {
     throw new Error('unsupported');
   }
 
+  /**
+   * Determine whether *at least one non-expired lock* starts with the given pattern.
+   * Helpful when working with groups of related locks, all having a separate TTL.
+   */
+  public hasLock(prefix: string): Promise<boolean> {
+    throw new Error('unsupported');
+  }
+
+  /**
+   * Terminate / exit / quit the instance
+   */
+  public quit(): Promise<void> {
+    return new Promise((resolve) => { resolve() });
+  }
+
 
   /**
    * Keep track of active fetches to prevent

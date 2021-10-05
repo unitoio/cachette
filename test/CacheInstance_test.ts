@@ -6,6 +6,9 @@ import { RedisCache } from '../src/lib/RedisCache';
 import { WriteThroughCache } from '../src/lib/WriteThroughCache';
 import { CacheInstance, FetchingFunction } from '../src/lib/CacheInstance';
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // set env var TEST_REDIS_URL (e.g. redis://localhost:6379) to enable running
 // the tests with Redis
@@ -348,6 +351,90 @@ function runTests(name: string, cache: CacheInstance): void {
       }
 
       expect(numExceptions).to.eql(10);
+    });
+
+    ifLockIt('creates locks that expire', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      await cache.lock(`${prefix}_sublock1`, 50);
+      const locksExist = await cache.hasLock(prefix);
+      expect(locksExist).to.be.true;
+
+      await sleep(51);
+      const locksExistAfterSleeping = await cache.hasLock(prefix);
+      expect(locksExistAfterSleeping).to.be.false;
+    });
+
+    ifLockIt('waits for expiry of existing locks', async () => {
+      const key = `prefix_${Math.random()}`;
+      const timeBeforeFirstLock = Date.now();
+      const firstLockTTL = 50;
+      await cache.lock(key, firstLockTTL);
+      const locksExist = await cache.hasLock(key);
+      expect(locksExist).to.be.true;
+
+      await cache.lock(key, 1000);
+      const timeAfterFirstLock = Date.now();
+      const locksStillExist = await cache.hasLock(key);
+      expect(locksStillExist).to.be.true;
+
+      expect(timeAfterFirstLock - timeBeforeFirstLock).to.be.greaterThanOrEqual(firstLockTTL);
+    });
+
+    ifLockIt('finds no lock if pattern does not match', async () => {
+      await cache.lock(`lock__${Math.random()}`, 10000);
+      await cache.lock(`otherlock__${Math.random()}`, 10000);
+
+      const locksExist = await cache.hasLock('whatever');
+      expect(locksExist).to.be.false;
+    });
+
+    ifLockIt('finds locks if a lock matches pattern', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      await cache.lock(`${prefix}_sublock1`, 10000);
+
+      const locksExist = await cache.hasLock(prefix);
+      expect(locksExist).to.be.true;
+    });
+
+    ifLockIt('finds locks if a lock matches pattern, with already a star at the end', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      await cache.lock(`${prefix}_sublock1`, 10000);
+
+      const locksExist = await cache.hasLock(`${prefix}*`);
+      expect(locksExist).to.be.true;
+    });
+
+    ifLockIt('finds no lock if a lock matched pattern, but was unlocked', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      const lock = await cache.lock(`${prefix}_sublock1`, 10000);
+      await cache.unlock(lock);
+
+      const locksExist = await cache.hasLock(prefix);
+      expect(locksExist).to.be.false;
+    });
+
+    ifLockIt('finds locks if several locks match pattern', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      await cache.lock(`${prefix}_sublock1`, 10000);
+      await cache.lock(`${prefix}_sublock2`, 10000);
+
+      const locksExist = await cache.hasLock(prefix);
+      expect(locksExist).to.be.true;
+    });
+
+    ifLockIt('returns no locks only when all the matching locks are cleared', async () => {
+      const prefix = `prefix_${Math.random()}`;
+      const lock1 = await cache.lock(`${prefix}_sublock1`, 10000);
+      expect(await cache.hasLock(prefix)).to.be.true;
+
+      const lock2 = await cache.lock(`${prefix}_sublock2`, 10000);
+      expect(await cache.hasLock(prefix)).to.be.true;
+
+      await cache.unlock(lock1);
+      expect(await cache.hasLock(prefix)).to.be.true;
+
+      await cache.unlock(lock2);
+      expect(await cache.hasLock(prefix)).to.be.false;
     });
 
     ifLockIt('locks before fetching if value not in cache', async () => {
