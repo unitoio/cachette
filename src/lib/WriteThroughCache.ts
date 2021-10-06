@@ -103,17 +103,14 @@ export class WriteThroughCache extends CacheInstance {
     await this.redisCacheForWriting.clearMemory();
   }
 
+  /**
+   * @inheritdoc
+   * Locking is *not* supported by the Write-Through cache. You want either:
+   * - The full-fledged RedisCache for prod workloads
+   * - A dumb LocalCache for dev/local workloads
+   */
   public isLockingSupported(): boolean {
-    return true;
-  }
-
-  public lock(resource: string, ttlMs: number): Promise<any> {
-    return this.redisCacheForWriting.lock(resource, ttlMs);
-  }
-
-
-  public unlock(lock: any): Promise<void> {
-    return this.redisCacheForWriting.unlock(lock);
+    return false;
   }
 
 }

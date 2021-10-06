@@ -23,11 +23,11 @@ export class RedisCache extends CacheInstance {
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
 
-  public static RETRY_DELAY = 5000;
-  public static MAX_REDLOCK_RETRY_COUNT = 20;
-  public static DEFAULT_REDIS_CLOCK_DRIFT_MS = 0.01;
-  public static DEFAULT_REDLOCK_DELAY_MS = 200;
-  public static DEFAULT_REDLOCK_JITTER_MS = 200;
+  public static REDIS_CONNECTION_TIMEOUT_MS = parseInt(process.env.REDIS_CONNECTION_TIMEOUT_MS as string, 10) || 5000;
+  public static REDLOCK_RETRY_COUNT = parseInt(process.env.REDLOCK_RETRY_COUNT as string, 10) || 20; // lib. default: 10
+  public static REDLOCK_RETRY_DELAY_MS = parseInt(process.env.REDLOCK_RETRY_DELAY_MS as string, 10) || 200; // lib. default: 200
+  public static REDLOCK_CLOCK_DRIFT_FACTOR = parseInt(process.env.REDLOCK_CLOCK_DRIFT_FACTOR as string, 10) || 0.01; // lib. default: 0.01
+  public static REDLOCK_JITTER_MS = parseInt(process.env.REDLOCK_JITTER_MS as string, 10) || 200; // lib. default: 200
 
   private redisClient: Redis.Redis;
   private ready = false;
@@ -44,7 +44,7 @@ export class RedisCache extends CacheInstance {
     this.url = redisUrl;
     this.redisClient = new Redis(redisUrl, {
       readOnly,
-      retryStrategy: () => RedisCache.RETRY_DELAY,
+      retryStrategy: () => RedisCache.REDIS_CONNECTION_TIMEOUT_MS,
       // master failover
       reconnectOnError: (err: any) => !readOnly && err.message.startsWith('READONLY'),
       // This will prevent the get/setValue calls from hanging
@@ -52,10 +52,10 @@ export class RedisCache extends CacheInstance {
       enableOfflineQueue: false,
     });
     this.redlock = new Redlock([this.redisClient], {
-      driftFactor: RedisCache.DEFAULT_REDIS_CLOCK_DRIFT_MS,
-      retryCount: RedisCache.MAX_REDLOCK_RETRY_COUNT,
-      retryDelay: RedisCache.DEFAULT_REDLOCK_DELAY_MS,
-      retryJitter: RedisCache.DEFAULT_REDLOCK_JITTER_MS,
+      driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
+      retryCount: RedisCache.REDLOCK_RETRY_COUNT,
+      retryDelay: RedisCache.REDLOCK_RETRY_DELAY_MS,
+      retryJitter: RedisCache.REDLOCK_JITTER_MS,
     });
 
     this.redisClient.on('ready', this.startConnectionStrategy.bind(this));
@@ -320,4 +320,45 @@ export class RedisCache extends CacheInstance {
   public async unlock(lock: Redlock.Lock): Promise<void> {
     return this.redlock.unlock(lock);
   }
+
+  /**
+   * @inheritdoc
+   *
+   * Implementation note & usage ***warning***: looking at Redis docs and the www,
+   *   there's no "index-backed" Redis function to do this in O(1).
+   *
+   * So, doing it with a Redis SCAN, https://redis.io/commands/scan . In many use cases it's okay,
+   * 1. Because Redis SCAN is fast (10M keys / 40ms on a laptop)
+   * 2. If your use case writes a reasonable number of locks, and sets reasonably-small TTLs,
+   *    guaranteeing Redis contains a reasonable-to-scan volume of items (depending on your hardware).
+   *
+   * Recommendation: This implies **workloads relying on this function should
+   * own their own Redis db**, to not scan through tons of unrelated keys.
+   *
+   * Implementation note: you might try to use instead a redis Hashmap / Set / Sorted set to group
+   * "sublocks", to be able use H/S/Z Redis functions to query efficiently inside a group of locks.
+   * That won't work in use cases where you need one TTL per lock, because it'd limit to one TTL
+   * (associated to a Redis *value*!) per prefix. Thus, values with TTLs, thus, SCAN.
+   */
+  public async hasLock(prefix: string): Promise<boolean> {
+    const redisPrefix = prefix.endsWith('*') ? prefix : `${prefix}*`;
+    let cursor = '';
+    while (cursor !== '0') { // indicates Redis completed the scan
+      // Redis detail: we set the `count` option to a number (1000) greater than
+      // the default (10), to minimize the amount of network round-trips caused
+      // by incomplete scans needing more scanning from the returned cursor.
+      const [nextCursor, matchingKeys] = await this.redisClient.scan(cursor || '0', 'match', redisPrefix, 'count', 1000);
+      if (matchingKeys.length > 0) {
+        return true;
+      }
+      cursor = nextCursor;
+    }
+
+    return false;
+  }
+
+  public async quit(): Promise<void> {
+    await this.redisClient.quit();
+  }
+
 }
