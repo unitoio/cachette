@@ -134,12 +134,20 @@ export class LocalCache extends CacheInstance {
 
   /**
    * @inheritdoc
+   *
+   * Note that this specific implementation in `LocalCache` is not very efficient.
+   * Use RedisCache for a performant implementation.
    */
   public async hasLock(prefix: string): Promise<boolean> {
     const startsWithPattern = prefix.replace(/\*$/, '');
     let found = false;
     this.cache.prune();
     this.cache.forEach((value, key) => {
+      // Doing a full CPU-inefficient traversal because `lru-cache.LRU` doesn't
+      // provide a `some` function or a way to exit this `forEach`. An alternative
+      // would be to work on `keys()`, which then would be RAM-inefficient.
+      // Neither is a big deal, this cache is meant to be used for small local/dev
+      // If this needs fixing, TODO move away from LRU.lru-cache.
       if (key.startsWith(startsWithPattern)) {
         found = true;
       }
