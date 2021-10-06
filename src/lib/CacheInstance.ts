@@ -99,7 +99,6 @@ export abstract class CacheInstance extends EventEmitter {
 
   /**
    * Determine whether *at least one non-expired lock* starts with the given pattern.
-   * Helpful when working with groups of related locks, all having a separate TTL.
    */
   public hasLock(prefix: string): Promise<boolean> {
     throw new Error('unsupported');

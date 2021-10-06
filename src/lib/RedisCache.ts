@@ -332,11 +332,11 @@ export class RedisCache extends CacheInstance {
    * 2. If your use case writes a reasonable number of locks, and sets reasonably-small TTLs,
    *    guaranteeing Redis contains a reasonable-to-scan volume of items (depending on your hardware).
    *
-   * Note 1: This implies **workloads relying on this function should own their own Redis db**,
-   * to not scan through tons of unrelated keys.
+   * Recommendation: This implies **workloads relying on this function should
+   * own their own Redis db**, to not scan through tons of unrelated keys.
    *
-   * Note 2: you might try to use instead a redis Hashmap / Set / Sorted set to group "sublocks",
-   * in order to be able use H/S/Z Redis functions to query efficiently inside a group of locks.
+   * Implementation note: you might try to use instead a redis Hashmap / Set / Sorted set to group
+   * "sublocks", to be able use H/S/Z Redis functions to query efficiently inside a group of locks.
    * That won't work in use cases where you need one TTL per lock, because it'd limit to one TTL
    * (associated to a Redis *value*!) per prefix. Thus, values with TTLs, thus, SCAN.
    */
@@ -344,9 +344,9 @@ export class RedisCache extends CacheInstance {
     const redisPrefix = prefix.endsWith('*') ? prefix : `${prefix}*`;
     let cursor = '';
     while (cursor !== '0') { // indicates Redis completed the scan
-      // Redis detail: we set the `count` option to a higher number than the default (10),
-      // to minimize the amount of network round-trips caused by incomplete scans needing
-      // more scanning from the returned cursor.
+      // Redis detail: we set the `count` option to a number (1000) greater than
+      // the default (10), to minimize the amount of network round-trips caused
+      // by incomplete scans needing more scanning from the returned cursor.
       const [nextCursor, matchingKeys] = await this.redisClient.scan(cursor || '0', 'match', redisPrefix, 'count', 1000);
       if (matchingKeys.length > 0) {
         return true;
