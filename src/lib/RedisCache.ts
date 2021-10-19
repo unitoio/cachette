@@ -61,6 +61,9 @@ export class RedisCache extends CacheInstance {
     this.redisClient.on('ready', this.startConnectionStrategy.bind(this));
     this.redisClient.on('end', this.endConnectionStrategy.bind(this));
     this.redisClient.on('error', this.errorStrategy.bind(this));
+
+    // TODO when migrating to Redlock v5: rename 'clientError' to 'error'
+    this.redlock.on('clientError', this.redlockErrorStrategy.bind(this));
   }
 
   /**
@@ -87,6 +90,10 @@ export class RedisCache extends CacheInstance {
    */
   public errorStrategy(): void {
     this.emit('warn', 'Error while connected to the Redis cache!');
+  }
+
+  public redlockErrorStrategy(err: any): void {
+    this.emit('warn', 'Redlock error:', err);
   }
 
   /**
