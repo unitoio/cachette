@@ -18,7 +18,7 @@ export class LocalCache extends CacheInstance {
   // for options.
   private cache: LRU<string, any> = new LRU({
     max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS as string, 10) || LocalCache.DEFAULT_MAX_ITEMS,
-    maxAge: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
+    ttl: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
     stale: false,
   });
 
@@ -33,7 +33,7 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public async itemCount(): Promise<number> {
-    return this.cache.itemCount;
+    return this.cache.size;
   }
 
   /**
@@ -51,7 +51,7 @@ export class LocalCache extends CacheInstance {
     if (ttl === 0) {
       this.cache.set(key, value);
     } else {
-      this.cache.set(key, value, ttl * 1000);
+      this.cache.set(key, value, { ttl: ttl * 1000 });
     }
     return true;
   }
@@ -76,21 +76,21 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public async delValue(key: string): Promise<void> {
-    this.cache.del(key);
+    this.cache.delete(key);
   }
 
   /**
    * @inheritdoc
    */
   public async clear(): Promise<void> {
-    this.cache.reset();
+    this.cache.clear();
   }
 
   /**
    * @inheritdoc
    */
   public async clearMemory(): Promise<void> {
-    this.cache.reset();
+    this.cache.clear();
   }
 
   /**
@@ -111,7 +111,7 @@ export class LocalCache extends CacheInstance {
       if (Date.now() - startTimestamp > LocalCache.LOCK_ACQUIRE_TIMEOUT) {
         throw new Error(`Abandoning locking ${resource} , as timed out while waiting for other lock to be released.`)
       }
-      this.cache.prune()
+      this.cache.purgeStale()
       if (!this.cache.has(resource)) {
         isLocked = false;
       } else {
@@ -120,7 +120,7 @@ export class LocalCache extends CacheInstance {
         await sleep(10);
       }
     }
-    this.cache.set(resource, 1, ttlMs);
+    this.cache.set(resource, 1, { ttl: ttlMs });
     return new Promise(resolve => { resolve(resource) });
   }
 
@@ -128,7 +128,7 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public async unlock(lock: any): Promise<void> {
-    this.cache.del(lock);
+    this.cache.delete(lock);
     return new Promise(resolve => { resolve() });
   }
 
@@ -141,7 +141,7 @@ export class LocalCache extends CacheInstance {
   public async hasLock(prefix: string): Promise<boolean> {
     const startsWithPattern = prefix.replace(/\*$/, '');
     let found = false;
-    this.cache.prune();
+    this.cache.purgeStale();
     this.cache.forEach((value, key) => {
       // Doing a full CPU-inefficient traversal because `lru-cache.LRU` doesn't
       // provide a `some` function or a way to exit this `forEach`. An alternative
