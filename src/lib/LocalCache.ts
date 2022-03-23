@@ -33,7 +33,7 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    */
   public async itemCount(): Promise<number> {
-    return this.cache.itemCount;
+    return this.cache.size;
   }
 
   /**
@@ -51,7 +51,7 @@ export class LocalCache extends CacheInstance {
     if (ttl === 0) {
       this.cache.set(key, value);
     } else {
-      this.cache.set(key, value, ttl * 1000);
+      this.cache.set(key, value, { ttl: ttl * 1000 });
     }
     return true;
   }
@@ -120,7 +120,7 @@ export class LocalCache extends CacheInstance {
         await sleep(10);
       }
     }
-    this.cache.set(resource, 1, ttlMs);
+    this.cache.set(resource, 1, { ttl: ttlMs });
     return new Promise(resolve => { resolve(resource) });
   }
 
