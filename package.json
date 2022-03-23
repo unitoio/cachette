@@ -68,7 +68,7 @@
     "chai": "4.x",
     "eslint": "7.x",
     "mocha": "9.x",
-    "npm-audit-resolver": "2.x",
+    "npm-audit-resolver": "^3.0.0-7",
     "nyc": "15.x",
     "pre-commit": "1.x",
     "sinon": "9.x",
