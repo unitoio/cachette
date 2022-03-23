@@ -7,7 +7,5 @@ module.exports = {
   recursive: true,
   exit: true,
   timeout: 60000,
-  reporter: 'xunit',
   'no-colors': true,
-  'reporter-options': 'output=ci_output/testresults/result.xml',
 };
