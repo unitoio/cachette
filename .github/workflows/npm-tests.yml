@@ -5,7 +5,9 @@ env:
   TEST_REDIS_URL: redis://localhost:6379
 on:
   pull_request:
-    types: [opened, updated, synchronize, ready_for_review, review_requested]
+    # adding 'ready_for_review' to the default [opened, synchronize, reopened] since we don't run on pr.draft == false
+    # see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - master
     paths:
