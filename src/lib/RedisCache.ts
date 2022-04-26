@@ -33,6 +33,7 @@ export class RedisCache extends CacheInstance {
   private ready = false;
   private url: string;
   private redlock: Redlock;
+  private redlockWithoutRetry: Redlock;
 
   constructor(redisUrl: string, readOnly = false) {
     super();
@@ -57,6 +58,12 @@ export class RedisCache extends CacheInstance {
       retryDelay: RedisCache.REDLOCK_RETRY_DELAY_MS,
       retryJitter: RedisCache.REDLOCK_JITTER_MS,
     });
+    this.redlockWithoutRetry = new Redlock([this.redisClient], {
+      driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
+      retryCount: 0,
+      retryDelay: 0,
+      retryJitter: 0,
+    });
 
     this.redisClient.on('ready', this.startConnectionStrategy.bind(this));
     this.redisClient.on('end', this.endConnectionStrategy.bind(this));
@@ -64,6 +71,7 @@ export class RedisCache extends CacheInstance {
 
     // TODO when migrating to Redlock v5: rename 'clientError' to 'error'
     this.redlock.on('clientError', this.redlockErrorStrategy.bind(this));
+    this.redlockWithoutRetry.on('clientError', this.redlockErrorStrategy.bind(this));
   }
 
   /**
@@ -317,8 +325,9 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async lock(resource: string, ttlMs: number): Promise<Redlock.Lock> {
-    return this.redlock.lock(resource, ttlMs);
+  public async lock(resource: string, ttlMs: number, retry = true): Promise<Redlock.Lock> {
+    const redlock = retry === false ? this.redlockWithoutRetry : this.redlock;
+    return redlock.lock(resource, ttlMs);
   }
 
   /**
