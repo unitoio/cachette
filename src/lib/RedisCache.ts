@@ -32,6 +32,11 @@ export class RedisCache extends CacheInstance {
   private redisClient: Redis.Redis;
   private ready = false;
   private url: string;
+  // We manage several redlock instances because some options (like retryCount)
+  // are set at redlock init. By having these options in our constructor too
+  // (and only having one redlock with fixed behavior), we would be unable to
+  // support mixing calls requiring one behavior, then another.
+  // And so, we have as many redlocks as we need to honor these runtime needs.
   private redlock: Redlock;
   private redlockWithoutRetry: Redlock;
 
