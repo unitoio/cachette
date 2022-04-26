@@ -81,10 +81,11 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @param resource    The name of the resource to lock
    * @param ttlMs       The time to live of the lock in ms
+   * @param retry       Whether or not to retry attempts to lock
    *
    * @returns           The lock, an opaque object that must be passed to unlock()
    */
-  public lock(resource: string, ttlMs: number): Promise<any> {
+  public lock(resource: string, ttlMs: number, retry?: boolean): Promise<any> {
     throw new Error('unsupported');
   }
 
