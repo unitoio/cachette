@@ -71,7 +71,7 @@
     "npm-audit-resolver": "^3.0.0-7",
     "nyc": "15.x",
     "pre-commit": "1.x",
-    "sinon": "13.x",
+    "sinon": "14.x",
     "source-map-support": "0.x",
     "typescript": "4.x"
   },
