@@ -42,8 +42,7 @@ jobs:
 
       - name: NPM install 📦
         run: |
-          npm ci
-          npm install -g npm-audit-resolver
+          npm --ignore-scripts ci
 
       - name: Npm audit 🕵️‍♀️
         run: |

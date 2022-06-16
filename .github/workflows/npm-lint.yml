@@ -44,7 +44,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.APPLICATION_NAME }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
       - name: NPM install 📦
         run: |
-          npm ci
+          npm --ignore-scripts ci
 
       - name: Npm lint 💅
         run: |
