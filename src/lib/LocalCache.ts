@@ -69,7 +69,7 @@ export class LocalCache extends CacheInstance {
    * @inheritdoc
    * Return the number of ms left in the item's TTL.
    * If item is not in cache, returns 0.
-   * Returns Infinity if item is in cache without a defined TTL.
+   * Returns a very large number (e.g. 1799999.9158420563) if item is in cache without a defined TTL.
    * Docs: https://github.com/isaacs/node-lru-cache#getremainingttlkey
    */
   public async getTtl(key: string): Promise<number | undefined> {
@@ -79,7 +79,7 @@ export class LocalCache extends CacheInstance {
       return undefined;
     }
     /** If entry does not expire, return 0 */
-    if (!Number.isInteger(remainingTtl)) {
+    if (remainingTtl > 1799999) {
       return 0;
     }
 

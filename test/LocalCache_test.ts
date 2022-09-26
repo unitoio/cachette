@@ -81,7 +81,7 @@ describe('LocalCache', () => {
 
     expect(wasSet).to.be.true;
     expect(cacheTtl).to.exist;
-    expect(cacheTtl).to.below(10 * 60 * 1000);
+    expect(cacheTtl).to.be.within(9 * 60 * 1000, 10 * 60 * 1000);
   });
 
   it('returns undefined when we call getTtl if the item does not exist in the cache', async () => {
