@@ -28,7 +28,6 @@ describe('LocalCache', () => {
   });
 
   it('can set values with expiry', async () => {
-
     const cache = new LocalCache();
     await cache.setValue('key', 'value', .2);
     let value = await cache.getValue('key');
@@ -40,7 +39,6 @@ describe('LocalCache', () => {
   });
 
   it('can delete a value', async () => {
-
     const cache = new LocalCache();
     await cache.setValue('key', 'value');
 
@@ -74,6 +72,32 @@ describe('LocalCache', () => {
     // restore
     LocalCache['DEFAULT_MAX_ITEMS'] = origMax;
 
+  })
+
+  it('can get the remaining TTL of an item', async () => {
+    const cache = new LocalCache();
+    const wasSet = await cache.setValue('key', 'value', 10 * 60);
+    const cacheTtl = await cache.getTtl('key'); // returns ttl in ms
+
+    expect(wasSet).to.be.true;
+    expect(cacheTtl).to.exist;
+    expect(cacheTtl).to.below(10 * 60 * 1000);
+  });
+
+  it('returns undefined when we call getTtl if the item does not exist in the cache', async () => {
+    const cache = new LocalCache();
+    const cacheTtl = await cache.getTtl('key');
+
+    expect(cacheTtl).to.be.undefined;
+  });
+
+  it('returns 0 when we call getTtl if the item does not expire', async () => {
+    const cache = new LocalCache();
+    const wasSet = await cache.setValue('key', 'value');
+    const cacheTtl = await cache.getTtl('key');
+    
+    expect(wasSet).to.be.true;
+    expect(cacheTtl).to.equal(0);
   });
 
 });
