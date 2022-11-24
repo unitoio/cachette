@@ -1,8 +1,6 @@
 import { expect } from 'chai';
-import * as Bluebird from 'bluebird';
 
 import { LocalCache } from '../src/lib/LocalCache';
-
 
 describe('LocalCache', () => {
 
@@ -32,7 +30,7 @@ describe('LocalCache', () => {
     await cache.setValue('key', 'value', .2);
     let value = await cache.getValue('key');
     expect(value).to.equal('value');
-    await Bluebird.delay(250);
+    await sleep(250);
     value = await cache.getValue('key');
     expect(value).to.equal(undefined);
 
@@ -95,9 +93,13 @@ describe('LocalCache', () => {
     const cache = new LocalCache();
     const wasSet = await cache.setValue('key', 'value');
     const cacheTtl = await cache.getTtl('key');
-    
+
     expect(wasSet).to.be.true;
     expect(cacheTtl).to.equal(0);
   });
 
 });
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

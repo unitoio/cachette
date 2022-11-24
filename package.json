@@ -55,7 +55,6 @@
     "test"
   ],
   "devDependencies": {
-    "@types/bluebird": "3.x",
     "@types/chai": "4.x",
     "@types/ioredis": "4.x",
     "@types/lru-cache": "7.x",
@@ -64,7 +63,6 @@
     "@types/sinon": "10.x",
     "@typescript-eslint/eslint-plugin": "5.x",
     "@typescript-eslint/parser": "5.x",
-    "bluebird": "3.x",
     "chai": "4.x",
     "eslint": "8.x",
     "mocha": "10.x",
