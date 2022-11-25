@@ -58,15 +58,13 @@ export class RedisCache extends CacheInstance {
       enableOfflineQueue: false,
     });
     this.redisClient.scan
-    // Hack until Redlock 5.x is out of beta
-    const redlockCompatibleClient = this.redisClient as unknown as Redlock.CompatibleRedisClient;
-    this.redlock = new Redlock([redlockCompatibleClient], {
+    this.redlock = new Redlock([this.redisClient as unknown as Redlock.CompatibleRedisClient], { // Hack until Redlock 5.x is out of beta
       driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
       retryCount: RedisCache.REDLOCK_RETRY_COUNT,
       retryDelay: RedisCache.REDLOCK_RETRY_DELAY_MS,
       retryJitter: RedisCache.REDLOCK_JITTER_MS,
     });
-    this.redlockWithoutRetry = new Redlock([redlockCompatibleClient], {
+    this.redlockWithoutRetry = new Redlock([this.redisClient as unknown as Redlock.CompatibleRedisClient], { // Hack until Redlock 5.x is out of beta
       driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
       retryCount: 0,
       retryDelay: 0,
