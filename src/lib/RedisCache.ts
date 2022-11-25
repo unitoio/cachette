@@ -1,5 +1,6 @@
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 import * as Redlock from 'redlock';
+import { Lock } from 'redlock';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
@@ -29,7 +30,7 @@ export class RedisCache extends CacheInstance {
   public static REDLOCK_CLOCK_DRIFT_FACTOR = parseInt(process.env.REDLOCK_CLOCK_DRIFT_FACTOR as string, 10) || 0.01; // lib. default: 0.01
   public static REDLOCK_JITTER_MS = parseInt(process.env.REDLOCK_JITTER_MS as string, 10) || 200; // lib. default: 200
 
-  private redisClient: Redis.Redis;
+  private redisClient: Redis;
   private ready = false;
   private url: string;
   // We manage several redlock instances because some options (like retryCount)
@@ -247,7 +248,7 @@ export class RedisCache extends CacheInstance {
 
     let result;
     if (ttl !== 0) {
-      result = await this.redisClient.set(key, value, 'ex', ttl);
+      result = await this.redisClient.set(key, value, 'EX', ttl);
     } else {
       result = await this.redisClient.set(key, value);
     }
@@ -330,7 +331,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async lock(resource: string, ttlMs: number, retry = true): Promise<Redlock.Lock> {
+  public async lock(resource: string, ttlMs: number, retry = true): Promise<Lock> {
     const redlock = retry === false ? this.redlockWithoutRetry : this.redlock;
     return redlock.lock(resource, ttlMs);
   }
@@ -338,7 +339,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async unlock(lock: Redlock.Lock): Promise<void> {
+  public async unlock(lock: Lock): Promise<void> {
     return this.redlock.unlock(lock);
   }
 
@@ -368,7 +369,7 @@ export class RedisCache extends CacheInstance {
       // Redis detail: we set the `count` option to a number (1000) greater than
       // the default (10), to minimize the amount of network round-trips caused
       // by incomplete scans needing more scanning from the returned cursor.
-      const [nextCursor, matchingKeys] = await this.redisClient.scan(cursor || '0', 'match', redisPrefix, 'count', 1000);
+      const [nextCursor, matchingKeys] = await this.redisClient.scan(cursor || '0', 'MATCH', redisPrefix, 'COUNT', 1000);
       if (matchingKeys.length > 0) {
         return true;
       }
