@@ -60,6 +60,7 @@
     "@types/lru-cache": "7.x",
     "@types/mocha": "10.x",
     "@types/node": "16.x",
+    "@types/redlock": "4.x",
     "@types/sinon": "10.x",
     "@typescript-eslint/eslint-plugin": "5.x",
     "@typescript-eslint/parser": "5.x",

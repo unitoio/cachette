@@ -1,6 +1,5 @@
 import Redis from 'ioredis';
 import * as Redlock from 'redlock';
-import { Lock } from 'redlock';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
@@ -58,13 +57,14 @@ export class RedisCache extends CacheInstance {
       // if there is no active connection.
       enableOfflineQueue: false,
     });
-    this.redlock = new Redlock([this.redisClient], {
+    this.redisClient.scan
+    this.redlock = new Redlock([this.redisClient as unknown as Redlock.CompatibleRedisClient], {
       driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
       retryCount: RedisCache.REDLOCK_RETRY_COUNT,
       retryDelay: RedisCache.REDLOCK_RETRY_DELAY_MS,
       retryJitter: RedisCache.REDLOCK_JITTER_MS,
     });
-    this.redlockWithoutRetry = new Redlock([this.redisClient], {
+    this.redlockWithoutRetry = new Redlock([this.redisClient as unknown as Redlock.CompatibleRedisClient], {
       driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
       retryCount: 0,
       retryDelay: 0,
@@ -331,7 +331,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async lock(resource: string, ttlMs: number, retry = true): Promise<Lock> {
+  public async lock(resource: string, ttlMs: number, retry = true): Promise<Redlock.Lock> {
     const redlock = retry === false ? this.redlockWithoutRetry : this.redlock;
     return redlock.lock(resource, ttlMs);
   }
@@ -339,7 +339,7 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
-  public async unlock(lock: Lock): Promise<void> {
+  public async unlock(lock: Redlock.Lock): Promise<void> {
     return this.redlock.unlock(lock);
   }
 
