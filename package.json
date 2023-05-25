@@ -2,8 +2,8 @@
   "name": "cachette",
   "version": "1.1.28",
   "engines": {
-    "node": ">=16",
-    "npm": ">=8.5.0"
+    "node": ">=18",
+    "npm": ">=9.5.0"
   },
   "description": "Resilient cache library supporting concurrent requests through local cache or Redis.",
   "main": "dist/src/index.js",
@@ -59,7 +59,7 @@
     "@types/ioredis": "5.x",
     "@types/lru-cache": "7.x",
     "@types/mocha": "10.x",
-    "@types/node": "16.x",
+    "@types/node": "18.x",
     "@types/redlock": "4.x",
     "@types/sinon": "10.x",
     "@typescript-eslint/eslint-plugin": "5.x",
@@ -72,7 +72,7 @@
     "pre-commit": "1.x",
     "sinon": "15.x",
     "source-map-support": "0.x",
-    "typescript": "4.x"
+    "typescript": "5.x"
   },
   "dependencies": {
     "ioredis": "5.x",
