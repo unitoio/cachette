@@ -4,7 +4,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "incremental": true,
-    "lib": ["ES2021"],
+    "lib": ["ES2022"],
     "listFiles": false,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -13,7 +13,7 @@
     "rootDir": ".",
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "ES2021"
+    "target": "ES2022"
   },
   "include": [
     "src/**/*",

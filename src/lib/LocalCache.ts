@@ -1,4 +1,4 @@
-import * as LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
@@ -16,10 +16,9 @@ export class LocalCache extends CacheInstance {
 
   // See https://github.com/isaacs/node-lru-cache#options
   // for options.
-  private cache: LRU<string, any> = new LRU({
+  private cache = new LRUCache<string, any>({
     max: Number.parseInt(process.env.CACHETTE_LC_MAX_ITEMS as string, 10) || LocalCache.DEFAULT_MAX_ITEMS,
     ttl: Number.parseInt(process.env.CACHETTE_LC_MAX_AGE as string, 10) || LocalCache.DEFAULT_MAX_AGE,
-    stale: false,
   });
 
   /**
