@@ -75,7 +75,7 @@
   },
   "dependencies": {
     "ioredis": "5.x",
-    "lru-cache": "9.x",
+    "lru-cache": "10.x",
     "redlock": "4.x"
   }
 }
