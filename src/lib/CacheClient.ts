@@ -8,7 +8,7 @@ export abstract class CacheClient {
     const buildKeyArgs = (args: any[]) => args
       .filter(x =>
         typeof x !== 'object' ||
-        // If the arg is an object, we check that it's not a instance of a class
+        // If the arg is an object, we check that it's not an instance of a class
         (typeof x === 'object' && (x?.constructor.name === 'Object' || x?.constructor.name === 'Array')) ||
         // typeof null === object, then we need to have another condition to accept null as well
         x === null
@@ -95,7 +95,7 @@ export abstract class CacheClient {
     };
   }
 
-  // We *do* want an loosely-typed `Function` here, by nature of the library
+  // We *do* want a loosely-typed `Function` here, by nature of the library
   // eslint-disable-next-line @typescript-eslint/ban-types
   public getUncachedFunction(functionName: string): Function {
     if (this[`${functionName}NoCache`]) {
