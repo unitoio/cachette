@@ -1,7 +1,4 @@
 # cachette
-[![Dependency Status](https://david-dm.org/unitoio/cachette.svg)](https://david-dm.org/unitoio/cachette)
-[![npm version](https://badge.fury.io/js/cachette.svg)](https://badge.fury.io/js/cachette)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Resilient cache library supporting concurrent requests through local cache or Redis.
 
