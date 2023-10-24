@@ -49,11 +49,6 @@
       "**/node_modules/**"
     ]
   },
-  "pre-commit": [
-    "audit-with-ignore",
-    "lint",
-    "test"
-  ],
   "devDependencies": {
     "@types/chai": "4.x",
     "@types/ioredis": "5.x",
@@ -68,8 +63,7 @@
     "mocha": "10.x",
     "npm-audit-resolver": "^3.0.0-7",
     "nyc": "15.x",
-    "pre-commit": "1.x",
-    "sinon": "15.x",
+    "sinon": "17.x",
     "source-map-support": "0.x",
     "typescript": "5.x"
   },
