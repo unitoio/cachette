@@ -218,4 +218,91 @@ describe('RedisCache', () => {
     });
   });
 
+  describe('deserializeComplexDataStructures', () => {
+    it('should correctly deserialize a Map', () => {
+      const serializedData = {
+        [RedisCache.MAP_PREFIX]: [
+          ['key1', 'value1'],
+          ['key2', 'value2']
+        ]
+      };
+      const deserialized = (RedisCache as any).deserializeComplexDataStructures(serializedData);
+      expect(deserialized).to.be.an.instanceOf(Map);
+      expect(Array.from(deserialized.entries())).to.deep.equal([
+        ['key1', 'value1'],
+        ['key2', 'value2']
+      ]);
+    });
+
+    it('should correctly deserialize a Set', () => {
+      const serializedData = {
+        [RedisCache.SET_PREFIX]: ['item1', 'item2', 'item3']
+      };
+      const deserialized = (RedisCache as any).deserializeComplexDataStructures(serializedData);
+      expect(deserialized).to.be.an.instanceOf(Set);
+      expect(Array.from(deserialized)).to.deep.equal(['item1', 'item2', 'item3']);
+    });
+
+    it('should correctly deserialize an object with no complex data structures', () => {
+      const serializedData = {
+        key1: 'value1',
+        key2: 'value2',
+        nested: {
+          key3: 'value3',
+          key4: 'value4'
+        }
+      };
+      const deserialized = (RedisCache as any).deserializeComplexDataStructures(serializedData);
+      expect(deserialized).to.deep.equal(serializedData);
+    });
+
+    it('should return a primitive value as is', () => {
+      const value = 42;
+      const deserialized = (RedisCache as any).deserializeComplexDataStructures(value);
+      expect(deserialized).to.equal(value);
+    });
+  });
+
+  describe('serializeComplexDataStructures', () => {
+    it('should correctly serialize a Map', () => {
+      const map = new Map([
+        ['key1', 'value1'],
+        ['key2', 'value2']
+      ]);
+      const serialized = (RedisCache as any).serializeComplexDataStructures(map);
+      expect(serialized).to.deep.equal({
+        [RedisCache.MAP_PREFIX]: [
+          ['key1', 'value1'],
+          ['key2', 'value2']
+        ]
+      });
+    });
+
+    it('should correctly serialize a Set', () => {
+      const set = new Set(['item1', 'item2', 'item3']);
+      const serialized = (RedisCache as any).serializeComplexDataStructures(set);
+      expect(serialized).to.deep.equal({
+        [RedisCache.SET_PREFIX]: ['item1', 'item2', 'item3']
+      });
+    });
+
+    it('should correctly serialize an object with no complex data structures', () => {
+      const complexObject = {
+        key1: 'value1',
+        key2: 'value2',
+        nested: {
+          key3: 'value3',
+          key4: 'value4'
+        }
+      };
+      const serialized = (RedisCache as any).serializeComplexDataStructures(complexObject);
+      expect(serialized).to.deep.equal(complexObject);
+    });
+
+    it('should return a primitive value as is', () => {
+      const value = 'hello';
+      const serialized = (RedisCache as any).serializeComplexDataStructures(value);
+      expect(serialized).to.equal(value);
+    });
+  });
 });
