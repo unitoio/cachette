@@ -22,8 +22,6 @@ export class RedisCache extends CacheInstance {
   public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
-  public static MAP_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-MAP';
-  public static SET_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-SET';
 
   public static REDIS_CONNECTION_TIMEOUT_MS = parseInt(process.env.REDIS_CONNECTION_TIMEOUT_MS as string, 10) || 5000;
   public static REDLOCK_RETRY_COUNT = parseInt(process.env.REDLOCK_RETRY_COUNT as string, 10) || 20; // lib. default: 10
@@ -164,9 +162,9 @@ export class RedisCache extends CacheInstance {
     if (value instanceof Object) {
       return RedisCache.JSON_PREFIX + JSON.stringify(value,  (key, value) => {
         if (value instanceof Set) {
-          return { __dataType: RedisCache.SET_PREFIX, value: Array.from(value) };
+          return { __dataType: 'Set', value: Array.from(value) };
         } else if (value instanceof Map) {
-          return { __dataType: RedisCache.MAP_PREFIX, value: Array.from(value) };
+          return { __dataType: 'Map', value: Array.from(value) };
         } else {
           return value;
         }
@@ -217,9 +215,9 @@ export class RedisCache extends CacheInstance {
     if (value.startsWith(RedisCache.JSON_PREFIX)) {
       return JSON.parse(value.substring(RedisCache.JSON_PREFIX.length), (key, value) => {
         if (typeof value === 'object' && value !== null) {
-          if (value.__dataType === RedisCache.SET_PREFIX) {
+          if (value.__dataType === 'Set') {
             return new Set(value.value);
-          } else if (value.__dataType === RedisCache.MAP_PREFIX) {
+          } else if (value.__dataType === 'Map') {
             return new Map(value.value);
           } else {
             return value;
