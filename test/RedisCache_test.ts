@@ -57,6 +57,53 @@ describe('RedisCache', () => {
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
+  
+    it('can serialize an object with a nested map', () => {
+      const mapStructure: Map<string, {
+        checksum: number;
+        originCommentId?: string;
+      }> = new Map();
+      mapStructure.set('key1', { checksum: 1, originCommentId: 'c1' });
+      mapStructure.set('key2', { checksum: 2, originCommentId: 'c2' });
+      const obj = {
+        level1: {
+          level2: {
+            level3: {
+              l3Map: mapStructure,
+              l3Bool: true,
+            },
+            l2Map: mapStructure,
+          },
+          l1Map: mapStructure,
+        },
+      };
+      let value = RedisCache.serializeValue(obj);
+      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      value = RedisCache.deserializeValue(value);
+      expect(value).to.deep.equal(obj);
+    });
+  
+    it('can serialize an object with a nested set', () => {
+      const setStructure: Set<string> = new Set();
+      setStructure.add('key1');
+      setStructure.add('key2');
+      const obj = {
+        level1: {
+          level2: {
+            level3: {
+              l3Set: setStructure,
+              l3Bool: false,
+            },
+            l2Set: setStructure,
+          },
+          l1Set: setStructure,
+        },
+      };
+      let value = RedisCache.serializeValue(obj);
+      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      value = RedisCache.deserializeValue(value);
+      expect(value).to.deep.equal(obj);
+    });
 
     it('can serialize the false value', () => {
       let value = RedisCache.serializeValue(false);

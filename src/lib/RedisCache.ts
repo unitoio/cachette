@@ -22,6 +22,8 @@ export class RedisCache extends CacheInstance {
   public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
+  public static MAP_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-MAP';
+  public static SET_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-SET';
 
   public static REDIS_CONNECTION_TIMEOUT_MS = parseInt(process.env.REDIS_CONNECTION_TIMEOUT_MS as string, 10) || 5000;
   public static REDLOCK_RETRY_COUNT = parseInt(process.env.REDLOCK_RETRY_COUNT as string, 10) || 20; // lib. default: 10
@@ -160,11 +162,31 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value instanceof Object) {
-      return RedisCache.JSON_PREFIX + JSON.stringify(value);
+      const simplifiedObject = RedisCache.serializeComplexDataStructures(value);
+      return RedisCache.JSON_PREFIX + JSON.stringify(simplifiedObject);
     }
 
     return value;
 
+  }
+
+  private static serializeComplexDataStructures(value: any): any {
+    if (value instanceof Map) {
+      return { [RedisCache.MAP_PREFIX]: Array.from(value.entries()) };
+    }
+    if (value instanceof Set) {
+      return { [RedisCache.SET_PREFIX]: Array.from(value) };
+    }
+    
+    if (typeof value === 'object' && value !== null) {
+      const simplifiedObject: any = {};
+      for (const [key, val] of Object.entries(value)) {
+        simplifiedObject[key] = RedisCache.serializeComplexDataStructures(val);
+      }
+      return simplifiedObject;
+    }
+    
+    return value;
   }
 
   /**
@@ -205,11 +227,30 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value.startsWith(RedisCache.JSON_PREFIX)) {
-      return JSON.parse(value.substring(RedisCache.JSON_PREFIX.length));
+      const simplifiedObject = JSON.parse(value.substring(RedisCache.JSON_PREFIX.length));
+      return RedisCache.deserializeComplexDataStructures(simplifiedObject);
     }
 
     return value;
 
+  }
+
+  private static deserializeComplexDataStructures(value: any): any {
+    if (typeof value === 'object' && value !== null) {
+      if (RedisCache.MAP_PREFIX in value && Array.isArray(value[RedisCache.MAP_PREFIX])) {
+        return new Map(value[RedisCache.MAP_PREFIX]);
+      }
+      if (RedisCache.SET_PREFIX in value && Array.isArray(value[RedisCache.SET_PREFIX])) {
+        return new Set(value[RedisCache.SET_PREFIX]);
+      }
+      const complexObject: any = {};
+      for (const [key, val] of Object.entries(value)) {
+        complexObject[key] = RedisCache.deserializeComplexDataStructures(val);
+      }
+      return complexObject;
+    }
+    
+    return value;
   }
 
   /**
