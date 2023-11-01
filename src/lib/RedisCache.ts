@@ -160,7 +160,15 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value instanceof Object) {
-      return RedisCache.JSON_PREFIX + JSON.stringify(value);
+      return RedisCache.JSON_PREFIX + JSON.stringify(value,  (key, value) => {
+        if (value instanceof Set) {
+          return { __dataType: 'Set', value: Array.from(value) };
+        } else if (value instanceof Map) {
+          return { __dataType: 'Map', value: Array.from(value) };
+        } else {
+          return value;
+        }
+      });
     }
 
     return value;
@@ -205,7 +213,19 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value.startsWith(RedisCache.JSON_PREFIX)) {
-      return JSON.parse(value.substring(RedisCache.JSON_PREFIX.length));
+      return JSON.parse(value.substring(RedisCache.JSON_PREFIX.length), (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          if (value.__dataType === 'Set') {
+            return new Set(value.value);
+          } else if (value.__dataType === 'Map') {
+            return new Map(value.value);
+          } else {
+            return value;
+          }
+        } else {
+          return value;
+        }
+      });
     }
 
     return value;
