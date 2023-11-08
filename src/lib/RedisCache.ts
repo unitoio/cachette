@@ -242,12 +242,12 @@ export class RedisCache extends CacheInstance {
   ): Promise<boolean> {
     try {
       return await this.setValueInternal(key, value, ttl);
-    } catch (error) {
-      /**
-       * A timeout can occur if the connection was broken during
-       * a value fetching. We don't want to hang forever if this is the case.
-       */
-      this.emit('warn', 'Error while setting value to Redis cache', error);
+    } catch (err) {
+       // Examples of things that may occur here:
+       // - A timeout, if the connection was broken during a value fetch.
+       // - A general error, e.g. if Redis is Out Of Memory.
+      const error = err as Error;
+      this.emit('warn', `Error while setting Redis key ${key} with ttl ${ttl}: ${error.name} - ${error.message}\n${error.stack}`);
       return false;
     }
   }
