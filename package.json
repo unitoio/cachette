@@ -30,8 +30,8 @@
     "test": "npm run compile && nyc mocha --config test/mocharc.js 'dist/test/**/*.js'; test -z \"$TEST_REDIS_URL\" && echo '!!! Warning: TEST_REDIS_URL unset, Redis tests did not run !!!' || true",
     "test:ci": "npm run compile && mkdir -p ci_output/testresults && mocha --config test/mocharc-ci.js 'dist/test/**/*.js'",
     "relock": "rm -rf node_modules package-lock.json; npm install --package-lock; npm out; true",
-    "postinstall": "npm run --silent githook-install",
-    "githook-install": "echo '#!/usr/bin/env sh\necho \"⚠️ Reminder that cachette is a *public* repo! ⚠️\"\necho \"No private info in: branch name, commit message, PR title & description & comments!\"\necho \"Ctrl+C to abort git push, Enter to proceed.\"\nread REPLY < /dev/tty' > '.git/hooks/pre-push' && chmod +x '.git/hooks/pre-push'"
+    "postprepare": "npm run --silent githook-install",
+    "githook-install": "mkdir -p .git/hooks/ && echo '#!/usr/bin/env sh\necho \"⚠️ Reminder that cachette is a *public* repo! ⚠️\"\necho \"No private info in: branch name, commit message, PR title & description & comments!\"\necho \"Ctrl+C to abort git push, Enter to proceed.\"\nread REPLY < /dev/tty' > '.git/hooks/pre-push' && chmod +x '.git/hooks/pre-push'"
   },
   "nyc": {
     "cache": false,
