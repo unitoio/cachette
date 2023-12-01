@@ -142,13 +142,13 @@ export abstract class CacheInstance extends EventEmitter {
    *
    * @returns       The cached or fetched value
    */
-  public async getOrFetchValue(
+  public async getOrFetchValue<T = CachableValue>(
     key: string,
     ttl: number,
     fetchFunction: FetchingFunction,
     lockTtl?: number,
     shouldCacheError?: (err: Error) => boolean,
-  ): Promise<CachableValue> {
+  ): Promise<T> {
 
     // already cached?
     let cached = await this.getValue(key);
