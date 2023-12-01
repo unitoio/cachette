@@ -73,7 +73,7 @@ function runTests(name: string, cache: CacheInstance): void {
       };
 
       await cache.setValue(key, 'value');
-      const fetchFunction = object.fetch.bind(object, 'newvalue');
+      const fetchFunction: () => Promise<string> = object.fetch.bind(object, 'newvalue');
       const value = await cache.getOrFetchValue(key, 10, fetchFunction);
       expect(value).to.eql('value');
       expect(numCalled).to.eql(0);
