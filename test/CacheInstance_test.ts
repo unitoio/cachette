@@ -10,6 +10,10 @@ async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function ayo(param: number): Promise<number> {
+  return Math.random();
+}
+
 // set env var TEST_REDIS_URL (e.g. redis://localhost:6379) to enable running
 // the tests with Redis
 
@@ -66,7 +70,7 @@ function runTests(name: string, cache: CacheInstance): void {
       const key = `key${Math.random()}`;
       let numCalled = 0;
       const object = {
-        fetch: async (v) => {
+        fetch: async (v): Promise<string> => {
           numCalled++;
           return v;
         },
@@ -81,6 +85,11 @@ function runTests(name: string, cache: CacheInstance): void {
         sinon.assert.notCalled(lockSpy);
         sinon.assert.notCalled(unlockSpy);
       }
+    });
+
+    it('asd', async() => {
+      
+      cache.getOrFetchValue('keyo', 12, ayo)
     });
 
     it('fetches if value not in cache', async () => {
