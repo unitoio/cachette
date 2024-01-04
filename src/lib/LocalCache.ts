@@ -95,6 +95,13 @@ export class LocalCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async waitForReplication(replicas: number, timeout: number): Promise<number> {
+    return 0;
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async clear(): Promise<void> {
     this.cache.clear();
   }
