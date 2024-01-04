@@ -219,22 +219,22 @@ describe('RedisCache', () => {
   });
 
   describe('waitForReplication', () => {
-      it('wait for replication', async function (): Promise<void> {
-        if (!process.env.TEST_REDIS_URL) {
-          this.skip();
-        }
+    it('wait for replication', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
 
-        const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
-        await cache.isReady();
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
 
-        await cache.clear();
+      await cache.clear();
 
-        await cache.setValue('test1', 'value1');
-        
-        const replicationAcknowledged = await cache.waitForReplication(0, 100);
+      await cache.setValue('test1', 'value1');
+      
+      const replicationAcknowledged = await cache.waitForReplication(0, 100);
 
-        // No replicas so we expect 0. This test basically confirms that waitForReplication doesn't crash. 🤷‍♂️
-        expect(replicationAcknowledged).to.equal(0);
-      })
+      // No replicas so we expect 0. This test basically confirms that waitForReplication doesn't crash. 🤷‍♂️
+      expect(replicationAcknowledged).to.equal(0);
+    });
   });
 });
