@@ -233,7 +233,7 @@ describe('RedisCache', () => {
         
         const replicationAcknowledged = await cache.waitForReplication(0, 100);
 
-        // No replicas so we expect 0. This test basically confirms that waitForRepication doesn't crash. 🤷‍♂️
+        // No replicas so we expect 0. This test basically confirms that waitForReplication doesn't crash. 🤷‍♂️
         expect(replicationAcknowledged).to.equal(0);
       })
   });
