@@ -124,7 +124,7 @@ export abstract class CacheClient {
    * Wait for the write commands to be acknowledged by the replicas.
    * This is useful when you want to ensure data is freshness on all nodes of the cluster.
    */
-  public async waitForReplication(replicas, timeout): Promise<number> {
+  public async waitForReplication(replicas: number = 5, timeout: number = 200): Promise<number> {
     return this.cacheInstance.waitForReplication(replicas, timeout);
   }
 
