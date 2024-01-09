@@ -59,7 +59,8 @@ export abstract class CacheInstance extends EventEmitter {
   public abstract delValue(key: string): Promise<void>;
 
   /**
-   * This command blocks the current client until all the previous write commands are successfully transferred and acknowledged by at least the specified number of replicas.
+   * This command blocks the current client until all the previous write commands are
+   * successfully transferred and acknowledged by at least the specified number of replicas.
    * 
    * @param replicas The number of replicas that should acknowledge write operations.
    * @param timeout The maximum amount of time to wait in milliseconds.
