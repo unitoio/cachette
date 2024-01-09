@@ -121,6 +121,19 @@ export abstract class CacheClient {
   }
 
   /**
+   * Wait for the write commands to be acknowledged by the replicas.
+   * This is useful when you want to ensure data is freshness on all nodes of the cluster.
+   * We're defaulting to 5 replicas because it is the maximum number of read-only replica nodes
+   * that you can have for each shard in AWS-Elastic cache (https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Replication.Redis.Groups.html)
+   * 
+   * /!\ If the number of replicas asked for acknowledgment is greater than the number of replicas in the cluster, the function will always block
+   * /!\ until the timeout is reached. Make sure you know the number of replicas in your cluster when calling this function.
+   */
+  public async waitForReplication(replicas: number = 5, timeout: number = 50): Promise<number> {
+    return this.cacheInstance.waitForReplication(replicas, timeout);
+  }
+
+  /**
    * Gets the valued returned from a cached function call,
    * using the CacheClient.cached.
    */

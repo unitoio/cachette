@@ -328,6 +328,14 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async waitForReplication(replicas: number, timeout: number): Promise<number> {
+    this.emit('wait');
+    return this.redisClient.wait(replicas, timeout);
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async clear(): Promise<void> {
     await this.redisClient.flushall();
   }

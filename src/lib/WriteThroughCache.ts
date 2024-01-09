@@ -90,6 +90,15 @@ export class WriteThroughCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async waitForReplication(replicas: number, timeout: number): Promise<number> {
+    this.emit('wait')
+    await this.localCache.waitForReplication(replicas, timeout);
+    return this.redisCacheForWriting.waitForReplication(replicas, timeout);
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async clear(): Promise<void> {
     await this.localCache.clear();
     await this.redisCacheForWriting.clear();
