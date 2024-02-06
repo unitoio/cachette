@@ -301,6 +301,28 @@ export class RedisCache extends CacheInstance {
   /**
    * @inheritdoc
    */
+  public async getKeys(pattern: string): Promise<string[]> {
+    try {
+      return await this.getKeysInternal(pattern);
+    } catch (error) {
+      /**
+       * A timeout can occur if the connection was broken during
+       * a value fetching. We don't want to hang forever if this is the case.
+       */
+      this.emit('warn', 'Error while fetching keys from the Redis cache', error);
+      return [];
+    }
+  }
+
+  private async getKeysInternal(pattern: string): Promise<string[]> {
+    const keys = await this.redisClient.keys(pattern);
+    this.emit('get', pattern, keys);
+    return keys;
+  }
+
+  /**
+   * @inheritdoc
+   */
   public async getTtl(key: string): Promise<number | undefined> {
     try {
       const ttl = await this.redisClient.pttl(key);

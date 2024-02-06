@@ -99,6 +99,30 @@ describe('LocalCache', () => {
     expect(cacheTtl).to.equal(0);
   });
 
+
+  it('should return an array of keys that match the given pattern', async () => {
+    const cache = new LocalCache();
+    cache.setValue('key1', 'value1');
+    cache.setValue('key2', 'value2');
+    cache.setValue('key3', 'value3');
+    cache.setValue('Difff3', 'different');
+
+    const keys = await cache.getKeys('key*');
+
+    expect(keys).to.deep.equal(['key1', 'key2', 'key3']);
+  });
+
+  it('should return an empty array if no keys match the given pattern', async () => {
+    const cache = new LocalCache();
+    cache.setValue('key1', 'value1');
+    cache.setValue('key2', 'value2');
+    cache.setValue('key3', 'value3');
+
+    const keys = await cache.getKeys('nonexistent*');
+
+    expect(keys).to.deep.equal([]);
+  });
+
 });
 
 function sleep(ms: number): Promise<void> {

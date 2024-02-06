@@ -2,12 +2,10 @@ import { CachableValue, CacheInstance } from './CacheInstance';
 import { RedisCache } from './RedisCache';
 import { LocalCache } from './LocalCache';
 
-
 /**
  * Write-through cache, using Redis and a local LRU cache.
  */
 export class WriteThroughCache extends CacheInstance {
-
   private redisCacheForWriting: CacheInstance;
   private redisCacheForReading: CacheInstance;
   private localCache: CacheInstance;
@@ -69,6 +67,13 @@ export class WriteThroughCache extends CacheInstance {
       await this.localCache.setValue(key, redisValue, ttl / 1000);
     }
     return redisValue;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public getKeys(pattern: string): Promise<string[]> {
+    return this.redisCacheForReading.getKeys(pattern);
   }
 
   /**

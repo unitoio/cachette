@@ -7,7 +7,6 @@ async function sleep(ms: number): Promise<void> {
 }
 
 export class LocalCache extends CacheInstance {
-
   public static DEFAULT_MAX_ITEMS = 5000;
   // Default maximum age for the items, in MS.
   public static DEFAULT_MAX_AGE: number = 30 * 60 * 1000;
@@ -62,6 +61,35 @@ export class LocalCache extends CacheInstance {
     const value = await this.cache.get(key);
     this.emit('get', key, value);
     return value;
+  }
+
+  /**
+   * @inheritdoc
+   * 
+   * Only support wildcard (*) globstyle pattern. Use RedisCache for more advanced pattern matching.
+   * Note that this specific implementation in `LocalCache` is not very efficient.
+   * Use RedisCache for a performant implementation.
+   */
+  public async getKeys(pattern: string = '*'): Promise<string[]> {
+    const keysGenerator = this.cache.rkeys();
+
+    const keys: Array<string> = [];
+
+    const regex = this.patternToRegex(pattern);
+
+    for (let value of keysGenerator) {
+      if (regex.test(value)) {
+        keys.push(value);
+      }
+    }
+
+    this.emit('keys', keys);
+    return keys;
+  }
+
+  private patternToRegex(pattern: string): RegExp {
+    const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+    return regex;
   }
 
   /**

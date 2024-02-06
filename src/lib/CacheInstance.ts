@@ -3,7 +3,6 @@ import { EventEmitter } from 'node:events';
 export type CachableValue = any;
 export type FetchingFunction = () => Promise<CachableValue>;
 
-
 export abstract class CacheInstance extends EventEmitter {
 
   /**
@@ -26,6 +25,17 @@ export abstract class CacheInstance extends EventEmitter {
    *
    */
   public abstract getValue(key: string): Promise<CachableValue>;
+
+  /**
+   * Find all keys matching the given pattern
+   *
+   * @param pattern   The pattern to match (glob-style, e.g. 'prefix:*')
+   *
+   * @return      The keys matching the pattern, or an empty array if
+   *              no such keys exist.
+   *
+   */
+  public abstract getKeys(pattern: string): Promise<string[]>;
 
   /**
    * Get the TTL of an entry, in ms
