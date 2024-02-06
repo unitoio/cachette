@@ -77,7 +77,7 @@ export class LocalCache extends CacheInstance {
 
     const regex = this.patternToRegex(pattern);
 
-    for (let value of keysGenerator) {
+    for (const value of keysGenerator) {
       if (regex.test(value)) {
         keys.push(value);
       }
