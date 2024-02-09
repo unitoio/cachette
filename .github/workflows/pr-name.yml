@@ -1,13 +1,19 @@
-name: ✏️ Enforce PR title
+name: 🚓 PR naming convention
+# You can find a reference of the emoji list in the description of the [#production](https://unitoinc.slack.com/archives/C44SLBB4L) channel on Slack
 
 on:
   pull_request:
     types: [opened, edited]
-    branches: [main, master] # keep both for max. copy-pastability
+    branches:
+      - master
 
 jobs:
-  enforce_pr_title:
-    uses: unitoio/github-actions/.github/workflows/enforce_pr_title.yml@main
-    with:
-      enforce-emoji: true
-      enforce-semver: false
+  pr_naming_convention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: "^(?:🌪|💨|🧰|💡|🚑|🐛) .+$" # Regex the title should match.
+          prefix_case_sensitive: false # title prefix are case insensitive
+          min_length: 5 # Min length of the title
+          max_length: 100 # Max length of the title
