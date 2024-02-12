@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: deepakputhraya/action-pr-title@master
         with:
-          regex: "^(?:🐛|🚑|🕴|🐎|🏎|⚗|🔒|💸|😀|🔍|🔧|🌪|💨|📦) .+$" # Regex the title should match.
+          regex: "^(?:🌪|💨|🧰|💡|🚑|🐛) .+$" # Regex the title should match.
           prefix_case_sensitive: false # title prefix are case insensitive
           min_length: 5 # Min length of the title
           max_length: 100 # Max length of the title
