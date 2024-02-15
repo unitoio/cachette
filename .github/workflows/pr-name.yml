@@ -3,9 +3,8 @@ name: 🚓 PR naming convention
 
 on:
   pull_request:
-    types: [opened, edited]
-    branches:
-      - master
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, master] # keep both for max. copy-pastability
 
 jobs:
   pr_naming_convention:
