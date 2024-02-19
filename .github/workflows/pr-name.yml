@@ -1,9 +1,8 @@
-name: 🚓 PR naming convention
-# You can find a reference of the emoji list in the description of the [#production](https://unitoinc.slack.com/archives/C44SLBB4L) channel on Slack
+name: ✏️ Enforce PR title
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
     branches: [main, master] # keep both for max. copy-pastability
 
 jobs:
