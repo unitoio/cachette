@@ -48,7 +48,8 @@
       "test/**",
       "test{,-*}.ts",
       "**/*{.,-}{test,spec}.ts",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      ".eslintrc.js"
     ]
   },
   "devDependencies": {
