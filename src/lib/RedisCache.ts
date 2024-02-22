@@ -22,6 +22,7 @@ export class RedisCache extends CacheInstance {
   public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
+  public static NUMBER_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-NUMBER';
 
   public static REDIS_CONNECTION_TIMEOUT_MS = parseInt(process.env.REDIS_CONNECTION_TIMEOUT_MS as string, 10) || 5000;
   public static REDLOCK_RETRY_COUNT = parseInt(process.env.REDLOCK_RETRY_COUNT as string, 10) || 20; // lib. default: 10
@@ -159,6 +160,10 @@ export class RedisCache extends CacheInstance {
       });
     }
 
+    if (typeof value === 'number') {
+      return `${RedisCache.NUMBER_PREFIX}${value}`;
+    }
+
     if (value instanceof Object) {
       return RedisCache.JSON_PREFIX + JSON.stringify(value,  (key, value) => {
         if (value instanceof Set) {
@@ -210,6 +215,11 @@ export class RedisCache extends CacheInstance {
       const deserializedError = JSON.parse(value.substring(RedisCache.ERROR_PREFIX.length));
       // return error, restoring potential Error metadata set as object properties
       return Object.assign(new Error(deserializedError.message), deserializedError);
+    }
+
+    if (value.startsWith(RedisCache.NUMBER_PREFIX)) {
+      const deserializedNumber = value.substring(RedisCache.NUMBER_PREFIX.length);
+      return Number.parseFloat(deserializedNumber);
     }
 
     if (value.startsWith(RedisCache.JSON_PREFIX)) {
