@@ -30,6 +30,9 @@ describe('LocalCache', () => {
     await cache.setValue('numMax', Number.MAX_SAFE_INTEGER);
     expect(await cache.getValue('numMax')).to.equal(Number.MAX_SAFE_INTEGER);
 
+    await cache.setValue('numInfinity', Infinity);
+    expect(await cache.getValue('numInfinity')).to.equal(Infinity);
+
     await cache.setValue('numBarf', 0.1 + 0.2); // 0.30000000000000004, IEEE754
     expect(await cache.getValue('numBarf')).to.equal(0.1 + 0.2);
   });
