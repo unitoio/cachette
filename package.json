@@ -53,7 +53,6 @@
   },
   "devDependencies": {
     "@types/chai": "4.x",
-    "@types/ioredis": "5.x",
     "@types/mocha": "10.x",
     "@types/node": "18.x",
     "@types/redlock": "4.x",
