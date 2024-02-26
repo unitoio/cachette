@@ -14,14 +14,13 @@ npm install --save cachette
 
 ```javascript
 const { WriteThroughCache } = require('cachette');
-const request = require('request-promise');
 
 // First, initialize the redis connection.
 const cache = new WriteThroughCache(process.env.REDIS_URL);
 
 async function fetchUrl(url) {
   console.log('fetching', url);
-  const response = await request.get(url);
+  const response = await fetch(url);
   console.log('fetched', url);
 }
 

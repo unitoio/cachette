@@ -15,6 +15,28 @@ describe('LocalCache', () => {
     expect(await cache.itemCount()).to.equal(1);
   });
 
+  it('can set/get numbers', async function (): Promise<void> {
+    const cache = new LocalCache();
+
+    await cache.setValue('numZero', 0);
+    expect(await cache.getValue('numZero')).to.equal(0);
+
+    await cache.setValue('numFloat', 123.456);
+    expect(await cache.getValue('numFloat')).to.equal(123.456);
+
+    await cache.setValue('numNegative', -99);
+    expect(await cache.getValue('numNegative')).to.equal(-99);
+
+    await cache.setValue('numMax', Number.MAX_SAFE_INTEGER);
+    expect(await cache.getValue('numMax')).to.equal(Number.MAX_SAFE_INTEGER);
+
+    await cache.setValue('numInfinity', Infinity);
+    expect(await cache.getValue('numInfinity')).to.equal(Infinity);
+
+    await cache.setValue('numBarf', 0.1 + 0.2); // 0.30000000000000004, IEEE754
+    expect(await cache.getValue('numBarf')).to.equal(0.1 + 0.2);
+  });
+
   it('will not throw if we set a value of undefined', async () => {
     const cache = new LocalCache();
     expect(await cache.itemCount()).to.equal(0);
