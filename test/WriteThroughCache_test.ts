@@ -174,4 +174,29 @@ describe('WriteThroughCache', () => {
 
   });
 
+  describe('getKeys', () => {
+    it('should return the keys matching the given pattern', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+      await cache.clear();
+      
+      await cache.setValue('key1', 'value1');
+      await cache.setValue('key2', 'value');
+      await cache.setValue('key3', 'value');
+      await cache.setValue('randomKey1', 'value');
+      await cache.setValue('randomKey2', 'value');
+
+      const pattern = 'key*';
+      const expectedOutput: string[] = ['key1', 'key2', 'key3'];
+
+      const result = await cache.getKeys(pattern);
+
+      expect(result.sort()).to.deep.equal(expectedOutput);
+    });
+  });
+
 });
