@@ -52,10 +52,12 @@ export class RedisCache extends CacheInstance {
     this.redisClient = new Redis(redisUrl, {
       readOnly,
       retryStrategy: () => RedisCache.REDIS_CONNECTION_TIMEOUT_MS,
-      // master failover
-      reconnectOnError: (err: any) => !readOnly && err.message.startsWith('READONLY'),
-      // This will prevent the get/setValue calls from hanging
-      // if there is no active connection.
+      // Force a reconnect during Redis maintenance|upgrades, where a failover
+      // primary / replica causes clients connected to the primary to become
+      // connected to what is now a replica, and error that writes fail.
+      // Following upstream recipe at https://github.com/redis/ioredis#reconnect-on-error
+      reconnectOnError: (err: Error) => !readOnly && err.message.includes('READONLY'),
+      // This prevents get/setValue calls from hanging if there is no active connection
       enableOfflineQueue: false,
     });
     this.redisClient.scan
