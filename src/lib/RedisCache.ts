@@ -60,7 +60,6 @@ export class RedisCache extends CacheInstance {
       // This prevents get/setValue calls from hanging if there is no active connection
       enableOfflineQueue: false,
     });
-    this.redisClient.scan
     this.redlock = new Redlock([this.redisClient as unknown as Redlock.CompatibleRedisClient], { // Hack until Redlock 5.x is out of beta
       driftFactor: RedisCache.REDLOCK_CLOCK_DRIFT_FACTOR,
       retryCount: RedisCache.REDLOCK_RETRY_COUNT,

@@ -307,7 +307,7 @@ describe('CacheClient', () => {
   describe('Redlock maintenance reminder', () => {
 
     it('is still on Redlock v4, or was carefully migrated to v5', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const redlockVersion = require('../../package.json').dependencies.redlock;
       if (redlockVersion !== '4.x') {
         throw new Error('Migrating Redlock to v5? This breaking test is a reminder to:\n  1. Migrate v4 handling of `clientError` events into v5 `error` events\n  2. Review error handling: Redlock v5 throws at many places, while Redlock v4 only threw in its constructor\n  3. Review other breaking changes provided by the upgrade guide, if Redlock maintainers provide one when shipping v5');
