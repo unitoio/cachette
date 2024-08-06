@@ -127,7 +127,7 @@ export class RedisCache extends CacheInstance {
    */
   public startConnectionStrategy(): void {
     this.ready = true;
-    this.emit('info', `Connection established to Redis at ${this.url}.`);
+    this.emit('info', `Connection established to Redis at ${this.url}`);
   }
 
   /**

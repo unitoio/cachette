@@ -12,11 +12,51 @@ export class WriteThroughCache extends CacheInstance {
   private redisCacheForReading: CacheInstance;
   private localCache: CacheInstance;
 
+  private metrics: {
+    enabled: boolean;
+    localHits: number;
+    redisHits: number;
+    doubleMisses: number;
+  };
+
   constructor(redisUrl: string) {
     super();
     this.redisCacheForWriting = new RedisCache(redisUrl);
     this.redisCacheForReading = new RedisCache(redisUrl, true);
     this.localCache = new LocalCache();
+
+    this.metrics = {
+      enabled: false,
+      localHits: 0,
+      redisHits: 0,
+      doubleMisses: 0,
+    };
+    if (process.env.CACHETTE_METRICS_PERIOD_MINUTES) {
+      const metricsPeriod = parseInt(process.env.CACHETTE_METRICS_PERIOD_MINUTES, 10);
+      if (Number.isInteger(metricsPeriod) && metricsPeriod > 0) {
+        this.metrics.enabled = true;
+        this.redisCacheForWriting.emit('info', `WriteThroughCache metrics enabled, will report every ${metricsPeriod} min`);
+        setInterval(() => {
+          const total = this.metrics.localHits + this.metrics.redisHits + this.metrics.doubleMisses;
+          this.redisCacheForWriting.emit(
+            'info',
+            `WriteThroughCache metrics during last ${metricsPeriod} min - Total: ${total}, ` +
+            `Local hits: ${this.metrics.localHits} (${total && Math.floor(100 * this.metrics.localHits / total)}%), ` +
+            `Redis hits: ${this.metrics.redisHits} (${total && Math.floor(100 * this.metrics.redisHits / total)}%), ` +
+            `Double misses: ${this.metrics.doubleMisses} (${total && Math.floor(100 * this.metrics.doubleMisses / total)}%).`,
+          );
+
+          this.metrics.localHits = 0;
+          this.metrics.redisHits = 0;
+          this.metrics.doubleMisses = 0;
+        }, metricsPeriod * 60 * 1000);
+      } else {
+        this.redisCacheForWriting.emit(
+          'warn',
+          'WriteThroughCache metrics activation impossible, CACHETTE_METRICS_PERIOD_MINUTES is invalid. ' +
+          `Must be a positive integer, but was ${process.env.CACHETTE_METRICS_PERIOD_MINUTES}`);
+      }
+    }
   }
 
   public on(eventName: string | symbol, listener: (...args: any[]) => void): this {
@@ -58,6 +98,9 @@ export class WriteThroughCache extends CacheInstance {
   public async getValue(key: string): Promise<CachableValue> {
     const localValue = await this.localCache.getValue(key);
     if (localValue !== undefined) {
+      if (this.metrics.enabled) {
+        this.metrics.localHits++;
+      }
       return localValue;
     }
     const [redisValue, ttl] = await Promise.all([
@@ -67,6 +110,14 @@ export class WriteThroughCache extends CacheInstance {
 
     if (redisValue !== undefined && ttl !== undefined) {
       await this.localCache.setValue(key, redisValue, ttl / 1000);
+      if (this.metrics.enabled) {
+        this.metrics.redisHits++;
+      }
+      return redisValue;
+    }
+
+    if (this.metrics.enabled) {
+      this.metrics.doubleMisses++;
     }
     return redisValue;
   }

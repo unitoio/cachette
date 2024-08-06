@@ -174,4 +174,130 @@ describe('WriteThroughCache', () => {
 
   });
 
+  describe('metrics', () => {
+    let sinonClock: sinon.SinonFakeTimers;
+
+    beforeEach(async () => {
+      sinonClock = sinon.useFakeTimers(0);
+    });
+
+    afterEach(() => {
+      delete process.env.CACHETTE_METRICS_PERIOD_MINUTES;
+      sinonClock.restore();
+    })
+
+    it('stores metrics if env. var is set', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      process.env.CACHETTE_METRICS_PERIOD_MINUTES = '1';
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+      expect(cache['metrics'].enabled).to.be.true;
+      const key = `key-metrics-${Math.random()}`;
+
+      // Getting bogus value to test doubleMisses
+      await cache.getValue(`non-existing-value-${Math.random()}`);
+      expect(cache['metrics'].localHits).to.equal(0);
+      expect(cache['metrics'].redisHits).to.equal(0);
+      expect(cache['metrics'].doubleMisses).to.equal(1);
+
+      // Setting in *Local* + *Redis* caches to test localHits
+      await cache.setValue(key, 'val');
+      await cache.getValue(key);
+      expect(cache['metrics'].localHits).to.equal(1);
+      expect(cache['metrics'].redisHits).to.equal(0);
+      expect(cache['metrics'].doubleMisses).to.equal(1);
+
+      // Evicting from private *Local* cache to test redisHits
+      await cache['localCache'].delValue(key);
+      await cache.getValue(key);
+      expect(cache['metrics'].localHits).to.equal(1);
+      expect(cache['metrics'].redisHits).to.equal(1);
+      expect(cache['metrics'].doubleMisses).to.equal(1);
+    });
+
+    it('does not store metrics by default', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      // *Not* setting process.env.CACHETTE_METRICS_PERIOD_MINUTES
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+      const key = `key-metrics-${Math.random()}`;
+
+      // Causing activity that would have caused { localHits, redisHits, doubleMisses }
+      await cache.getValue(`non-existing-value-${Math.random()}`);
+      await cache.setValue(key, 'val');
+      await cache.getValue(key);
+      await cache['localCache'].delValue(key);
+      await cache.getValue(key);
+      expect(cache['metrics'].enabled).to.be.false;
+      expect(cache['metrics'].localHits).to.equal(0);
+      expect(cache['metrics'].redisHits).to.equal(0);
+      expect(cache['metrics'].doubleMisses).to.equal(0);
+    });
+
+    it('does not store metrics if env. var is invalid', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+      process.env.CACHETTE_METRICS_PERIOD_MINUTES = 'foo'; // invalid: not a positive integer
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+      const key = `key-metrics-${Math.random()}`;
+
+      // Causing activity that would have caused { localHits, redisHits, doubleMisses }
+      await cache.getValue(`non-existing-value-${Math.random()}`);
+      await cache.setValue(key, 'val');
+      await cache.getValue(key);
+      await cache['localCache'].delValue(key);
+      await cache.getValue(key);
+      expect(cache['metrics'].enabled).to.be.false;
+      expect(cache['metrics'].localHits).to.equal(0);
+      expect(cache['metrics'].redisHits).to.equal(0);
+      expect(cache['metrics'].doubleMisses).to.equal(0);
+    });
+
+    it('emits metrics periodically', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      process.env.CACHETTE_METRICS_PERIOD_MINUTES = '1';
+      const cache = new WriteThroughCache(process.env.TEST_REDIS_URL as string);
+      const infoSpy = sinon.spy();
+      cache.on('info', infoSpy);
+      await cache.isReady();
+
+      // Causing 1 localHit, 1 redisHit, 1 doubleMiss
+      const key = `key-metrics-${Math.random()}`;
+      await cache.getValue(`non-existing-value-${Math.random()}`);
+      await cache.setValue(key, 'val');
+      await cache.getValue(key);
+      await cache['localCache'].delValue(key);
+      await cache.getValue(key);
+
+      // Testing we emitted at requested period
+      const metricsReports0 = infoSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('metrics'));
+      expect(metricsReports0.length).to.equal(0);
+
+      sinonClock.tick(59999); // t = 1min minus a millisecond
+      const metricsReports59s = infoSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('metrics'));
+      expect(metricsReports59s.length).to.equal(0);
+
+      sinonClock.tick(2); // t = 1min plus a millisecond
+      const metricsReports61s = infoSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('metrics'));
+      expect(metricsReports61s.length).to.equal(1);
+      expect(metricsReports61s[0]).to.equal('WriteThroughCache metrics during last 1 min - Total: 3, Local hits: 1 (33%), Redis hits: 1 (33%), Double misses: 1 (33%).')
+
+      // Causing no activity for a minute and testing we emit again
+      sinonClock.tick(60000); // t = 2min plus a millisecond
+      const metricsReports121s = infoSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('metrics'));
+      expect(metricsReports121s.length).to.equal(2);
+      expect(metricsReports121s[1]).to.equal('WriteThroughCache metrics during last 1 min - Total: 0, Local hits: 0 (0%), Redis hits: 0 (0%), Double misses: 0 (0%).')
+    });
+
+  });
+
 });
