@@ -53,21 +53,22 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "9.x",
     "@types/chai": "4.x",
+    "@types/eslint__js": "8.x",
     "@types/mocha": "10.x",
     "@types/node": "18.x",
     "@types/redlock": "4.x",
     "@types/sinon": "17.x",
-    "@typescript-eslint/eslint-plugin": "7.x",
-    "@typescript-eslint/parser": "7.x",
     "chai": "4.x",
-    "eslint": "8.x",
+    "eslint": "9.x",
     "mocha": "10.x",
     "npm-audit-resolver": "^3.0.0-7",
     "nyc": "17.x",
     "sinon": "18.x",
     "source-map-support": "0.x",
-    "typescript": "5.x"
+    "typescript": "5.x",
+    "typescript-eslint": "8.x"
   },
   "dependencies": {
     "ioredis": "5.x",

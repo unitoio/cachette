@@ -96,7 +96,7 @@ export abstract class CacheClient {
   }
 
   // We *do* want a loosely-typed `Function` here, by nature of the library
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   public getUncachedFunction(functionName: string): Function {
     if (this[`${functionName}NoCache`]) {
       return this[`${functionName}NoCache`].bind(this);
