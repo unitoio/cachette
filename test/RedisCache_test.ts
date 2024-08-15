@@ -53,11 +53,11 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value).to.be.instanceOf(Buffer);
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
-  
+
     it('can serialize an object with a nested map', () => {
       const mapStructure: Map<string, {
         checksum: number;
@@ -78,11 +78,11 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value).to.be.instanceOf(Buffer);
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
-  
+
     it('can serialize an object with a nested set', () => {
       const setStructure: Set<string> = new Set();
       setStructure.add('key1');
@@ -100,7 +100,7 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value).to.be.instanceOf(Buffer);
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
@@ -258,7 +258,7 @@ describe('RedisCache', () => {
       await cache.clear();
 
       await cache.setValue('test1', 'value1');
-      
+
       const replicationAcknowledged = await cache.waitForReplication(0, 50);
 
       // No replicas so we expect 0. This test basically confirms that waitForReplication doesn't crash. 🤷‍♂️

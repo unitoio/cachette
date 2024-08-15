@@ -1,8 +1,10 @@
 import Redis from 'ioredis';
 import * as Redlock from 'redlock';
+import { Packr } from 'msgpackr';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
+const MPACK = new Packr({ moreTypes: true });
 
 /**
  * Wrapper class for using Redis as a cache.
@@ -166,15 +168,7 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value instanceof Object) {
-      return RedisCache.JSON_PREFIX + JSON.stringify(value,  (key, value) => {
-        if (value instanceof Set) {
-          return { __dataType: 'Set', value: Array.from(value) };
-        } else if (value instanceof Map) {
-          return { __dataType: 'Map', value: Array.from(value) };
-        } else {
-          return value;
-        }
-      });
+      return MPACK.pack(value);
     }
 
     return value;
@@ -212,6 +206,10 @@ export class RedisCache extends CacheInstance {
       return false;
     }
 
+    if (value instanceof Buffer) {
+      return MPACK.unpack(value);
+    }
+
     if (value.startsWith(RedisCache.ERROR_PREFIX)) {
       const deserializedError = JSON.parse(value.substring(RedisCache.ERROR_PREFIX.length));
       // return error, restoring potential Error metadata set as object properties
@@ -240,7 +238,6 @@ export class RedisCache extends CacheInstance {
     }
 
     return value;
-
   }
 
   /**
