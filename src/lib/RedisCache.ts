@@ -4,7 +4,7 @@ import { Packr } from 'msgpackr';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
-const MPACK = new Packr({ moreTypes: true });
+const MPACK = new Packr({ moreTypes: true }); // `moreTypes: true` to get free support for Set & Map
 
 /**
  * Wrapper class for using Redis as a cache.
