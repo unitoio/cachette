@@ -193,7 +193,7 @@ export class RedisCache extends CacheInstance {
    * > If the key is missing, reply will be null.
    *
    */
-  public static deserializeValue(value: CachableValue): CachableValue {
+  public static deserializeValue(value: string | null): CachableValue {
 
     if (value === null) {
       // null means that the key was not present, which we interpret as undefined.
