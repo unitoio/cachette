@@ -53,7 +53,7 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value).to.be.instanceOf(Buffer);
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
@@ -78,7 +78,7 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value).to.be.instanceOf(Buffer);
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
@@ -100,7 +100,7 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value).to.be.instanceOf(Buffer);
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
@@ -219,6 +219,47 @@ describe('RedisCache', () => {
       expect(wasSet).to.be.true;
       value = await cache.getValue('key');
       expect(value).to.be.false;
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
+
+    it('can set a buffer value', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      const wasSet = await cache.setValue('key', { '🍌': '🥔' });
+      expect(wasSet).to.be.true;
+
+      const value = await cache.getValue('key');
+      expect(value).to.deep.equal({ '🍌': '🥔' });
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
+
+    it('can get a JSON value', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      // Manual serialization here to avoid the automatic serialization of the setValue method.
+      const wasSet = await cache.setValue('key', `${RedisCache.JSON_PREFIX}${JSON.stringify({ '🍌': '🥔' })}`);
+      expect(wasSet).to.be.true;
+
+      const value = await cache.getValue('key');
+      expect(value).to.deep.equal({ '🍌': '🥔' });
 
       expect(await cache.itemCount()).to.equal(1);
     });

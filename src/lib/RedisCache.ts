@@ -23,6 +23,7 @@ export class RedisCache extends CacheInstance {
   public static TRUE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-TRUE';
   public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
+  public static MSGP_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-MSGP';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
   public static NUMBER_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-NUMBER';
 
@@ -168,11 +169,10 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value instanceof Object) {
-      return MPACK.pack(value);
+      return `${RedisCache.MSGP_PREFIX}${MPACK.pack(value).toString('binary')}`;
     }
 
     return value;
-
   }
 
   /**
@@ -206,8 +206,8 @@ export class RedisCache extends CacheInstance {
       return false;
     }
 
-    if (value instanceof Buffer) {
-      return MPACK.unpack(value);
+    if (value.startsWith(RedisCache.MSGP_PREFIX)) {
+      return MPACK.unpack(Buffer.from(value.substring(RedisCache.MSGP_PREFIX.length), 'binary'));
     }
 
     if (value.startsWith(RedisCache.ERROR_PREFIX)) {
