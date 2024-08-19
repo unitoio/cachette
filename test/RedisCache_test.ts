@@ -223,7 +223,7 @@ describe('RedisCache', () => {
       expect(await cache.itemCount()).to.equal(1);
     });
 
-    it('can set a buffer value', async function (): Promise<void> {
+    it('can set a msgpacked object', async function (): Promise<void> {
       if (!process.env.TEST_REDIS_URL) {
         this.skip();
       }
