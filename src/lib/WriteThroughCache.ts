@@ -4,7 +4,31 @@ import { LocalCache } from './LocalCache';
 
 
 /**
- * Write-through cache, using Redis and a local LRU cache.
+ * Write-through cache, using Redis and a local LRU cache with aligned TTLs.
+ *
+ * **WARNING** if using this in a distributed app where cache consistency matters!
+ * Consider this case of an app with several servers/instances using WriteThroughCache:
+ *  1. Instance I1 sets key/value foo: bar (both local & redis)
+ *  2. Instance I2 gets value foo, populating its local cache with "bar"
+ *  ----- At that moment, LocalCaches of I1 & I2 are aligned, foo: bar
+ *  3. Instance I1 deletes key foo (both local & redis)
+ *  ----- At that moment, LocalCaches of I1 & I2 are *mis*aligned about foo!
+ *        - I1 has nothing
+ *        - I2 has "bar"
+ *
+ * -> This is fixable, e.g. using Redis pub/sub, to let clients subscribe to
+ *    set/del events, and react with an eviction from their LocalCache.
+ *    In the context where we cachette maintainers got bitten by this, it made
+ *    sense to just abandon usage of WriteThroughCache, and switch the app with
+ *    high consistency expectations from a WriteThroughCache to a RedisCache:
+ *      +++: simpler, more consistent
+ *      ---: a tolerable increase in Redis usage (CPU, network, latency)
+ *
+ *    So, pub/sub remains unimplemented, but it would be a reasonable addition.
+ *    API design consideration: set/dels maybe shouldn't *always* cause Redis
+ *    publish (said differently, maybe not *all* set/dels should cause a
+ *    LocalCache eviction, to limit pub/sub traffic explosion? Maybe, or maybe
+ *    "pub/sub traffic explosion" is a non-concern? To be evaluated :)
  */
 export class WriteThroughCache extends CacheInstance {
 
