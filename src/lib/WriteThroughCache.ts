@@ -18,9 +18,9 @@ import { LocalCache } from './LocalCache';
  *
  * -> This is fixable, e.g. using Redis pub/sub, to let clients subscribe to
  *    set/del events, and react with an eviction from their LocalCache.
- *    In the context we cachette maintainers got bitten by this, it made sense
- *    to simply abandon usage of WriteThroughCache, and switch the app with high
- *    consistency expectations from a WriteThroughCache to a RedisCache:
+ *    In the context where we cachette maintainers got bitten by this, it made
+ *    sense to just abandon usage of WriteThroughCache, and switch the app with
+ *    high consistency expectations from a WriteThroughCache to a RedisCache:
  *      +++: simpler, more consistent
  *      ---: a tolerable increase in Redis usage (CPU, network, latency)
  *
