@@ -65,7 +65,7 @@
     "mocha": "10.x",
     "npm-audit-resolver": "^3.0.0-7",
     "nyc": "17.x",
-    "sinon": "18.x",
+    "sinon": "19.x",
     "source-map-support": "0.x",
     "typescript": "5.x",
     "typescript-eslint": "8.x"

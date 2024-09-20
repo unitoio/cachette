@@ -178,7 +178,10 @@ describe('WriteThroughCache', () => {
     let sinonClock: sinon.SinonFakeTimers;
 
     beforeEach(async () => {
-      sinonClock = sinon.useFakeTimers(0);
+      sinonClock = sinon.useFakeTimers({
+        now: 0,
+        toFake: ['setInterval'],
+      });
     });
 
     afterEach(() => {
