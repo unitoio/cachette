@@ -72,6 +72,7 @@
   },
   "dependencies": {
     "ioredis": "5.x",
+    "msgpackr": "1.x",
     "lru-cache": "10.x",
     "redlock": "4.x"
   }

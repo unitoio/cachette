@@ -1,8 +1,10 @@
 import Redis from 'ioredis';
 import * as Redlock from 'redlock';
+import { Packr } from 'msgpackr';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
+const MPACK = new Packr({ moreTypes: true }); // `moreTypes: true` to get free support for Set & Map
 
 /**
  * Wrapper class for using Redis as a cache.
@@ -21,6 +23,7 @@ export class RedisCache extends CacheInstance {
   public static TRUE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-TRUE';
   public static FALSE_VALUE = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-FALSE';
   public static JSON_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-JSON';
+  public static MSGP_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-MSGP';
   public static ERROR_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-ERROR';
   public static NUMBER_PREFIX = 'f405eed4-507c-4aa5-a6d2-c1813d584b8f-NUMBER';
 
@@ -166,19 +169,10 @@ export class RedisCache extends CacheInstance {
     }
 
     if (value instanceof Object) {
-      return RedisCache.JSON_PREFIX + JSON.stringify(value,  (key, value) => {
-        if (value instanceof Set) {
-          return { __dataType: 'Set', value: Array.from(value) };
-        } else if (value instanceof Map) {
-          return { __dataType: 'Map', value: Array.from(value) };
-        } else {
-          return value;
-        }
-      });
+      return `${RedisCache.MSGP_PREFIX}${MPACK.pack(value).toString('binary')}`;
     }
 
     return value;
-
   }
 
   /**
@@ -212,6 +206,10 @@ export class RedisCache extends CacheInstance {
       return false;
     }
 
+    if (value.startsWith(RedisCache.MSGP_PREFIX)) {
+      return MPACK.unpack(Buffer.from(value.substring(RedisCache.MSGP_PREFIX.length), 'binary'));
+    }
+
     if (value.startsWith(RedisCache.ERROR_PREFIX)) {
       const deserializedError = JSON.parse(value.substring(RedisCache.ERROR_PREFIX.length));
       // return error, restoring potential Error metadata set as object properties
@@ -240,7 +238,6 @@ export class RedisCache extends CacheInstance {
     }
 
     return value;
-
   }
 
   /**

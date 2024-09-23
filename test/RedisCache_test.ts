@@ -53,11 +53,11 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
-  
+
     it('can serialize an object with a nested map', () => {
       const mapStructure: Map<string, {
         checksum: number;
@@ -78,11 +78,11 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
-  
+
     it('can serialize an object with a nested set', () => {
       const setStructure: Set<string> = new Set();
       setStructure.add('key1');
@@ -100,7 +100,7 @@ describe('RedisCache', () => {
         },
       };
       let value = RedisCache.serializeValue(obj);
-      expect(value.startsWith(RedisCache.JSON_PREFIX)).to.be.true;
+      expect(value.startsWith(RedisCache.MSGP_PREFIX)).to.be.true;
       value = RedisCache.deserializeValue(value);
       expect(value).to.deep.equal(obj);
     });
@@ -222,6 +222,47 @@ describe('RedisCache', () => {
 
       expect(await cache.itemCount()).to.equal(1);
     });
+
+    it('can set a msgpacked object', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      const wasSet = await cache.setValue('key', { '🍌': '🥔' });
+      expect(wasSet).to.be.true;
+
+      const value = await cache.getValue('key');
+      expect(value).to.deep.equal({ '🍌': '🥔' });
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
+
+    it('can get a JSON value', async function (): Promise<void> {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      await cache.isReady();
+
+      // Just to be sure that the cache is really empty...
+      await cache.clear();
+
+      // Manual serialization here to avoid the automatic serialization of the setValue method.
+      const wasSet = await cache.setValue('key', `${RedisCache.JSON_PREFIX}${JSON.stringify({ '🍌': '🥔' })}`);
+      expect(wasSet).to.be.true;
+
+      const value = await cache.getValue('key');
+      expect(value).to.deep.equal({ '🍌': '🥔' });
+
+      expect(await cache.itemCount()).to.equal(1);
+    });
   });
 
   describe('itemCount', async () => {
@@ -258,7 +299,7 @@ describe('RedisCache', () => {
       await cache.clear();
 
       await cache.setValue('test1', 'value1');
-      
+
       const replicationAcknowledged = await cache.waitForReplication(0, 50);
 
       // No replicas so we expect 0. This test basically confirms that waitForReplication doesn't crash. 🤷‍♂️
