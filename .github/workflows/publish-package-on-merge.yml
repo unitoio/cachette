@@ -25,7 +25,7 @@ jobs:
           git remote set-url origin https://UnitoBot:${{ secrets.UNITO_BOT_PAT_TOKEN }}@github.com/${{ github.repository }}
           # Eventually use the pull request title to patch, minor or major
           npm version patch -m "Bump version to: %s [skip ci]"
-          git push --no-verify origin master
+          git push --no-verify origin main
           git push --tags
 
       - name: Checkout GitHub Action Repo
