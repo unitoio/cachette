@@ -20,14 +20,14 @@ jobs:
     steps:
       # https://github.com/actions/checkout
       - name: Checkout 🛎️
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get node version ⭐️
         run: |
           echo "NODE_VERSION=$(echo $(jq '.engines.node' package.json) | sed -E 's/"[<>=]*([0-9]([\.0-9a-z]+)?)*.*"/\1/')" >> $GITHUB_ENV
           echo "${{ env.NODE_VERSION }}"
       - name: Setup Node ${{ env.NODE_VERSION }}📍️
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         env:
           CI: true
         with:
@@ -35,7 +35,7 @@ jobs:
 
       # https://github.com/actions/cache
       - name: NPM cache 📦
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ env.APPLICATION_NAME }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
