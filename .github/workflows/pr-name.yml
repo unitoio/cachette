@@ -3,7 +3,7 @@ name: ✏️ Enforce PR title
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review]
-    branches: [main, master] # keep both for max. copy-pastability
+    branches: [main]
 
 jobs:
   pr_naming_convention:
