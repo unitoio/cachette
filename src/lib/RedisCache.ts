@@ -3,6 +3,7 @@ import * as Redlock from 'redlock';
 
 import { CachableValue, CacheInstance } from './CacheInstance';
 
+export const SIZE_THRESHOLD_WARNING_BYTES = 20_000_000;
 
 /**
  * Wrapper class for using Redis as a cache.
@@ -140,7 +141,7 @@ export class RedisCache extends CacheInstance {
    * and retrieve them as strings.
    *
    */
-  public static serializeValue(value: CachableValue): CachableValue {
+  public static serializeValue(value: CachableValue): string {
 
     if (value === null) {
       return RedisCache.NULL_VALUE;
@@ -178,7 +179,6 @@ export class RedisCache extends CacheInstance {
     }
 
     return value;
-
   }
 
   /**
@@ -277,7 +277,13 @@ export class RedisCache extends CacheInstance {
 
     value = RedisCache.serializeValue(value);
 
-    let result;
+    const serializedValueBytes = Buffer.byteLength(value, 'utf8');
+    if (serializedValueBytes >= SIZE_THRESHOLD_WARNING_BYTES) {
+      const mb = Math.round(serializedValueBytes / 1_000_000);
+      this.emit('warn', `Writing large value to Redis! Key "${key}" with ttl=${ttl} has a value of ${mb} MB!`);
+    }
+
+    let result: 'OK' | undefined;
     if (ttl !== 0) {
       result = await this.redisClient.set(key, value, 'EX', ttl);
     } else {
