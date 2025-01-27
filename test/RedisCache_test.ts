@@ -1,6 +1,7 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { RedisCache } from '../src/lib/RedisCache';
+import { RedisCache, SIZE_THRESHOLD_WARNING_BYTES } from '../src/lib/RedisCache';
 
 
 describe('RedisCache', () => {
@@ -221,6 +222,40 @@ describe('RedisCache', () => {
       expect(value).to.be.false;
 
       expect(await cache.itemCount()).to.equal(1);
+    });
+
+    it('emits a warning when setting a large-enough value', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      const warnSpy = sinon.spy();
+      cache.on('warn', warnSpy);
+      await cache.isReady();
+
+      const key = `emits-warning-on-large-value-${Math.random()}`;
+      await cache.setValue(key, 'a'.repeat(SIZE_THRESHOLD_WARNING_BYTES));
+
+      const warningsAfterSetLargeKey = warnSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('Writing large value to Redis!'));
+      expect(warningsAfterSetLargeKey.length).to.equal(1);
+    });
+
+    it('does NOT emit a warning when setting a small-enough value', async function () {
+      if (!process.env.TEST_REDIS_URL) {
+        this.skip();
+      }
+
+      const cache = new RedisCache(process.env.TEST_REDIS_URL as string);
+      const warnSpy = sinon.spy();
+      cache.on('warn', warnSpy);
+      await cache.isReady();
+
+      const key = `doesnt-emit-warning-on-small-value-${Math.random()}`;
+      await cache.setValue(key, 'a'.repeat(SIZE_THRESHOLD_WARNING_BYTES - 1));
+
+      const warningsAfterSetLargeKey = warnSpy.getCalls().map(c => c.firstArg).filter(msg => msg.includes('Writing large value to Redis!'));
+      expect(warningsAfterSetLargeKey.length).to.equal(0);
     });
   });
 
