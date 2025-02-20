@@ -55,7 +55,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-${{ env.APPLICATION_NAME }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
       - name: NPM install 📦
-        run: npm ci
+        run: npm --no-audit --no-fund ci
 
       - name: Pushes the package to NPM
         run: |
