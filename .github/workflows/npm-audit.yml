@@ -1,8 +1,7 @@
 name: 🔒️ Npm Audit
-
+permissions: {}
 env:
   APPLICATION_NAME: cachette
-
 on:
   pull_request:
     # adding 'ready_for_review' to the default [opened, synchronize, reopened] since we don't run on pr.draft == false
@@ -15,10 +14,15 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.draft == false }}
+    permissions:
+      contents: read
     steps:
       # https://github.com/actions/checkout
       - name: Checkout 🛎️
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          show-progress: false
 
       - name: Get node version ⭐️
         run: |
@@ -40,7 +44,7 @@ jobs:
 
       - name: NPM install 📦
         run: |
-          npm --ignore-scripts ci
+          npm --ignore-scripts --no-audit --no-fund ci
 
       - name: Npm audit 🕵️‍♀️
         run: |
