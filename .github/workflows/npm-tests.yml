@@ -1,5 +1,5 @@
 name: 🚦 Npm Tests
-
+permissions: {}
 env:
   APPLICATION_NAME: cachette
   TEST_REDIS_URL: redis://localhost:6379
@@ -15,6 +15,8 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.draft == false }}
+    permissions:
+      contents: read
 
     services:
       # Label used to access the service container
@@ -34,6 +36,9 @@ jobs:
       # https://github.com/actions/checkout
       - name: Checkout 🛎️
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          show-progress: false
 
       - name: Get node version ⭐️
         run: |

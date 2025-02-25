@@ -1,5 +1,5 @@
 name: ✏️ Enforce PR title
-
+permissions: {}
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review]
@@ -8,6 +8,7 @@ on:
 jobs:
   pr_naming_convention:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - uses: deepakputhraya/action-pr-title@master
         with:
