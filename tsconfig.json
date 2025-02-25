@@ -4,7 +4,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "incremental": true,
-    "lib": ["ES2022"],
+    "lib": ["ES2023"],
     "listFiles": false,
     "module": "commonjs",
     "moduleResolution": "node",
